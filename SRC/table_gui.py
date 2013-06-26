@@ -48,7 +48,7 @@ class TableWidget(QWidget):
 		# define the header to be display verticaly
 		self.vHeader = self.setVHeader()
 
-		#get the data right
+		#get the data right (ie define tableData )
 		self.getAllData(flow)
 
 		#initiate the all widget
@@ -58,8 +58,8 @@ class TableWidget(QWidget):
 
 		# define the table displayed
 		self.table = QTableView()
-		# define the table to be used
 		
+		# define the table to be used
 		self.tableModel = TableData(self.tableData, self.vHeader, TABLE_TITLE, self)
 		
 		#define the model to be used by the table
@@ -104,7 +104,6 @@ class TableWidget(QWidget):
 
 		# take all the data
 		# ----------------
-
 		for data in ["ASK","RPK","Rev"]:
 			for yld in equivYield:
 				# for forecast
@@ -112,6 +111,7 @@ class TableWidget(QWidget):
 				# for ref
 				self.tableData.append(self.core.DATA_REF[equivData[data]][equivFlow[flow]][equivYield[yld]][1:13])
 
+				
 	def setVHeader(self):
 		"""set the vHeader right - development only """
 		vHeader = []
