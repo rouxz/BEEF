@@ -43,6 +43,11 @@ class TableWidget(QWidget):
 		self.core = core
 
 		# internal table detaining all necessary information
+		# 2 lines representing forecast and ref
+		#	Type of data * 3
+		#		Flow * 5
+		#			yield * 3
+		#				month * 13
 		self.tableData = []
 
 		# define the header to be display verticaly
@@ -115,28 +120,32 @@ class TableWidget(QWidget):
 	def setVHeader(self):
 		"""set the vHeader right - development only """
 		vHeader = []
-		for data in ["ASK","RPK","Rev"]:
+		for data in ["ASK","RPK","Yield","LF","Rev"]:
 			for yld in equivYield:
 				for nick_name in ["Data", "Ref", "YoY"]:
 					vHeader.append(data + " - " + yld + " " + nick_name)
 		return vHeader
 
 class TableData(QAbstractTableModel):
-	""" table for including all data within a table """
-
+	""" table displaying all the data """
+	""" this table requires a big array containing all required data """
+	
 	def __init__(self, datain, vheader, hheader, parent=None, *args):
+		""" define array containing all the data and all the headers""" 
 		QAbstractTableModel.__init__(self, parent, *args)
 		self.arraydata = datain
 		self.vheader = vheader
 		self.hheader = hheader
 		
 	def rowCount(self, parent):
+		#return 27
 		return len(self.arraydata)
 
 	def columnCount(self, parent):
 		return len(self.arraydata[0])
 
 	def data(self, index, role):
+		""" retrieve data within the data container """
 		if not index.isValid():
 			return QVariant()
 		elif role != Qt.DisplayRole:

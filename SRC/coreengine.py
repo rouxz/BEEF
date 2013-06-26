@@ -11,11 +11,12 @@ class Core():
 		# the core is based on
 		# --------------------
 		# - DATA for forecasting
-			# 3 type of data * 5 traffic flow * 3 yld * 12 months
-		self.DATA_FCST = [[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]],[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]],[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]]]
+			# 3 type of data * 5 traffic flow * 3 yld * 17 months (12+ 1 year + 4 quarters)
+		self.DATA_FCST = [[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]]]
 
+		
 		# - reference DATA
-		self.DATA_REF = [[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]],[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]],[[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13],[[None]*13,[None]*13,[None]*13]]]
+		self.DATA_REF = [[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]],[[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17],[[None]*17,[None]*17,[None]*17]]]
 		# - events lists (FIFO)
 		self.EVENTS_LIST = []
 		# - type of treatment

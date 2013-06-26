@@ -2,7 +2,7 @@
 
 # shared parameters
 # ----------------
-equivData = {"Rev": 0, "RPK": 1, "ASK": 2}
+equivData = {"Rev": 0, "RPK": 1, "ASK": 2, "yield": 3, "LF": 4}
 equivMonth = {"Jan":1, "Feb":2 , "Mar":3, "Apr":4, "May":5, "Jun":6, "Jul":7, "Aug":8, "Sep":9, "Oct":10, "Nov":11, "Dec":12}
 equivFlow = { "Local" : 0, "SH-MH" : 1, "MH-MH" : 2,  "MH-LH" : 3, "All" : 4  }
 equivYield = { "HY":1, "LY":0, "AY":2}
