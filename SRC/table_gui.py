@@ -111,16 +111,25 @@ class TableWidget(QWidget):
 		# ----------------
 		
 		# data scheme of the array 
-		#  ASK HY Data 
-		#		  Ref
-		#		  YoY
-		#  ASK LY Data 
-		#		  Ref
-		#		  YoY
-		#  ASK AY Data 
-		#		  Ref
-		#		  YoY
-		
+		#	0  ASK HY Data 
+		#	1		  Ref
+		#	2		  YoY
+		#	3  ASK LY Data 
+		#	4		  Ref
+		#	5		  YoY
+		#	6  ASK AY Data 
+		#	7		  Ref
+		#	8		  YoY
+		#	9  ASK HY Data 
+		#	10		  Ref
+		#	11		  YoY
+		#	12  ASK LY Data 
+		#	13		  Ref
+		#	14		  YoY
+		# 	15 ASK AY Data 
+		#	16		  Ref
+		#	17		  YoY
+	
 
 		
 		
@@ -149,10 +158,8 @@ class TableWidget(QWidget):
 	def setVHeader(self):
 		"""set the vHeader right - development only """
 		vHeader = []
-		for data in ["ASK", "RPK", "LF", "Yield","Rev", "RASK"]:
-			for yld in equivYield:
-				for nick_name in ["Data", "Ref", "YoY"]:
-					vHeader.append(data + " - " + yld + " " + nick_name)
+		for data in VERTICAL_HEADER:
+					vHeader.append(data)
 		return vHeader
 
 class TableData(QAbstractTableModel):
@@ -193,10 +200,11 @@ class TableData(QAbstractTableModel):
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
 		
-		# ASK consistency (9 first lines)
+		
+		# RPK consistency (9 first lines)
 		# -------------------------------
-		for m in equiMonth:
-			
+		#for m in equivMonth:
+		#	self.arraydata[
 				
 			
 		
