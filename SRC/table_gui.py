@@ -44,7 +44,7 @@ class TableWidget(QWidget):
 
 		# internal table detaining all necessary information
 		# 2 lines representing forecast and ref
-		#	Type of data * 3
+		#	Type of data * 
 		#		Flow * 5
 		#			yield * 3
 		#				month * 13
@@ -109,18 +109,47 @@ class TableWidget(QWidget):
 
 		# take all the data
 		# ----------------
-		for data in ["ASK","RPK","Rev"]:
+		
+		# data scheme of the array 
+		#  ASK HY Data 
+		#		  Ref
+		#		  YoY
+		#  ASK LY Data 
+		#		  Ref
+		#		  YoY
+		#  ASK AY Data 
+		#		  Ref
+		#		  YoY
+		
+
+		
+		
+		
+		
+		
+		for data in ["ASK", "RPK", "LF", "yield", "Rev"]:
 			for yld in equivYield:
 				# for forecast
-				self.tableData.append(self.core.DATA_FCST[equivData[data]][equivFlow[flow]][equivYield[yld]][1:13])
+				self.tableData.append(self.core.DATA_FCST[equivData[data]][equivFlow[flow]][equivYield[yld]][1:17])
 				# for ref
-				self.tableData.append(self.core.DATA_REF[equivData[data]][equivFlow[flow]][equivYield[yld]][1:13])
+				self.tableData.append(self.core.DATA_REF[equivData[data]][equivFlow[flow]][equivYield[yld]][1:17])
+				# for yoy
+				self.tableData.append([None]*17)
+				
+		# insert RASK data
+		for yld in equivYield:
+			# for forecast
+			self.tableData.append([None]*17)
+			# for ref
+			self.tableData.append([None]*17)
+			# for yoy
+			self.tableData.append([None]*17)
 
 				
 	def setVHeader(self):
 		"""set the vHeader right - development only """
 		vHeader = []
-		for data in ["ASK","RPK","Yield","LF","Rev"]:
+		for data in ["ASK", "RPK", "LF", "Yield","Rev", "RASK"]:
 			for yld in equivYield:
 				for nick_name in ["Data", "Ref", "YoY"]:
 					vHeader.append(data + " - " + yld + " " + nick_name)
@@ -160,3 +189,15 @@ class TableData(QAbstractTableModel):
 		if orientation == Qt.Horizontal:
 			return QVariant(self.hheader[section])
 
+			
+	def setDataConsistency(self):
+		""" allow to calculate links within the array representing the table"""
+		
+		# ASK consistency (9 first lines)
+		# -------------------------------
+		for m in equiMonth:
+			
+				
+			
+		
+		
