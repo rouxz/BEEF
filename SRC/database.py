@@ -101,7 +101,7 @@ class Database():
 			table[equivData["RPK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.RPK
 			# ask
 			table[equivData["ASK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.ASK
-
+			
 	###################################
 	# setting data
 	###################################

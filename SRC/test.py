@@ -4,12 +4,11 @@ from database import *
 from static import *
 from coreengine import *
 
-print("Test")
+import re
 
-db = Database(DBNAME)
-core = Core(db)
-core.set_rfs_used("FAA")
+#regexp = re.compile("(Rev|RPK).*(?!YoY)$")
+reg = "(Rev|RPK).(HY|LY).(?!YoY).*"
+regexp = re.compile(reg)
+test = "RPK LY Ref"
+print(test + " " + str(regexp.match(test)))
 
-core.get_data_CY()
-print(core.referenceList)
-db.__del__()

@@ -5,6 +5,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from mainGui import *
 from file_manager import *
+import re
 
 # data to display
 my_array = [['00','01','02'],
@@ -51,10 +52,13 @@ class TableWidget(QWidget):
 		self.tableData = []
 
 		# define the header to be display verticaly
-		self.vHeader = self.setVHeader()
+		self.vHeader = VERTICAL_HEADER
 
 		#get the data right (ie define tableData )
-		self.getAllData(flow)
+		self.retrieveData(flow)
+
+		# set consistency for all data
+		self.setDataConsistency()
 
 		#initiate the all widget
 		self.initUI(flow)
@@ -104,63 +108,100 @@ class TableWidget(QWidget):
 		qr.moveCenter(cp)
 		self.move(qr.topLeft())
 
-	def getAllData(self, flow):
-		"""retrieve all necessary data from core engine and put them into internal table """
+	def retrieveData(self, flow):
+		"""retrieve all necessary data from core engine and put them into internal array """
 
 		# take all the data
 		# ----------------
 
-		# data scheme of the array
-		#	0  ASK HY Data
-		#	1		  Ref
-		#	2		  YoY
-		#	3  ASK LY Data
-		#	4		  Ref
-		#	5		  YoY
-		#	6  ASK AY Data
-		#	7		  Ref
-		#	8		  YoY
-		#	9  ASK HY Data
-		#	10		  Ref
-		#	11		  YoY
-		#	12  ASK LY Data
-		#	13		  Ref
-		#	14		  YoY
-		# 	15 ASK AY Data
-		#	16		  Ref
-		#	17		  YoY
-
-
-
-
-
-
-
-		for data in ["ASK", "RPK", "LF", "yield", "Rev"]:
-			for yld in equivYield:
+		#populate ASK and RPK
+		for data in ["ASK", "RPK"]:
+			for yld in ARRAY_YIELD:
 				# for forecast
-				self.tableData.append(self.core.DATA_FCST[equivData[data]][equivFlow[flow]][equivYield[yld]][1:17])
+				self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index(data)][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
 				# for ref
-				self.tableData.append(self.core.DATA_REF[equivData[data]][equivFlow[flow]][equivYield[yld]][1:17])
+				self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index(data)][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
 				# for yoy
-				self.tableData.append([None]*17)
+				self.tableData.append([0]*17)
 
-		# insert RASK data
-		for yld in equivYield:
+
+
+		# populate LF data with blank line
+		for yld in ARRAY_YIELD:
 			# for forecast
-			self.tableData.append([None]*17)
+			self.tableData.append([0]*17)
 			# for ref
-			self.tableData.append([None]*17)
+			self.tableData.append([0]*17)
 			# for yoy
-			self.tableData.append([None]*17)
+			self.tableData.append([0]*17)
 
+		# populate yield data with blank line
+		for yld in ARRAY_YIELD:
+			# for forecast
+			self.tableData.append([0]*17)
+			# for ref
+			self.tableData.append([0]*17)
+			# for yoy
+			self.tableData.append([0]*17)
 
-	def setVHeader(self):
-		"""set the vHeader right - development only """
-		vHeader = []
-		for data in VERTICAL_HEADER:
-					vHeader.append(data)
-		return vHeader
+		# populate rev data
+		for yld in ARRAY_YIELD:
+			# for forecast
+			self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index("Rev")][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+			# for ref
+			self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index("Rev")][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+			# for yoy
+			self.tableData.append([0]*17)
+
+		# populate RASK data with blank line
+		for yld in ARRAY_YIELD:
+			# for forecast
+			self.tableData.append([0]*17)
+			# for ref
+			self.tableData.append([0]*17)
+			# for yoy
+			self.tableData.append([0]*17)
+
+		#check array consistency
+		#for r in VERTICAL_HEADER:
+		#	print(r + " len " + str(len(self.tableData[VERTICAL_HEADER.index(r)])))
+
+	def setDataConsistency(self):
+		""" allow to calculate links within the array representing the table"""
+
+		regexp1 = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
+
+		# calculation on total per line for relevant lines (RPK, REV) for HY and LY
+		# 1- annual
+		# 2- quarters
+		for r in VERTICAL_HEADER:
+			if regexp1.match(r) != None:
+				# annual sum
+				sum = 0
+				for i in range(0,12):
+					sum += self.tableData[VERTICAL_HEADER.index(r)][i]
+				self.tableData[VERTICAL_HEADER.index(r)][12] = sum
+				# quarterly sum
+				for q in ARRAY_QUARTERS:
+					sum = 0
+					for m in q:
+						sum += self.tableData[VERTICAL_HEADER.index(r)][m-1]
+					self.tableData[VERTICAL_HEADER.index(r)][13 + ARRAY_QUARTERS.index(q)] = sum
+					
+		# 3 - calculate data for AY RPK and REV
+		regexp2 = re.compile("(Rev|RPK).AY.(?!YoY).*")
+		#for r in VERTICAL_HEADER:
+		#	#looking for AY info 
+		#	if regexp2.match != None:
+		#		#summing LY and HY
+		#		for i in range(0,18):
+		#			if r[:3] = "Rev":
+		#				self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(r)] 
+		
+		
+		# 3 - populate yield, lF and RASK
+
+		# 4 - calculate YoY Y-Y
 
 class TableData(QAbstractTableModel):
 	""" table displaying all the data """
@@ -197,14 +238,9 @@ class TableData(QAbstractTableModel):
 			return QVariant(self.hheader[section])
 
 
-	def setDataConsistency(self):
-		""" allow to calculate links within the array representing the table"""
 
 
-		# RPK consistency (9 first lines)
-		# -------------------------------
-		#for m in equivMonth:
-		#	self.arraydata[
+
 
 
 
