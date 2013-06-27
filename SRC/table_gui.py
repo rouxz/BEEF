@@ -35,8 +35,8 @@ class Tabs(QTabWidget):
 
 class TableWidget(QWidget):
 	""" class describing the table of data used in the several tabs """
-	
-	
+
+
 	def __init__(self, core, flow, parent):
 		QWidget.__init__(self, parent)
 		# set the core engine
@@ -44,7 +44,7 @@ class TableWidget(QWidget):
 
 		# internal table detaining all necessary information
 		# 2 lines representing forecast and ref
-		#	Type of data * 
+		#	Type of data *
 		#		Flow * 5
 		#			yield * 3
 		#				month * 13
@@ -63,10 +63,10 @@ class TableWidget(QWidget):
 
 		# define the table displayed
 		self.table = QTableView()
-		
+
 		# define the table to be used
 		self.tableModel = TableData(self.tableData, self.vHeader, TABLE_TITLE, self)
-		
+
 		#define the model to be used by the table
 		self.table.setModel(self.tableModel)
 
@@ -76,7 +76,7 @@ class TableWidget(QWidget):
 		# set the font
 		self.table.setFont(QFont("Courier New", 8))
 
-		
+
 
 		# set horizontal header properties
 		#self.table.horizontalHeader().setStretchLastSection(True)
@@ -109,33 +109,33 @@ class TableWidget(QWidget):
 
 		# take all the data
 		# ----------------
-		
-		# data scheme of the array 
-		#	0  ASK HY Data 
+
+		# data scheme of the array
+		#	0  ASK HY Data
 		#	1		  Ref
 		#	2		  YoY
-		#	3  ASK LY Data 
+		#	3  ASK LY Data
 		#	4		  Ref
 		#	5		  YoY
-		#	6  ASK AY Data 
+		#	6  ASK AY Data
 		#	7		  Ref
 		#	8		  YoY
-		#	9  ASK HY Data 
+		#	9  ASK HY Data
 		#	10		  Ref
 		#	11		  YoY
-		#	12  ASK LY Data 
+		#	12  ASK LY Data
 		#	13		  Ref
 		#	14		  YoY
-		# 	15 ASK AY Data 
+		# 	15 ASK AY Data
 		#	16		  Ref
 		#	17		  YoY
-	
 
-		
-		
-		
-		
-		
+
+
+
+
+
+
 		for data in ["ASK", "RPK", "LF", "yield", "Rev"]:
 			for yld in equivYield:
 				# for forecast
@@ -144,7 +144,7 @@ class TableWidget(QWidget):
 				self.tableData.append(self.core.DATA_REF[equivData[data]][equivFlow[flow]][equivYield[yld]][1:17])
 				# for yoy
 				self.tableData.append([None]*17)
-				
+
 		# insert RASK data
 		for yld in equivYield:
 			# for forecast
@@ -154,7 +154,7 @@ class TableWidget(QWidget):
 			# for yoy
 			self.tableData.append([None]*17)
 
-				
+
 	def setVHeader(self):
 		"""set the vHeader right - development only """
 		vHeader = []
@@ -165,14 +165,14 @@ class TableWidget(QWidget):
 class TableData(QAbstractTableModel):
 	""" table displaying all the data """
 	""" this table requires a big array containing all required data """
-	
+
 	def __init__(self, datain, vheader, hheader, parent=None, *args):
-		""" define array containing all the data and all the headers""" 
+		""" define array containing all the data and all the headers"""
 		QAbstractTableModel.__init__(self, parent, *args)
 		self.arraydata = datain
 		self.vheader = vheader
 		self.hheader = hheader
-		
+
 	def rowCount(self, parent):
 		#return 27
 		return len(self.arraydata)
@@ -196,16 +196,15 @@ class TableData(QAbstractTableModel):
 		if orientation == Qt.Horizontal:
 			return QVariant(self.hheader[section])
 
-			
+
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
-		
-		
+
+
 		# RPK consistency (9 first lines)
 		# -------------------------------
 		#for m in equivMonth:
 		#	self.arraydata[
-				
-			
-		
-		
+
+
+

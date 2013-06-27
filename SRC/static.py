@@ -54,4 +54,9 @@ VERTICAL_HEADER = {"ASK HY CY": 0, "ASK HY Ref": 1, "ASK HY YoY": 2, "ASK LY CY"
 		"RPK AY CY" : 15, "RPK AY Ref": 16, "RPK AY YoY" : 17, "LF HY CY": 18, "LF HY Ref" : 19, "LF HY CY-Ref": 20, \
 		"LF LY CY": 21, "LF LY Ref": 22, "LF LY CY-Ref": 23, "LF AY CY": 24, "LF AY Ref": 25, "LF AY CY-Ref": 26, \
 		"Yield HY CY": 27, "Yield HY Ref": 28, "Yield HY YoY": 29, "Yield LY CY": 30, "Yield LY Ref": 31, "Yield LY YoY": 32, \
-		"Yield AY CY": 33, "Yield AY Ref": 34, "Yield AY YoY": 35, "Rev HY CY": 36, "Rev HY Ref": 37, "Rev HY YoY": 38}
+		"Yield AY CY": 33, "Yield AY Ref": 34, "Yield AY YoY": 35, "Rev HY CY": 36, "Rev HY Ref": 37, "Rev HY YoY": 38, \
+		"Rev LY CY": 39, "Rev LY Ref": 40, "Rev LY YoY": 41, "Rev AY CY": 42, "Rev AY Ref": 43, "Rev AY YoY": 44, \
+		"RASK HY CY": 45, "RASK HY Ref": 46, "RASK HY YoY": 47, "RASK LY CY": 48, "RASK LY Ref": 49, "RASK LY YoY": 50, \
+		"RASK AY CY": 51, "RASK AY Ref": 52, "RASK AY YoY": 53 }
+		
+MAX_NUM_LINES = 53
