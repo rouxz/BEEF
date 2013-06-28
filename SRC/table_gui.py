@@ -66,19 +66,20 @@ class TableWidget(QWidget):
 	def initUI(self,flow):
 
 		# define the table displayed
-		self.table = QTableView()
+		#self.table = QTableView()
+		self.table = MyTableView(self.tableData, self)
 
-		# define the table to be used
-		self.tableModel = TableData(self.tableData, self.vHeader, TABLE_TITLE, self)
+		# define the data to be used
+		#self.tableModel = TableData(self.tableData, self.vHeader, TABLE_TITLE, self)
 
 		#define the model to be used by the table
-		self.table.setModel(self.tableModel)
+		#self.table.setModel(self.tableModel)
 
 		 # set the minimum size
-		self.table.setMinimumSize(800, 300)
+		#self.table.setMinimumSize(800, 300)
 
 		# set the font
-		self.table.setFont(QFont("Courier New", 8))
+		#self.table.setFont(QFont("Courier New", 8))
 
 
 
@@ -187,24 +188,24 @@ class TableWidget(QWidget):
 					for m in q:
 						sum += self.tableData[VERTICAL_HEADER.index(r)][m-1]
 					self.tableData[VERTICAL_HEADER.index(r)][13 + ARRAY_QUARTERS.index(q)] = sum
-					
+
 		# 3 - calculate data for AY RPK and REV
 		regexp2 = re.compile("(Rev|RPK).AY.(?!YoY).*")
 		#for r in VERTICAL_HEADER:
-		#	#looking for AY info 
+		#	#looking for AY info
 		#	if regexp2.match != None:
 		#		#summing LY and HY
 		#		for i in range(0,18):
 		#			if r[:3] = "Rev":
-		#				self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(r)] 
-		
-		
+		#				self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(r)]
+
+
 		# 3 - populate yield, lF and RASK
 
 		# 4 - calculate YoY Y-Y
 
 class TableData(QAbstractTableModel):
-	""" table displaying all the data """
+	""" all the data bying displayed in the tabe """
 	""" this table requires a big array containing all required data """
 
 	def __init__(self, datain, vheader, hheader, parent=None, *args):
@@ -242,5 +243,47 @@ class TableData(QAbstractTableModel):
 
 
 
+class MyTableView(QTableView):
+	""" table specialisation of QTableView """
+
+	def __init__(self, tableData, parent):
+
+		QTableView.__init__(self)
+
+		# define the data to be used
+		self.tableModel = TableData(tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
+
+		#define the model to be used by the table
+		self.setModel(self.tableModel)
+
+		 # set the minimum size
+		self.setMinimumSize(1000, 300)
+
+		# set the font
+		self.setFont(QFont("Courier New", 8))
 
 
+		#connecting events
+		self.doubleClicked.connect(self.affiche_coordo)
+		self.clicked.connect(self.affiche_coordo)
+		#self.connect(self, SIGNAL("clicked"), SLOT("affiche_coordo()"))
+		#self.connect(self, SIGNAL("cellDoubleClicked(int,int)"), SLOT("fun_default()"))
+
+	@pyqtSlot()
+	def fun_default(self):
+		""" handle clicking on a cell event """
+		#print("Cells r:" + str(row) + " ,c:" + str(col) + " clicked")
+		print("OSU")
+
+	@pyqtSlot(int,int)
+	def affiche_coordo(x, y):
+		print("Cells r:" + str(x) + " ,c:" + str(y) + " clicked")
+
+
+	#def cellClicked (row, col):
+	#	""" handle clicking on a cell event """
+	#	self.default(row, col)
+
+	#def cellDoubleClicked (self, row, col):
+	#	""" handle clicking on a cell event """
+	#	self.activated.connect(self.fun_default)
