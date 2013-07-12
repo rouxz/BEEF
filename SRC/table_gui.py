@@ -94,6 +94,10 @@ class TableWidget(QWidget):
 		for row in xrange(nrows):
 			self.table.setRowHeight(row, 18)
 
+
+		#first data consistency
+		self.setDataConsistency()
+
 		#add the table within a layout
 		self.layout = QVBoxLayout(self)
 		self.layout.addWidget(self.table)
@@ -191,18 +195,46 @@ class TableWidget(QWidget):
 
 		# 3 - calculate data for AY RPK and REV
 		regexp2 = re.compile("(Rev|RPK).AY.(?!YoY).*")
-		#for r in VERTICAL_HEADER:
-		#	#looking for AY info
-		#	if regexp2.match != None:
-		#		#summing LY and HY
-		#		for i in range(0,18):
-		#			if r[:3] = "Rev":
-		#				self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(r)]
+		for r in VERTICAL_HEADER:
+			#looking for AY RPK and REV info
+			if regexp2.match(r) != None:
+				#summing LY and HY for each column
+				for i in range(0,17):
+					deb = r[:3]
+					fin = r[-3:].strip()
+					self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(deb + " HY " + fin)][i] + self.tableData[VERTICAL_HEADER.index(deb + " LY " + fin)][i]
 
 
 		# 3 - populate yield, lF and RASK
-
-		# 4 - calculate YoY Y-Y
+		regexp3 = re.compile("(Yield|LF|RASK).(AY|LY|AY).(?!YoY).*")
+		for r in VERTICAL_HEADER:
+			# looking for yield LF ans RASK
+			if regexp3.match(r):
+				# calcul des yields
+				if r[:5]=="Yield":
+					#verif de division par 0
+					fin = r[5:]
+					if  self.tableData[VERTICAL_HEADER.index("RPK" + r[5:])][i] > 0:
+						self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index("Rev" + fin)][i] /  self.tableData[VERTICAL_HEADER.index("RPK" + fin )][i]
+				#calculation LF
+				#calculation RASK
+				
+				
+		# 4 - calculate YoY for ASK/RPK/Yield/Rev
+		# -------------------
+		
+		regexp = re.compile("(ASK|RPK|Yield|Rev).(AY|LY|AY).(YoY).*")
+		for r in VERTICAL_HEADER:
+			# looking for all YoY except LF
+			if regexp.match(r):
+				prefix = r[:-3].strip()
+				if  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] > 0:
+					self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i]
+		
+		
+		# 5 - calculate CY-PY for LF
+		# --------------------------
+		
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabe """

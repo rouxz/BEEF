@@ -7,8 +7,8 @@ from coreengine import *
 import re
 
 #regexp = re.compile("(Rev|RPK).*(?!YoY)$")
-reg = "(Rev|RPK).(HY|LY).(?!YoY).*"
+reg = "(Rev|RPK).AY.(?!YoY).*"
 regexp = re.compile(reg)
-test = "RPK LY Ref"
+test = "RPK AY YoY"
 print(test + " " + str(regexp.match(test)))
 

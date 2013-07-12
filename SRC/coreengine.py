@@ -45,10 +45,11 @@ class Core():
 
 	def get_data_ref(self):
 		if self.TREATMENT == RETREATMENT:
-			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_nrt(self.referenceTable))
-		else:
 			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_rt(self.referenceTable))
-
+		else:
+			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_nrt(self.referenceTable))
+		#print("Data for May Rev Local LY" + str(self.DATA_REF[ARRAY_DATA.index("Rev")][ARRAY_FLOW.index("Local")][ARRAY_YIELD.index("LY")][5]))
+		
 	# ###############
 	# handling data
 	# ##############

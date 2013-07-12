@@ -15,10 +15,11 @@ def main():
 	db = Database(DBNAME)
 	# core engine to handle db
 	core = Core(db)
-	
+
 	#for testing purpose only
 	core.set_rfs_used("FAA")
 	core.get_data_CY()
+	core.get_data_ref()
 
 
 	# for launching the ui
@@ -27,7 +28,7 @@ def main():
 	w = TopWindow(core)
 	w.show()
 	sys.exit(app.exec_())
-	
+
 	db.__del__()
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ equivMonth = {"Jan":1, "Feb":2 , "Mar":3, "Apr":4, "May":5, "Jun":6, "Jul":7, "A
 equivFlow = { "Local" : 0, "SH-MH" : 1, "MH-MH" : 2,  "MH-LH" : 3, "All" : 4  }
 equivYield = { "HY":0, "LY":1, "AY":2}
 ARRAY_YIELD = ["HY", "LY", "AY"]
+ARRAY_FLOW = ["Local", "SH-MH", "MH-MH","MH-LH","All" ]
 ARRAY_DATA = ["Rev", "RPK", "ASK"]
 ARRAY_QUARTERS = [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
 
