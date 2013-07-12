@@ -38,11 +38,14 @@ class TableWidget(QWidget):
 	""" class describing the table of data used in the several tabs """
 
 
-	def __init__(self, core, flow, parent):
+	def __init__(self, core, flow, parent, debug=True):
+		
 		QWidget.__init__(self, parent)
+		
 		# set the core engine
 		self.core = core
-
+		self.debug=debug
+		
 		# internal table detaining all necessary information
 		# 2 lines representing forecast and ref
 		#	Type of data *
@@ -214,8 +217,9 @@ class TableWidget(QWidget):
 				if r[:5]=="Yield":
 					#verif de division par 0
 					fin = r[5:]
-					if  self.tableData[VERTICAL_HEADER.index("RPK" + r[5:])][i] > 0:
-						self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index("Rev" + fin)][i] /  self.tableData[VERTICAL_HEADER.index("RPK" + fin )][i]
+					for i in range(0,17):
+						if  self.tableData[VERTICAL_HEADER.index("RPK" + r[5:])][i] > 0:
+							self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index("Rev" + fin)][i] /  self.tableData[VERTICAL_HEADER.index("RPK" + fin )][i]
 				#calculation LF
 				#calculation RASK
 				
@@ -228,10 +232,13 @@ class TableWidget(QWidget):
 			# looking for all YoY except LF
 			if regexp.match(r):
 				prefix = r[:-3].strip()
-				if  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] > 0:
-					self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i]
-		
-		
+				for i in range(0,17):
+					if  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] > 0:
+						self.tableData[VERTICAL_HEADER.index(r)][i]  = str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%"
+						if self.debug == True:
+							print(r + ": " + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i]))
+							print (r + " :" + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%")
+			
 		# 5 - calculate CY-PY for LF
 		# --------------------------
 		
