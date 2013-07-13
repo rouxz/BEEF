@@ -4,15 +4,14 @@ from static import *
 
 class MyFileManager():
 	""" Managing my file """
-	def __init__(self):
+	def __init__(self, platform=PLATFORM_WINDOWS):
 		self.wd = os.getcwd()
 		print("")
-		print("System is " + sys.platform)
 		print("Working directory is :" + self.wd)
 		print("")
 	
 		#setting repertory serapator
-		if sys.platform == "linux2":
+		if platform == PLATFORM_LINUX:
 			directorySep = "/"
 		else:
 			directorySep = "\\"

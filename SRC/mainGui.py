@@ -15,7 +15,7 @@ from table_gui import *
 # création de la vue et du conteneur
 class TopWindow(QMainWindow):
 	""" create a window being the main window of the gui """
-	def __init__(self, core):
+	def __init__(self, core, platform = PLATFORM_WINDOWS):
 		# initiate the main widget
 		QMainWindow.__init__(self)
 
@@ -23,7 +23,7 @@ class TopWindow(QMainWindow):
 		self.core = core
 
 		# file manager
-		self.fm = MyFileManager()
+		self.fm = MyFileManager(platform)
 
 		# init the window
 		self.initTopWindow(self.fm, self.core)

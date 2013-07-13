@@ -1,18 +1,37 @@
-from pyodbc import *
+try:
+	from pyodbc import *
+except ImportError:
+	from sqlite3 import *
 from static import *
 
 class Database():
-	def __init__(self, dbname, debug=True):
+	def __init__(self, platform=PLATFORM_WINDOWS, debug=True):
 		# Connect to an access database using pyodbc
-		self.dbname = dbname
+		
 		self.debug = debug
+		self.platform = platform
+		
+		if self.platform == PLATFORM_WINDOWS:
+			self.dbname = DBNAME
+		else:
+			self.dbname = DBNAME_UNIX
+		
 		try:
-			self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
+			
+			if self.platform == PLATFORM_WINDOWS:
+				#connection MS ACCESS
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
+			else:
+				# Connection to sqlite3
+				print("Platform different than windows / switching to SQLite")
+				self.cnx = sqlite3.connect(DBPATH_UNIX + "/" + self.dbname)
+			
 			print("Connection to db " + self.dbname + " successfull")
-			# clear RFS used
+			# clear RFS used for consistency purpose
 			self.clear_rfs_used()
 		except:
 			print("Connection to db " + self.dbname + " failed")
+			
 
 	def __del__(self):
 		#disconnect properly from database
