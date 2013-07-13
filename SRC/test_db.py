@@ -1,21 +1,14 @@
 import database
 import os
 from static import *
+from sqlite3 import *
+
+db =  DBPATH_UNIX + "/" + DBNAME_UNIX
 
 try:
-			
-	if self.platform == PLATFORM_WINDOWS:
-		#connection MS ACCESS
-		self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
-	else:
-		# Connection to sqlite3
-		print("Platform different than windows / switching to SQLite")
-		print(DBPATH_UNIX + "/" + DBNAME_UNIX)
-		self.cnx = sqlite3.connect(os.getcwd() + "/" + DBPATH_UNIX + "/" + DBNAME_UNIX)
-			
-	print("Connection to db " + DBNAME_UNIX + " successfull")
-	# clear RFS used for consistency purpose
-	self.clear_rfs_used()
-	
+	print("Platform different than windows / switching to SQLite")
+	print(db)
+	cnx = connect( db)
+	print("Connection to db " + db + " successfull")
 except:
-	print("Connection to db " + os.getcwd() + "/" + DBPATH_UNIX + "/" + DBNAME_UNIX + " failed")
+	print("Connection to db " + db + " failed")

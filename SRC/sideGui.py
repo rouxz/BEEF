@@ -80,11 +80,13 @@ class ReferenceWidget(QGroupBox):
 	def addReference(self, core):
 		""" add the reference table to be used """
 		# retrieve the list of reference form the core engine
-		lst = core.referenceList
-		
-		for i in lst:
-			if i.TABLE != "DATA_RAW":
-				self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))
+		try:
+			lst = core.referenceList
+			for i in lst:
+				if i.TABLE_NAME != "DATA_RAW":
+					self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))
+		except:
+			pass
 		
 class PerimeterSelection(QGroupBox):
 	""" allow to select the route perimeter """
