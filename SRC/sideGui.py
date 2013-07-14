@@ -15,13 +15,16 @@ from file_manager import *
 
 class SidePanel(QWidget):
 	""" a class for including a side panel allowing to select several options in the gui """
-	def __init__(self, fm, core, parent):
+	def __init__(self, fm, core, parent, platform = PLATFORM_WINDOWS):
 		QWidget.__init__(self)
 		self.layout = QVBoxLayout()
+		
+		self.platform = platform
+		
 		# user interaction
 		self.layout.addWidget(UserInteraction(self))
 		# reference
-		self.layout.addWidget(ReferenceWidget(core, self))
+		self.layout.addWidget(ReferenceWidget(core, self, self.platform))
 		# route perimeter
 		self.layout.addWidget(PerimeterSelection(fm, self))
 
@@ -53,8 +56,11 @@ class UserInteraction(QGroupBox):
 
 class ReferenceWidget(QGroupBox):
 	""" allow selection of the type of ref for calculation and setting parameters for the ref"""
-	def __init__(self, core, parent):
+	def __init__(self, core, parent, platform = PLATFORM_WINDOWS):
 		QGroupBox.__init__(self, parent)
+		
+		self.platform = platform
+		
 		self.setTitle(QString("Reference"))
 
 		self.layout = QVBoxLayout()
@@ -80,11 +86,17 @@ class ReferenceWidget(QGroupBox):
 	def addReference(self, core):
 		""" add the reference table to be used """
 		# retrieve the list of reference form the core engine
+
 		lst = core.referenceList
-		
-		for i in lst:
-			if i.TABLE != "DATA_RAW":
-				self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))
+		if self.platform == PLATFORM_WINDOWS:
+			for i in lst:
+				if i.TABLE_NAME != "DATA_RAW":
+					self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))
+		else:
+			for i in lst:
+				if i[0] != "DATA_RAW":
+					self.listRef.addItem(QListWidgetItem(i[1], self.listRef))
+
 		
 class PerimeterSelection(QGroupBox):
 	""" allow to select the route perimeter """

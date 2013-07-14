@@ -3,7 +3,7 @@
 # Global data
 # ----------
 
-PROG__SHORT_NAME = "BEEF"
+PROG_SHORT_NAME = "BEEF"
 PROG_LONG_NAME = "BEEF"
 VERSION = 0.2
 
@@ -42,6 +42,11 @@ RPK = "rpk"
 # ---------------
 DBNAME = "DATA_PERSO.accdb"
 DBPATH = "C:\TOOLS\BEEF\DATA"
+DBPATH_UNIX = "DATA"
+DBNAME_UNIX = "database_test.db"
+PLATFORM_WINDOWS = 1
+PLATFORM_LINUX = 2
+PLATFORM_MAC = 3
 
 # for file_manager.py
 # ---------------
@@ -52,6 +57,7 @@ HIERARCHY_DIR = "hierarchy"
 # ----------
 
 TITLE_TOPWINDOW = "BEEF - Bugdet Evaluation for Each Flow"
+TITLE_LINE =      "######################################"
 
 #spacing for top grid layout
 GRID_LAYOUT_SPACE = 10

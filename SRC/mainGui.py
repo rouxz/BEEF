@@ -15,15 +15,17 @@ from table_gui import *
 # création de la vue et du conteneur
 class TopWindow(QMainWindow):
 	""" create a window being the main window of the gui """
-	def __init__(self, core):
+	def __init__(self, core, platform = PLATFORM_WINDOWS):
 		# initiate the main widget
 		QMainWindow.__init__(self)
+		
+		self.platform = platform
 
 		#core
 		self.core = core
 
 		# file manager
-		self.fm = MyFileManager()
+		self.fm = MyFileManager(platform)
 
 		# init the window
 		self.initTopWindow(self.fm, self.core)
@@ -37,7 +39,7 @@ class TopWindow(QMainWindow):
 		# central widget
 		########################
 
-		self.setCentralWidget(CentralWidget(fm, core, self))
+		self.setCentralWidget(CentralWidget(fm, core, self, self.platform))
 
 		########################
 		# Status and menu bars
@@ -71,8 +73,10 @@ class TopWindow(QMainWindow):
 class CentralWidget(QWidget):
 	""" a widget being the main widget within the topwindow"""
 	""" this main widget will have all the required tabs and table within """
-	def __init__(self, fm, core, parent):
+	def __init__(self, fm, core, parent, platform = PLATFORM_WINDOWS):
 		QWidget.__init__(self, parent)
+		
+		self.platform = platform
 
 		self.initCentralWidget(fm, core)
 
@@ -101,7 +105,7 @@ class CentralWidget(QWidget):
 		self.grid.addWidget(self.title, 0 , 0, 1, -1)
 
 		# set the side panel
-		self.sidePanel = SidePanel(fm, core, self)
+		self.sidePanel = SidePanel(fm, core, self, self.platform)
 		self.grid.addWidget(self.sidePanel, 1, 0)
 
 		#setting the layout

@@ -1,18 +1,37 @@
-from pyodbc import *
+try:
+	from pyodbc import *
+except ImportError:
+	from sqlite3 import *
 from static import *
 
 class Database():
-	def __init__(self, dbname, debug=True):
+	def __init__(self, platform=PLATFORM_WINDOWS, debug=True):
 		# Connect to an access database using pyodbc
-		self.dbname = dbname
+		
 		self.debug = debug
+		self.platform = platform
+		
+		if self.platform == PLATFORM_WINDOWS:
+			self.dbname = DBNAME
+		else:
+			self.dbname = DBNAME_UNIX
+		
 		try:
-			self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
+			
+			if self.platform == PLATFORM_WINDOWS:
+				#connection MS ACCESS
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
+			else:
+				# Connection to sqlite3
+				print("Platform different than windows / switching to SQLite")
+				self.cnx = connect(DBPATH_UNIX + "/" + self.dbname)
+			
 			print("Connection to db " + self.dbname + " successfull")
-			# clear RFS used
+			# clear RFS used for consistency purpose
 			self.clear_rfs_used()
 		except:
 			print("Connection to db " + self.dbname + " failed")
+			
 
 	def __del__(self):
 		#disconnect properly from database
@@ -44,7 +63,7 @@ class Database():
 			cursor = self.cnx.cursor()
 			#execute the SQL change
 			if self.debug == True:
-				print("Executing following SQL command : " + SQLquery + "on db : " + self.dbname)
+				print("Executing following SQL command : " + SQLquery + " on db : " + self.dbname)
 			cursor.execute(SQLquery)
 			#commit change in db
 			self.cnx.commit()
@@ -65,21 +84,28 @@ class Database():
 	def fetch_architecture(self):
 		""" get all tables that can be used by the programm """
 		lst = []
-		for chunk in self.__execute_query("SELECT TABLE, NICK_NAME FROM TABLE_REF WHERE NICK_NAME <> '';"):
+		for chunk in self.__execute_query("SELECT TABLE_NAME, NICK_NAME FROM TABLE_REF WHERE NICK_NAME <> '';"):
 			lst.append(chunk)
 		return lst
 
 	def clear_rfs_used(self):
 		""" clear the list of RFS currently handled """
-		return self.__commit_query("DELETE * FROM RFS_USED;")
-
+		if self.platform == PLATFORM_WINDOWS:
+			return self.__commit_query("DELETE * FROM RFS_USED;")
+		else:
+			return self.__commit_query("DELETE FROM RFS_USED;")
+	
+	
 	###################################
 	# getting data
 	###################################
 
 	def get_data_CY(self):
 		""" will fetch all data for routes defined in the RFS_USED table """
-		return self.__execute_query("SELECT MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK FROM R_G_DATA_RAW;")
+		if self.platform == PLATFORM_WINDOWS:
+			return self.__execute_query("SELECT MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK FROM R_G_DATA_RAW;")
+		else:
+			return self.__execute_query("SELECT DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK FROM DATA_RAW INNER JOIN RFS_USED ON DATA_RAW.RFS = RFS_USED.RFS GROUP BY DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW;")
 
 	def get_data_ref_nrt(self, ref):
 		""" get data for the reference non retreated"""
