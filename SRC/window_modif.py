@@ -15,11 +15,15 @@ class Window_modif(QDialog):
 		self.CY = CY
 		self.ref = ref
 		self.yoy = self.calcYoY(CY, ref)
+
 		
-		#moving to another data
-		
-		
+		#set the UI
 		self.initUI()
+		
+		#set to relative by default
+		self.toRelative()
+		
+		#launch the UI
 		self.exec_()
 	
 	
@@ -45,19 +49,34 @@ class Window_modif(QDialog):
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
 		#CY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.CY)), self))
-		#PY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.ref)), self))
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("CY"), self))
+		self.CY_LE = QLineEdit(QString(str(self.CY)), self)
+		self.dataGroupBoxLayout.addWidget(self.CY_LE)
+		#ref
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("Ref"), self))
+		self.ref_LE = QLineEdit(QString(str(self.ref)), self)
+		self.dataGroupBoxLayout.addWidget(self.ref_LE)
+		
 		# YoY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.yoy)), self))
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("YoY"), self))
+		self.yoy_LE = QLineEdit(QString(str(self.yoy) + "%"), self)
+		self.yoy_LE.setInputMask(QString("000.00%"))
+		self.dataGroupBoxLayout.addWidget(self.yoy_LE)
 		
 		self.dataGroupBox.setLayout(self.dataGroupBoxLayout)
 		
-		# a group box for moving between cells
+		# a group box for moving between cells and validating calculation
 		self.moveGroupBox = QGroupBox(self)
 
-		self.moveGroupBoxLayout = QVBoxLayout()
-		self.moveGroupBoxLayout.addWidget(QLabel(QString("Absolute"), self))
+		self.moveGroupBoxLayout = QHBoxLayout()
+		
+		self.buttonPrev = QPushButton(QString("<"), self)
+		self.buttonValidate = QPushButton(QString("Validate"), self)
+		self.buttonNext = QPushButton(QString(">"), self)
+		
+		self.moveGroupBoxLayout.addWidget(self.buttonPrev)
+		self.moveGroupBoxLayout.addWidget(self.buttonValidate)
+		self.moveGroupBoxLayout.addWidget(self.buttonNext)
 		
 		self.moveGroupBox.setLayout(self.moveGroupBoxLayout)
 		
@@ -71,6 +90,16 @@ class Window_modif(QDialog):
 		#adding the groupbox of moving
 		self.layout.addWidget(self.moveGroupBox)
 		
+		# connect slots and signals
+		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.updateCY)
+		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.updateCY)
+		# void	editingFinished ()
+# void	returnPressed ()
+# void	selectionChanged ()
+# void	textChanged ( const QString & text )
+# void	textEdited ( co
+		
+		#setting the main layout
 		self.setLayout(self.layout)
 		
 		self.setWindowTitle("Da Du Run")
@@ -78,6 +107,43 @@ class Window_modif(QDialog):
 		
 	def calcYoY(self, CY, ref):
 		if ref != 0:
-			return self.CY / self.ref - 1
+			return (self.CY / self.ref - 1) * 100
 		else:
 			return 0
+			
+	def switchAbsoluteRelative(self, bool):
+		""" define if the display should be set for relative evolution or absolute data """
+		if bool == True:
+			self.CY_LE.setReadOnly(True)
+			self.ref_LE.setReadOnly(True)
+		else:
+			self.ref_LE.setReadOnly(True)
+			self.yoy_LE.setReadOnly(True)
+			
+	def toAbsolute(self):
+		""" set mode of input as absolute """
+		self.switchAbsoluteRelative(False)
+		
+	def toRelative(self):
+		""" set mode of input as relative """
+		self.switchAbsoluteRelative(True)
+		
+		
+	def recalculateCY(self, yoy):
+		""" recalculate data for CY based on the reference and change the display """
+		if self.ref !=0:
+			#changing data
+			self.CY = self.ref * (1 + yoy)
+			print(self.CY)
+			#changing display
+			self.CY_LE.setText(str(self.CY))
+		else:
+			self.CY = 0
+			
+	def updateCY(self):
+		""" change the display after having set a data in the YoY field """
+		#odd behaviour on converting Qstring to float !!
+		print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
+		#self.yoy = float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100
+		self.recalculateCY(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
+		

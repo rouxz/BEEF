@@ -337,7 +337,6 @@ class MyTableView(QTableView):
 		if regexp.match(header) and index.column() < 12:
 			
 			if header[-3:].strip() == "CY":
-				print("CY")
 				cy = index.data(Qt.DisplayRole).toPyObject()
 				ref = index.sibling(index.row()+1, index.column()).data(Qt.DisplayRole).toPyObject()
 			elif header[-3:].strip() == "Ref":
