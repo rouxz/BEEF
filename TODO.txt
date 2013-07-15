@@ -1,0 +1,6 @@
+TODO
+
+In window_modif.py
+------------------
+Move to next case
+Create an event for the core after validation
