@@ -41,7 +41,12 @@ class Window_modif(QDialog):
 		self.dataGroupBox.setTitle(QString("Data"))
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("Absolute"), self))
+		#CY
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("CY"), self))
+		#PY
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("Ref"), self))
+		# YoY
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("YoY"), self))
 		
 		self.dataGroupBox.setLayout(self.dataGroupBoxLayout)
 		
