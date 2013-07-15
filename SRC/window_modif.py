@@ -7,11 +7,14 @@ from table_gui import *
 class Window_modif(QDialog):
 	""" windows to modif values with a tableView """
 	
-	def __init__(self, parent):
+	def __init__(self, parent, CY, ref):
 		QWidget.__init__(self, parent)
 		
 		
-		#data to be updated
+		#data used
+		self.CY = CY
+		self.ref = ref
+		self.yoy = self.calcYoY(CY, ref)
 		
 		#moving to another data
 		
@@ -20,14 +23,14 @@ class Window_modif(QDialog):
 		self.exec_()
 	
 	
-	def initUI(self, *args):
+	def initUI(self):
 		""" display the window properly """
 		
 		#global layout for the widget
 		self.layout = QVBoxLayout()
 		
 		# a group box for selecting how we want to proceed (relative evolution or absolute value)
-		self.evolGroupBox = QGroupBox(self, *args)
+		self.evolGroupBox = QGroupBox(self)
 		self.evolGroupBox.setTitle(QString("Choose type of modification"))
 		
 		self.evolGroupBoxLayout = QVBoxLayout()
@@ -37,21 +40,21 @@ class Window_modif(QDialog):
 		self.evolGroupBox.setLayout(self.evolGroupBoxLayout)
 		
 		# a group box for defining the data
-		self.dataGroupBox = QGroupBox(self, *args)
+		self.dataGroupBox = QGroupBox(self)
 		self.dataGroupBox.setTitle(QString("Data"))
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
 		#CY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("CY"), self))
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.CY)), self))
 		#PY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("Ref"), self))
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.ref)), self))
 		# YoY
-		self.dataGroupBoxLayout.addWidget(QTextEdit(QString("YoY"), self))
+		self.dataGroupBoxLayout.addWidget(QTextEdit(QString(str(self.yoy)), self))
 		
 		self.dataGroupBox.setLayout(self.dataGroupBoxLayout)
 		
 		# a group box for moving between cells
-		self.moveGroupBox = QGroupBox(self, *args)
+		self.moveGroupBox = QGroupBox(self)
 
 		self.moveGroupBoxLayout = QVBoxLayout()
 		self.moveGroupBoxLayout.addWidget(QLabel(QString("Absolute"), self))
@@ -72,3 +75,9 @@ class Window_modif(QDialog):
 		
 		self.setWindowTitle("Da Du Run")
 		self.show()
+		
+	def calcYoY(self, CY, ref):
+		if ref != 0:
+			return self.CY / self.ref - 1
+		else:
+			return 0

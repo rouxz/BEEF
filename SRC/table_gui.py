@@ -40,13 +40,13 @@ class TableWidget(QWidget):
 
 
 	def __init__(self, core, flow, parent, debug=True):
-		
+
 		QWidget.__init__(self, parent)
-		
+
 		# set the core engine
 		self.core = core
 		self.debug=debug
-		
+
 		# internal table detaining all necessary information
 		# 2 lines representing forecast and ref
 		#	Type of data *
@@ -223,11 +223,11 @@ class TableWidget(QWidget):
 							self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index("Rev" + fin)][i] /  self.tableData[VERTICAL_HEADER.index("RPK" + fin )][i]
 				#calculation LF
 				#calculation RASK
-				
-				
+
+
 		# 4 - calculate YoY for ASK/RPK/Yield/Rev
 		# -------------------
-		
+
 		regexp = re.compile("(ASK|RPK|Yield|Rev).(AY|LY|AY).(YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for all YoY except LF
@@ -239,10 +239,10 @@ class TableWidget(QWidget):
 						if self.debug == True:
 							print(r + ": " + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i]))
 							print (r + " :" + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%")
-			
+
 		# 5 - calculate CY-PY for LF
 		# --------------------------
-		
+
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabe """
@@ -291,7 +291,7 @@ class MyTableView(QTableView):
 		QTableView.__init__(self)
 
 		self.parent = parent
-		
+
 		# define the data to be used
 		self.tableModel = TableData(tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
 
@@ -306,10 +306,17 @@ class MyTableView(QTableView):
 
 
 		#connecting events
-		self.doubleClicked.connect(self.affiche_coordo)
-		self.clicked.connect(self.affiche_coordo)
+		#-----------------
+		
+		#old way
+		#self.doubleClicked.connect(self.affiche_coordo)
+		#self.clicked.connect(self.affiche_coordo)
+		
+		#new way
 		#self.connect(self, SIGNAL("clicked"), SLOT("affiche_coordo()"))
-		#self.connect(self, SIGNAL("cellDoubleClicked(int,int)"), SLOT("fun_default()"))
+		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
+		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
+		
 
 	@pyqtSlot()
 	def fun_default(self):
@@ -317,15 +324,29 @@ class MyTableView(QTableView):
 		#print("Cells r:" + str(row) + " ,c:" + str(col) + " clicked")
 		print("OSU")
 
-	@pyqtSlot(int,int)
-	def affiche_coordo(x, y):
-		#print("Cells r:" + str(x) + " ,c:" + str(y) + " clicked")
-		Window_modif(None)
 
-	#def cellClicked (row, col):
-	#	""" handle clicking on a cell event """
-	#	self.default(row, col)
+	def cell_clicked_event(self, index):
+		
+		#for debuggin purpose only
+		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString())
+		
+		#determine if the clicked cell what kind of data is it and if it is editable or not
+		# RPK or yield are the only editable cells
+		regexp = re.compile("(RPK|Yield).*")
+		header = VERTICAL_HEADER[index.row()]
+		if regexp.match(header) and index.column() < 12:
+			
+			if header[-3:].strip() == "CY":
+				print("CY")
+				cy = index.data(Qt.DisplayRole).toPyObject()
+				ref = index.sibling(index.row()+1, index.column()).data(Qt.DisplayRole).toPyObject()
+			elif header[-3:].strip() == "Ref":
+				cy = index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
+				ref =  index.data(Qt.DisplayRole).toPyObject()
+			else:
+				cy = index.sibling(index.row()-2, index.column()).data(Qt.DisplayRole).toPyObject()
+				ref =  index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
+			Window_modif(None, cy, ref)
+			print("cy:" + str(type(cy)) + "ref: " + str(type(ref)))
 
-	#def cellDoubleClicked (self, row, col):
-	#	""" handle clicking on a cell event """
-	#	self.activated.connect(self.fun_default)
+	
