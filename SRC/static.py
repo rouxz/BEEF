@@ -41,7 +41,7 @@ RPK = "rpk"
 # for database.py
 # ---------------
 DBNAME = "DATA_PERSO.accdb"
-DBPATH = "C:\TOOLS\BEEF\DATA"
+DBPATH = "C:\\Users\\m409577\\Documents\\GitHub\\BEEF\\DATA"
 DBPATH_UNIX = "DATA"
 DBNAME_UNIX = "database_test.db"
 PLATFORM_WINDOWS = 1
@@ -76,5 +76,5 @@ VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY YoY" , "ASK LY CY" ,"ASK
 		"Yield AY CY" , "Yield AY Ref" , "Yield AY YoY" , "Rev HY CY" , "Rev HY Ref" , "Rev HY YoY" , \
 		"Rev LY CY" , "Rev LY Ref" , "Rev LY YoY" , "Rev AY CY" , "Rev AY Ref" , "Rev AY YoY" , \
 		"RASK HY CY" , "RASK HY Ref" , "RASK HY YoY" , "RASK LY CY" , "RASK LY Ref" , "RASK LY YoY" , \
-		"RASK AY CY" , "RASK AY Ref" , "RASK AY YoY"  ]	
+		"RASK AY CY" , "RASK AY Ref" , "RASK AY YoY"  ]
 MAX_NUM_LINES = 53

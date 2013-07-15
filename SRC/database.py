@@ -7,31 +7,32 @@ from static import *
 class Database():
 	def __init__(self, platform=PLATFORM_WINDOWS, debug=True):
 		# Connect to an access database using pyodbc
-		
+
 		self.debug = debug
 		self.platform = platform
-		
+
 		if self.platform == PLATFORM_WINDOWS:
 			self.dbname = DBNAME
 		else:
 			self.dbname = DBNAME_UNIX
+
 		
 		try:
-			
+
 			if self.platform == PLATFORM_WINDOWS:
 				#connection MS ACCESS
-				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + dbname + ";Uid=Admin;Pwd=;")
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
 			else:
 				# Connection to sqlite3
 				print("Platform different than windows / switching to SQLite")
 				self.cnx = connect(DBPATH_UNIX + "/" + self.dbname)
-			
+
 			print("Connection to db " + self.dbname + " successfull")
 			# clear RFS used for consistency purpose
 			self.clear_rfs_used()
 		except:
 			print("Connection to db " + self.dbname + " failed")
-			
+
 
 	def __del__(self):
 		#disconnect properly from database
@@ -94,8 +95,8 @@ class Database():
 			return self.__commit_query("DELETE * FROM RFS_USED;")
 		else:
 			return self.__commit_query("DELETE FROM RFS_USED;")
-	
-	
+
+
 	###################################
 	# getting data
 	###################################
@@ -111,7 +112,7 @@ class Database():
 		""" get data for the reference non retreated"""
 		query = "SELECT " + ref + ".MONTH, " + ref + ".CONTRIB, " + ref + ".FLOW, Sum(" + ref + ".REV) AS REV, Sum(" + ref + ".REV_EX_ROX) AS REV_EX_ROX, Sum(" + ref + ".RPK) AS RPK, Sum(" + ref + ".ASK) AS ASK FROM " + ref + " INNER JOIN RFS_USED ON " + ref + ".RFS = RFS_USED.RFS GROUP BY " + ref + ".MONTH, " + ref + ".CONTRIB, " + ref + ".FLOW;"
 		return self.__execute_query(query)
-		
+
 	def get_data_ref_rt(self, ref):
 		""" get data for the reference retreated"""
 		query = "SELECT " + ref + ".MONTH, " + ref + ".CONTRIB, " + ref + ".FLOW, Sum(" + ref + ".REV) AS REV, Sum(" + ref + ".REV_EX_ROX) AS REV_EX_ROX, Sum(" + ref + ".RPK) AS RPK, Sum(" + ref + ".ASK) AS ASK FROM (RFS_USED INNER JOIN RFS_RETRAITEMENT ON RFS_USED.RFS = RFS_RETRAITEMENT.RFS) INNER JOIN " + ref + " ON (RFS_RETRAITEMENT.MONTH = " + ref + ".MONTH) AND (RFS_RETRAITEMENT.RFS_RT = " + ref + ".RFS) GROUP BY " + ref + ".MONTH, " + ref + ".CONTRIB, " + ref + ".FLOW;"
@@ -127,7 +128,7 @@ class Database():
 			table[equivData["RPK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.RPK
 			# ask
 			table[equivData["ASK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.ASK
-			
+
 	###################################
 	# setting data
 	###################################
@@ -144,7 +145,7 @@ class Database():
 			self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		else:
 			pass
-			
+
 	def set_data_value(self, type, flow, yld, month, value):
 		""" modify data within table according to provided value"""
 		""" can only be used when one route is selected """
@@ -154,5 +155,4 @@ class Database():
 			self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		else:
 			pass
-			
-			
+
