@@ -215,6 +215,5 @@ pip-log.txt
 .mr.developer.cfg
 
 #Perso
-DATA\
-DATA/
 *.accdb
+*.laccdb
