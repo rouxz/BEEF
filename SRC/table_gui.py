@@ -5,6 +5,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from mainGui import *
 from file_manager import *
+from window_modif import *
 import re
 
 # data to display
@@ -289,6 +290,8 @@ class MyTableView(QTableView):
 
 		QTableView.__init__(self)
 
+		self.parent = parent
+		
 		# define the data to be used
 		self.tableModel = TableData(tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
 
@@ -316,8 +319,8 @@ class MyTableView(QTableView):
 
 	@pyqtSlot(int,int)
 	def affiche_coordo(x, y):
-		print("Cells r:" + str(x) + " ,c:" + str(y) + " clicked")
-
+		#print("Cells r:" + str(x) + " ,c:" + str(y) + " clicked")
+		Window_modif(None)
 
 	#def cellClicked (row, col):
 	#	""" handle clicking on a cell event """

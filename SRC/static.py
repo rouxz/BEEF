@@ -5,7 +5,7 @@
 
 PROG_SHORT_NAME = "BEEF"
 PROG_LONG_NAME = "BEEF"
-VERSION = 0.2
+VERSION = 0.3
 
 
 # shared parameters
