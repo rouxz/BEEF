@@ -178,6 +178,7 @@ class Window_modif(QDialog):
 		self.recalculate_cy(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
 		#update the table view
 		self.parentTable.tableModel.setData(self.index, self.cy)
+		
 		#create a modif event
 		self.sidePanel.user_interaction.addPendingActions(event.Event())
 		

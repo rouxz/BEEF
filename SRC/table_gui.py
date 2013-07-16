@@ -73,7 +73,6 @@ class TableData(QAbstractTableModel):
 		self.hheader = hheader
 
 	def rowCount(self, parent):
-		#return 27
 		return len(self.arraydata)
 
 	def columnCount(self, parent):
@@ -107,10 +106,8 @@ class TableData(QAbstractTableModel):
 		"""change data in the data model without updating the gui """
 		self.arraydata[row][col] = value
 		
-	def updateDisplay(self, index1, index2):
-		self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index1, index2)
-	
-	#self.index(0,0), self.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+	def updateDisplay(self):
+		self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(0,0), self.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
 	
 	def setData2(self, row, col, value):
 		""" test only """
@@ -158,12 +155,12 @@ class MyTableView(QTableView):
 		#define dataModel for MVC
 		self.tableModel = TableData(self.tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
 
-		# get data from coreengine
-		self.retrieveData()
-
 		#define the model to be used by the table
 		self.setModel(self.tableModel)
 
+		# get data from coreengine
+		self.retrieveData()
+		
 		 # set the minimum size
 		self.setMinimumSize(1000, 300)
 
@@ -200,11 +197,11 @@ class MyTableView(QTableView):
 						if end == "CY":
 							#print(self.flow + " r : " + r + " - m:" + str(c+1) + " v: "+   str(self.core.DATA_FCST[type][flw][yld][c + 1]))
 							#self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
-							self.tableModel.setData(self.tableModel.index(row,c),self.core.DATA_FCST[type][flw][yld][c + 1])
+							self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_FCST[type][flw][yld][c + 1])
 							print(str(self.tableModel.index(row,c).data().toString()))
 						elif end == "Ref":
 							# self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
-							self.tableModel.setData(self.tableModel.index(row,c),self.core.DATA_REF[type][flw][yld][c + 1])
+							self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_REF[type][flw][yld][c + 1])
 					else:
 						# self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 						self.tableModel.setData(self.tableModel.index(row,c),0)
@@ -214,10 +211,11 @@ class MyTableView(QTableView):
 
 		# calcultate all totals
 
-		#update display
-		# self.tableModel.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
-		self.tableModel.updateDisplay(self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
-		#self.tableModel.dataChanged()
+		
+		
+		#update display	
+		# self.tableModel.updateDisplay(self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+		
 		
 	def retrieveData_(self):
 		"""retrieve all necessary data from core engine and put them into internal array """
@@ -355,7 +353,7 @@ class MyTableView(QTableView):
 	def cell_clicked_event(self, index):
 
 		#for debuggin purpose only
-		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.data(index, Qt.DisplayRole).toString()))
+		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
 
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
