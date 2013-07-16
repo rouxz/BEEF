@@ -196,25 +196,25 @@ class MyTableView(QTableView):
 						# data is either Rev or RPK for CY or ref
 						if end == "CY":
 							#print(self.flow + " r : " + r + " - m:" + str(c+1) + " v: "+   str(self.core.DATA_FCST[type][flw][yld][c + 1]))
-							#self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
-							self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_FCST[type][flw][yld][c + 1])
-							print(str(self.tableModel.index(row,c).data().toString()))
+							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
+							# self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_FCST[type][flw][yld][c + 1])
+							# print(str(self.tableModel.index(row,c).data().toString()))
 						elif end == "Ref":
-							# self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
-							self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_REF[type][flw][yld][c + 1])
+							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
+							# self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_REF[type][flw][yld][c + 1])
 					else:
-						# self.tableModel.setDataNoDisplayUpdate(row, c, 0)
-						self.tableModel.setData(self.tableModel.index(row,c),0)
+						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+						# self.tableModel.setData(self.tableModel.index(row,c),0)
 				else:
-						# self.tableModel.setDataNoDisplayUpdate(row, c, 0)
-						self.tableModel.setData(self.tableModel.index(row,c),0)
+						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+						# self.tableModel.setData(self.tableModel.index(row,c),0)
 
 		# calcultate all totals
 
 		
 		
 		#update display	
-		# self.tableModel.updateDisplay(self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+		self.tableModel.updateDisplay()
 		
 		
 	def retrieveData_(self):
