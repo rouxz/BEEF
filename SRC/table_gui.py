@@ -105,19 +105,19 @@ class TableData(QAbstractTableModel):
 	def setDataNoDisplayUpdate(self, row, col, value):
 		"""change data in the data model without updating the gui """
 		self.arraydata[row][col] = value
-		
+
 	def updateDisplay(self):
 		self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(0,0), self.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
-	
+
 	def setData2(self, row, col, value):
 		""" test only """
 		self.setData(self.index(row, col), value)
-	
-		
+
+
 	def index(self, row, col, parent = QModelIndex()):
 		""" redefinition of the index function """
 		return self.createIndex(row, col)
-		
+
 	# def flags(self, index):
 		# if index.isValid() and index.row < self.rowCount(None) and index.col < self.columCount(None):
 			# return Qt.ItemFlags(Qt.ItemIsEditable | Qt.ItemIsSelectable |Qt.ItemIsEnabled)
@@ -158,14 +158,16 @@ class MyTableView(QTableView):
 		#define the model to be used by the table
 		self.setModel(self.tableModel)
 
-		# get data from coreengine
-		self.retrieveData()
-		
-		 # set the minimum size
-		self.setMinimumSize(1000, 300)
-
 		# set the font
 		self.setFont(QFont("Courier New", 8))
+
+		# get data from coreengine
+		self.retrieveData()
+
+		 # set the minimum size
+		# self.setMinimumSize(1000, 300)
+
+
 
 		# set row height
 		# nrows = len(my_array)
@@ -188,6 +190,7 @@ class MyTableView(QTableView):
 			row = VERTICAL_HEADER.index(r)
 
 			for c in range(len(TABLE_TITLE)):
+				print(str(r) + "-" + str(c) + " " )
 				if DATA_FROM_DB.match(r):
 					end = r[-3:].strip()
 					yld = ARRAY_YIELD.index(r[4:6].strip())
@@ -211,12 +214,12 @@ class MyTableView(QTableView):
 
 		# calcultate all totals
 
-		
-		
-		#update display	
+
+
+		#update display
 		self.tableModel.updateDisplay()
-		
-		
+
+
 	def retrieveData_(self):
 		"""retrieve all necessary data from core engine and put them into internal array """
 

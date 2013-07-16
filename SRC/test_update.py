@@ -17,7 +17,7 @@ class MyTableView(QTableView):
 		self.tableData = [[0] * 3]*5
 
 		#define dataModel for MVC
-		self.tableModel = TableData(mydata, HEADER, ROWS)
+		self.tableModel = TableData(self.tableData, ROWS, HEADER)
 
 		#define the model to be used by the table
 		self.setModel(self.tableModel)
