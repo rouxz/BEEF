@@ -77,16 +77,22 @@ class Core():
 
 	def __events_handler(self):
 		# take an event and apply what is needed
-
+		res = 0
+		
 		for e in self.EVENTS_LIST:
 		# for each event handle it and then remove it
-			e.handle(self)
+			res = e.handle(self)
 			self.EVENTS_LIST.pop(0)
-
-	def save(self):
+		return res
+			
+	def process_events(self):
 		#apply all pending change
-		self.__events_handler()
+		res = self.__events_handler()
 		#retrieve new data
 		self.get_data_CY()
+		#flag to make sure process is OK
+		return res
 		
+	def clear_events(self):
+		self.EVENTS_LIST = []
 

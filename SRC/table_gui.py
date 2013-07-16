@@ -23,16 +23,28 @@ my_array = [['00','01','02'],
 class Tabs(QTabWidget):
 	""" class for defining the tabs including all the tables """
 
+	
+	
 	def __init__(self, core, parent):
 		QTabWidget.__init__(self, parent)
 
 		self.setMinimumSize(300,300)
+		
+		self.tabs = []
+		
+		i = 0
+		
 		for flow in equivFlow:
-			self.addTab(TableWidget(core, flow, parent), flow)
+			self.tabs.append(TableWidget(core, flow, parent))
+			self.addTab(self.tabs[i], flow)
+			i = i +1
 		#self.minimumSizeHint()
 
 
-
+	def updateTabs(self):
+		""" update the data displayed in all the present tabs"""
+		for tab in self.tabs
+			tab.updateDisplay()
 
 
 class TableWidget(QWidget):
@@ -120,6 +132,9 @@ class TableWidget(QWidget):
 	def retrieveData(self, flow):
 		"""retrieve all necessary data from core engine and put them into internal array """
 
+		# clear the array
+		self.tableData = []
+		
 		# take all the data
 		# ----------------
 
@@ -243,6 +258,9 @@ class TableWidget(QWidget):
 		# 5 - calculate CY-PY for LF
 		# --------------------------
 
+	def updateDisplay(self):
+		""" update the display of this tabs """
+		print("Display should be updated ")
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabe """
@@ -345,7 +363,7 @@ class MyTableView(QTableView):
 			else:
 				cy = index.sibling(index.row()-2, index.column()).data(Qt.DisplayRole).toPyObject()
 				ref =  index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
-			Window_modif(None, cy, ref)
+			Window_modif(None, cy, ref, index.column(), header[:-3])
 			print("cy:" + str(type(cy)) + "ref: " + str(type(ref)))
 
 	

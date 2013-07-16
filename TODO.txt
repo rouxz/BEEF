@@ -4,3 +4,13 @@ In window_modif.py
 ------------------
 Move to next case
 Create an event for the core after validation
+Update table after modification
+
+In sideGui.py
+-------------
+Handle an event sent through a slot
+
+In tableGui.py
+-------------
+
+Finish data consistency

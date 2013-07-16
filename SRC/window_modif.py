@@ -7,7 +7,7 @@ from table_gui import *
 class Window_modif(QDialog):
 	""" windows to modif values with a tableView """
 	
-	def __init__(self, parent, CY, ref):
+	def __init__(self, parent, CY, ref, month, type):
 		QWidget.__init__(self, parent)
 		
 		
@@ -18,7 +18,7 @@ class Window_modif(QDialog):
 
 		
 		#set the UI
-		self.initUI()
+		self.initUI(month, type)
 		
 		#set to relative by default
 		self.toRelative()
@@ -27,7 +27,7 @@ class Window_modif(QDialog):
 		self.exec_()
 	
 	
-	def initUI(self):
+	def initUI(self, month, type):
 		""" display the window properly """
 		
 		#global layout for the widget
@@ -80,6 +80,11 @@ class Window_modif(QDialog):
 		
 		self.moveGroupBox.setLayout(self.moveGroupBoxLayout)
 		
+		#top label for displaying information
+		self.topLabel = QLabel(QString(type + " - Month : " + str(month)))
+		
+		#adding the top label
+		self.layout.addWidget(self.topLabel)
 		
 		#adding the groupbox of user action selection
 		self.layout.addWidget(self.evolGroupBox)

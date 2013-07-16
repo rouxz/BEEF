@@ -1,6 +1,6 @@
 ﻿import sys
 
-from static import *
+import static as STATIC
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from mainGui import *
@@ -22,7 +22,7 @@ class SidePanel(QWidget):
 		self.platform = platform
 		
 		# user interaction
-		self.layout.addWidget(UserInteraction(self))
+		self.layout.addWidget(UserInteraction(core, self))
 		# reference
 		self.layout.addWidget(ReferenceWidget(core, self, self.platform))
 		# route perimeter
@@ -35,28 +35,67 @@ class SidePanel(QWidget):
 
 
 class UserInteraction(QGroupBox):
-		""" a class for the user to interact with the database / core engine """
-		def __init__(self, *args):
+		""" a class for the user to interact with the database / core engine 
+			this class allow to apply all pending actions to the database behind all calculations
+		"""
+		def __init__(self, core, *args):
 			QGroupBox.__init__(self, *args)
+			
+			# core engine to process all requests
+			self.core = core
+			self.nbrPending = 0
+			
 			self.setTitle(QString("User actions"))
 			self.layout = QVBoxLayout()
 
 			#show number of pending actions
-			self.layout.addWidget(QLabel(QString("Pending actions : 0"), self))
+			self.labelNbrPending = QLabel(QString("Pending actions : 0"), self)
+			self.layout.addWidget(self.labelNbrPending)
 
 			#save button
-			self.layout.addWidget(QPushButton("Save", self))
+			self.save = QPushButton("Discard", self)
+			self.layout.addWidget(self.save)
 			#discard button
-			self.layout.addWidget(QPushButton("Discard", self))
+			self.discard = QPushButton("Discard", self)
+			self.layout.addWidget(self.discard)
 
-
+			#connect slots and signals
+			self.save.connect(self.save, SIGNAL("clicked()"), self.saveActions)
+			self.discard.connect(self.discard, SIGNAL("clicked()"), self.discardActions)
+			
 			self.setLayout(self.layout)
 
+		def setNumberPending(self, num):
+			""" update the display of the number of pending actions with the required number"""
+			self.nbrPending = num
+			self.labelNbrPending.setText(STATIC.PENDING_ACTIONS + str(num))
+		
+		def incrementPending(self):
+			self.setNumberPending(self.nbrPending + 1)
+		
+		def zeroPending(self):
+			self.setNumberPending(0)
+		
+		def addPendingActions(self, action):
+			""" add an action to the core list """
+			self.incrementPending()
+			print("Action added")
+			
+		def saveActions(self):
+			print("Processing actions")
+			if self.core.process_events() == 0:
+				print("Actions saved")
+			else:
+				print("Error processing data")
+		
+		def discardActions(self):
+			self.core.clear_events()
+			print("Actions discarded")
 
 
 class ReferenceWidget(QGroupBox):
 	""" allow selection of the type of ref for calculation and setting parameters for the ref"""
-	def __init__(self, core, parent, platform = PLATFORM_WINDOWS):
+	def __init__(self, core, parent, platform = STATIC.PLATFORM_WINDOWS):
 		QGroupBox.__init__(self, parent)
 		
 		self.platform = platform
@@ -88,7 +127,7 @@ class ReferenceWidget(QGroupBox):
 		# retrieve the list of reference form the core engine
 
 		lst = core.referenceList
-		if self.platform == PLATFORM_WINDOWS:
+		if self.platform == STATIC.PLATFORM_WINDOWS:
 			for i in lst:
 				if i.TABLE_NAME != "DATA_RAW":
 					self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))

@@ -12,7 +12,8 @@ class Event():
 		
 	
 	def handle(self, core):
-		
+		""" class used to process an event """
+		return 0
 		
 
 class EventModifValue(Event):
@@ -39,9 +40,10 @@ class EventModifValue(Event):
 		percentageRev = self.valueRev / core.DATA_FCST[equivData["Rev"]][equivFlow[self.__flow]][equivYld[self.__yld]][self.__month]
 		percentageRPK = self.valueRPK / core.DATA_FCST[equivData["Rev"]][equivFlow[self.__flow]][equivYld[self.__yld]][self.__month]
 		# commit these data into the db
-		core.db.set_data_percentage("Rev", self.__flow, self.__yld, self.__month, percentageRev)
-		core.db.set_data_percentage("RPK", self.__flow, self.__yld, self.__month, percentageRev)
-
+		res1 = core.db.set_data_percentage("Rev", self.__flow, self.__yld, self.__month, percentageRev)
+		res2 = core.db.set_data_percentage("RPK", self.__flow, self.__yld, self.__month, percentageRev)
+		#results of the commit
+		return res1 +res 2
 		
 class EventModifScope(Event):
 	""" define a new scope ie add a new route with the route scope """

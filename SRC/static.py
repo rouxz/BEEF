@@ -5,7 +5,7 @@
 
 PROG_SHORT_NAME = "BEEF"
 PROG_LONG_NAME = "BEEF"
-VERSION = 0.3
+VERSION = 0.2
 
 
 # shared parameters
@@ -52,6 +52,11 @@ PLATFORM_MAC = 3
 # ---------------
 
 HIERARCHY_DIR = "hierarchy"
+
+# for sideGui.py
+# ---------------
+
+PENDING_LABEL = "Pending actions : "
 
 # for gui.py
 # ----------

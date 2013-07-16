@@ -140,19 +140,19 @@ class Database():
 	def set_data_percentage(self, type, flow, yld, month, percentage):
 		""" modify data within table according to provided percentage """
 		if type == "Rev":
-			self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		elif type == "RPK":
-			self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		else:
-			pass
+			return 1
 
 	def set_data_value(self, type, flow, yld, month, value):
 		""" modify data within table according to provided value"""
 		""" can only be used when one route is selected """
 		if type == "Rev":
-			self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		elif type == "RPK":
-			self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		else:
-			pass
+			return 1
 
