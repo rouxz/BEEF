@@ -56,7 +56,8 @@ class TopWindow(QMainWindow):
 		# central widget
 		########################
 
-		self.setCentralWidget(CentralWidget(fm, core, self, self.statusBar(), self.platform))
+		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.platform)
+		self.setCentralWidget(self.centralWidget)
 		
 		
 		#pack the window
@@ -93,15 +94,17 @@ class CentralWidget(QWidget):
 		self.grid = QGridLayout()
 		self.grid.setSpacing(GRID_LAYOUT_SPACE)
 
-
+		#SIDE PANEL
+		self.sidePanel = SidePanel(fm, core, self, self.status, self.platform)
+		
 		#######################"
 		# Place all the itemes
 		########################
 
-
+		
 
 		# set the tabs
-		self.tabsWidget = Tabs(core, self)
+		self.tabsWidget = Tabs(core, self.sidePanel, self)
 		self.grid.addWidget(self.tabsWidget, 1 , 1)
 
 
@@ -111,7 +114,6 @@ class CentralWidget(QWidget):
 		self.grid.addWidget(self.title, 0 , 0, 1, -1)
 
 		# set the side panel
-		self.sidePanel = SidePanel(fm, core, self, self.status, self.platform)
 		self.grid.addWidget(self.sidePanel, 1, 0)
 
 		#setting the layout

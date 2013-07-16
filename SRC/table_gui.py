@@ -25,20 +25,32 @@ class Tabs(QTabWidget):
 
 	
 	
-	def __init__(self, core, parent):
+	def __init__(self, core, sidePanel, parent):
 		QTabWidget.__init__(self, parent)
-
-		self.setMinimumSize(300,300)
 		
+		
+		
+		
+		self.parentWidget = parent
+		
+		#for user interactions
+		self.sidePanel = sidePanel
+		
+		#list of all the displayed tabs
 		self.tabs = []
 		
 		i = 0
 		
+		# add new tabs
 		for flow in equivFlow:
-			self.tabs.append(TableWidget(core, flow, parent))
+			self.tabs.append(MyTableView(core, flow, self.sidePanel, parent))
 			self.addTab(self.tabs[i], flow)
 			i = i +1
-		#self.minimumSizeHint()
+		
+		self.setUI()
+		
+	def setUI(self):
+		self.setMinimumSize(300,300)
 
 
 	def updateTabs(self):
@@ -47,88 +59,99 @@ class Tabs(QTabWidget):
 			tab.updateDisplay()
 
 
-class TableWidget(QWidget):
-	""" class describing the table of data used in the several tabs """
+class TableData(QAbstractTableModel):
+	""" all the data bying displayed in the tabs """
+	""" this table requires a big array containing all required data """
 
+	def __init__(self, datain, vheader, hheader, parent=None, *args):
+		""" define array containing all the data and all the headers"""
+		QAbstractTableModel.__init__(self, parent, *args)
+		self.arraydata = datain
+		self.vheader = vheader
+		self.hheader = hheader
 
-	def __init__(self, core, flow, parent, debug=True):
+	def rowCount(self, parent):
+		#return 27
+		return len(self.arraydata)
 
-		QWidget.__init__(self, parent)
+	def columnCount(self, parent):
+		return len(self.arraydata[0])
 
-		# set the core engine
+	def data(self, index, role):
+		""" retrieve data within the data container """
+		if not index.isValid():
+			return QVariant()
+		elif role != Qt.DisplayRole:
+			return QVariant()
+		return QVariant(self.arraydata[index.row()][index.column()])
+
+	def headerData(self, section, orientation, role):
+		if role != Qt.DisplayRole:
+			return QVariant()
+		if orientation == Qt.Vertical:
+			return QVariant(self.vheader[section])
+		if orientation == Qt.Horizontal:
+			return QVariant(self.hheader[section])
+
+	def setData(self, index, value):
+		if index.isValid():
+			self.arraydata[index.row()][index.column()] = value
+			#show to the world the update
+			self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
+
+	
+
+class MyTableView(QTableView):
+	""" table specialisation of QTableView displaying all the data and calculated KPI fetched from db"""
+
+	def __init__(self, core, flow, sidePanel, parent, debug = True):
+
+		QTableView.__init__(self)
+
+		#core engine
 		self.core = core
-		self.debug=debug
-
-		# internal table detaining all necessary information
-		# 2 lines representing forecast and ref
-		#	Type of data *
-		#		Flow * 5
-		#			yield * 3
-		#				month * 13
+		
+		#sidePanel
+		self.sidePanel = sidePanel
+		
+		#debug parameter
+		self.debug = debug
+		
+		#flow represented in this table
+		self.flow =  flow
+		
+		
+		# define the data to be used
 		self.tableData = []
-
-		# define the header to be display verticaly
-		self.vHeader = VERTICAL_HEADER
-
-		#get the data right (ie define tableData )
-		self.retrieveData(flow)
-
+		self.retrieveData(self.flow)
+		
 		# set consistency for all data
 		self.setDataConsistency()
-
-		#initiate the all widget
-		self.initUI(flow)
-
-	def initUI(self,flow):
-
-		# define the table displayed
-		#self.table = QTableView()
-		self.table = MyTableView(self.tableData, self)
-
-		# define the data to be used
-		#self.tableModel = TableData(self.tableData, self.vHeader, TABLE_TITLE, self)
+		
+		#define dataModel for MVC
+		self.tableModel = TableData(self.tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
 
 		#define the model to be used by the table
-		#self.table.setModel(self.tableModel)
+		self.setModel(self.tableModel)
 
 		 # set the minimum size
-		#self.table.setMinimumSize(800, 300)
+		self.setMinimumSize(1000, 300)
 
 		# set the font
-		#self.table.setFont(QFont("Courier New", 8))
-
-
-
-		# set horizontal header properties
-		#self.table.horizontalHeader().setStretchLastSection(True)
-
-		# set column width to fit contents
-		#self.table.resizeColumnsToContents()
+		self.setFont(QFont("Courier New", 8))
 
 		# set row height
-		nrows = len(my_array)
-		for row in xrange(nrows):
-			self.table.setRowHeight(row, 18)
+		# nrows = len(my_array)
+		# for row in xrange(nrows):
+			# self.table.setRowHeight(row, 18)
 
-
-		#first data consistency
-		self.setDataConsistency()
-
-		#add the table within a layout
-		self.layout = QVBoxLayout(self)
-		self.layout.addWidget(self.table)
-		self.setLayout(self.layout)
-
-		#self.center()
-		#self.show()
-
-	def center(self):
-
-		qr = self.frameGeometry()
-		cp = QDesktopWidget().availableGeometry().center()
-		qr.moveCenter(cp)
-		self.move(qr.topLeft())
-
+		#connecting events
+		#-----------------
+		
+		#new way
+		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
+		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
+		
 	def retrieveData(self, flow):
 		"""retrieve all necessary data from core engine and put them into internal array """
 
@@ -262,87 +285,6 @@ class TableWidget(QWidget):
 		""" update the display of this tabs """
 		print("Display should be updated ")
 
-class TableData(QAbstractTableModel):
-	""" all the data bying displayed in the tabe """
-	""" this table requires a big array containing all required data """
-
-	def __init__(self, datain, vheader, hheader, parent=None, *args):
-		""" define array containing all the data and all the headers"""
-		QAbstractTableModel.__init__(self, parent, *args)
-		self.arraydata = datain
-		self.vheader = vheader
-		self.hheader = hheader
-
-	def rowCount(self, parent):
-		#return 27
-		return len(self.arraydata)
-
-	def columnCount(self, parent):
-		return len(self.arraydata[0])
-
-	def data(self, index, role):
-		""" retrieve data within the data container """
-		if not index.isValid():
-			return QVariant()
-		elif role != Qt.DisplayRole:
-			return QVariant()
-		return QVariant(self.arraydata[index.row()][index.column()])
-
-	def headerData(self, section, orientation, role):
-		if role != Qt.DisplayRole:
-			return QVariant()
-		if orientation == Qt.Vertical:
-			return QVariant(self.vheader[section])
-		if orientation == Qt.Horizontal:
-			return QVariant(self.hheader[section])
-
-
-
-
-
-
-class MyTableView(QTableView):
-	""" table specialisation of QTableView """
-
-	def __init__(self, tableData, parent):
-
-		QTableView.__init__(self)
-
-		self.parent = parent
-
-		# define the data to be used
-		self.tableModel = TableData(tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
-
-		#define the model to be used by the table
-		self.setModel(self.tableModel)
-
-		 # set the minimum size
-		self.setMinimumSize(1000, 300)
-
-		# set the font
-		self.setFont(QFont("Courier New", 8))
-
-
-		#connecting events
-		#-----------------
-		
-		#old way
-		#self.doubleClicked.connect(self.affiche_coordo)
-		#self.clicked.connect(self.affiche_coordo)
-		
-		#new way
-		#self.connect(self, SIGNAL("clicked"), SLOT("affiche_coordo()"))
-		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
-		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
-		
-
-	@pyqtSlot()
-	def fun_default(self):
-		""" handle clicking on a cell event """
-		#print("Cells r:" + str(row) + " ,c:" + str(col) + " clicked")
-		print("OSU")
-
-
 	def cell_clicked_event(self, index):
 		
 		#for debuggin purpose only
@@ -350,20 +292,18 @@ class MyTableView(QTableView):
 		
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
-		regexp = re.compile("(RPK|Yield).*")
+		
+		
+		#open pop up window
 		header = VERTICAL_HEADER[index.row()]
+		regexp = re.compile("(RPK|Yield).*")
 		if regexp.match(header) and index.column() < 12:
-			
-			if header[-3:].strip() == "CY":
-				cy = index.data(Qt.DisplayRole).toPyObject()
-				ref = index.sibling(index.row()+1, index.column()).data(Qt.DisplayRole).toPyObject()
-			elif header[-3:].strip() == "Ref":
-				cy = index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
-				ref =  index.data(Qt.DisplayRole).toPyObject()
-			else:
-				cy = index.sibling(index.row()-2, index.column()).data(Qt.DisplayRole).toPyObject()
-				ref =  index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
-			Window_modif(None, cy, ref, index.column(), header[:-3])
-			print("cy:" + str(type(cy)) + "ref: " + str(type(ref)))
+			Window_modif(self, index)
 
+	def center(self):
+
+		qr = self.frameGeometry()
+		cp = QDesktopWidget().availableGeometry().center()
+		qr.moveCenter(cp)
+		self.move(qr.topLeft())
 	

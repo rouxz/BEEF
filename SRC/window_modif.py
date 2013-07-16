@@ -2,23 +2,32 @@ from static import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from table_gui import *
-
+import re
+import event
 
 class Window_modif(QDialog):
 	""" windows to modif values with a tableView """
 	
-	def __init__(self, parent, CY, ref, month, type):
+	def __init__(self, parent, index):
 		QWidget.__init__(self, parent)
 		
+		#parent - MyTableView
+		self.parentTable = parent
+		
+		# index QModelIndex representing the cell launching this pop up
+		self.index = index
 		
 		#data used
-		self.CY = CY
-		self.ref = ref
-		self.yoy = self.calcYoY(CY, ref)
+		self.getData(self.index)
+		
+		self.yoy = self.calcyoY(self.cy, self.ref)
+		
+		#side panel to send the events
+		self.sidePanel = self.parentTable.parentTableWidget.sidePanel
 
 		
 		#set the UI
-		self.initUI(month, type)
+		self.initUI()
 		
 		#set to relative by default
 		self.toRelative()
@@ -27,7 +36,7 @@ class Window_modif(QDialog):
 		self.exec_()
 	
 	
-	def initUI(self, month, type):
+	def initUI(self):
 		""" display the window properly """
 		
 		#global layout for the widget
@@ -48,10 +57,10 @@ class Window_modif(QDialog):
 		self.dataGroupBox.setTitle(QString("Data"))
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
-		#CY
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("CY"), self))
-		self.CY_LE = QLineEdit(QString(str(self.CY)), self)
-		self.dataGroupBoxLayout.addWidget(self.CY_LE)
+		#cy
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("cy"), self))
+		self.cy_LE = QLineEdit(QString(str(self.cy)), self)
+		self.dataGroupBoxLayout.addWidget(self.cy_LE)
 		#ref
 		self.dataGroupBoxLayout.addWidget(QLabel(QString("Ref"), self))
 		self.ref_LE = QLineEdit(QString(str(self.ref)), self)
@@ -81,7 +90,7 @@ class Window_modif(QDialog):
 		self.moveGroupBox.setLayout(self.moveGroupBoxLayout)
 		
 		#top label for displaying information
-		self.topLabel = QLabel(QString(type + " - Month : " + str(month)))
+		self.topLabel = QLabel(QString(self.header[:-3] + " - Month : " + str(self.index.column()+1)))
 		
 		#adding the top label
 		self.layout.addWidget(self.topLabel)
@@ -96,8 +105,8 @@ class Window_modif(QDialog):
 		self.layout.addWidget(self.moveGroupBox)
 		
 		# connect slots and signals
-		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.updateCY)
-		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.updateCY)
+		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
+		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
 		# void	editingFinished ()
 # void	returnPressed ()
 # void	selectionChanged ()
@@ -109,17 +118,33 @@ class Window_modif(QDialog):
 		
 		self.setWindowTitle("Da Du Run")
 		self.show()
+	
+	def getData(self, index):
+	
+		self.header = VERTICAL_HEADER[index.row()]
 		
-	def calcYoY(self, CY, ref):
+		if self.header[-3:].strip() == "CY":
+			self.cy = index.data(Qt.DisplayRole).toPyObject()
+			self.ref = index.sibling(index.row()+1, index.column()).data(Qt.DisplayRole).toPyObject()
+		elif self.header[-3:].strip() == "Ref":
+			self.cy = index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
+			self.ref =  index.data(Qt.DisplayRole).toPyObject()
+		else:
+			self.cy = index.sibling(index.row()-2, index.column()).data(Qt.DisplayRole).toPyObject()
+			self.ref =  index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
+		#print("Popup " + str(self.cy)  + "-" + str(self.ref))
+
+	
+	def calcyoY(self, cy, ref):
 		if ref != 0:
-			return (self.CY / self.ref - 1) * 100
+			return (self.cy / self.ref - 1) * 100
 		else:
 			return 0
 			
 	def switchAbsoluteRelative(self, bool):
 		""" define if the display should be set for relative evolution or absolute data """
 		if bool == True:
-			self.CY_LE.setReadOnly(True)
+			self.cy_LE.setReadOnly(True)
 			self.ref_LE.setReadOnly(True)
 		else:
 			self.ref_LE.setReadOnly(True)
@@ -134,21 +159,25 @@ class Window_modif(QDialog):
 		self.switchAbsoluteRelative(True)
 		
 		
-	def recalculateCY(self, yoy):
-		""" recalculate data for CY based on the reference and change the display """
+	def recalculate_cy(self, yoy):
+		""" recalculate data for cy based on the reference and change the display """
 		if self.ref !=0:
 			#changing data
-			self.CY = self.ref * (1 + yoy)
-			print(self.CY)
-			#changing display
-			self.CY_LE.setText(str(self.CY))
-		else:
-			self.CY = 0
+			self.cy = self.ref * (1 + yoy)
+			#print(self.cy)
 			
-	def updateCY(self):
+			#changing display
+			self.cy_LE.setText(str(self.cy))
+		else:
+			self.cy = 0
+			
+	def update_cy(self):
 		""" change the display after having set a data in the YoY field """
 		#odd behaviour on converting Qstring to float !!
-		print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
-		#self.yoy = float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100
-		self.recalculateCY(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
+		#print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
+		self.recalculate_cy(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
+		#update the table view
+		self.parentTable.tableModel.setData(self.index, self.cy)
+		#create a modif event
+		self.sidePanel.user_interaction.addPendingActions(event.Event())
 		

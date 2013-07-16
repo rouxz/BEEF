@@ -9,7 +9,7 @@ class Event():
 	
 	
 	def __init__(self):
-		
+		pass
 	
 	def handle(self, core):
 		""" class used to process an event """
@@ -43,7 +43,7 @@ class EventModifValue(Event):
 		res1 = core.db.set_data_percentage("Rev", self.__flow, self.__yld, self.__month, percentageRev)
 		res2 = core.db.set_data_percentage("RPK", self.__flow, self.__yld, self.__month, percentageRev)
 		#results of the commit
-		return res1 +res 2
+		return (res1 + res2)
 		
 class EventModifScope(Event):
 	""" define a new scope ie add a new route with the route scope """

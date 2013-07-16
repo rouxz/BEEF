@@ -27,7 +27,8 @@ class SidePanel(QWidget):
 		self.layout = QVBoxLayout()
 		
 		# user interaction
-		self.layout.addWidget(UserInteraction(core, self.status, self))
+		self.user_interaction = UserInteraction(core, self.status, self)
+		self.layout.addWidget(self.user_interaction)
 		# reference
 		self.layout.addWidget(ReferenceWidget(core, self, self.platform))
 		# route perimeter
@@ -76,7 +77,7 @@ class UserInteraction(QGroupBox):
 		def setNumberPending(self, num):
 			""" update the display of the number of pending actions with the required number"""
 			self.nbrPending = num
-			self.labelNbrPending.setText(STATIC.PENDING_ACTIONS + str(num))
+			self.labelNbrPending.setText(STATIC.PENDING_LABEL + str(num))
 		
 		def incrementPending(self):
 			self.setNumberPending(self.nbrPending + 1)
@@ -87,11 +88,13 @@ class UserInteraction(QGroupBox):
 		def addPendingActions(self, action):
 			""" add an action to the core list """
 			self.incrementPending()
-			print("Action added")
+			self.status.showMessage("Action added")
+			self.core.add_event(action)
+
 			
 		def saveActions(self):
 			self.status.showMessage("Processing actions")
-			print("Processing actions")
+			#print("Processing actions")
 			if self.core.process_events() == 0:
 				self.status.showMessage("Actions saved")
 				print("Actions saved")
@@ -100,8 +103,13 @@ class UserInteraction(QGroupBox):
 				print("Error processing data")
 		
 		def discardActions(self):
+			#clear core engine
 			self.core.clear_events()
+			#zero the display
+			self.zeroPending()
 			self.status.showMessage("Actions discarded")
+			#re get all data from db
+			self.core.get_data_CY()
 			print("Actions discarded")
 
 
