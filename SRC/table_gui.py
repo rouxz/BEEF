@@ -8,6 +8,11 @@ from file_manager import *
 from window_modif import *
 import re
 
+
+# regexp
+# ------
+DATA_FROM_DB = re.compile("(Rev|RPK|ASK).(HY|LY).(?!YoY).*")
+
 # data to display
 my_array = [['00','01','02'],
 			['10','11','12'],
@@ -23,32 +28,29 @@ my_array = [['00','01','02'],
 class Tabs(QTabWidget):
 	""" class for defining the tabs including all the tables """
 
-	
-	
+
+
 	def __init__(self, core, sidePanel, parent):
 		QTabWidget.__init__(self, parent)
-		
-		
-		
-		
+
 		self.parentWidget = parent
-		
+
 		#for user interactions
 		self.sidePanel = sidePanel
-		
+
 		#list of all the displayed tabs
 		self.tabs = []
-		
+
 		i = 0
-		
+
 		# add new tabs
 		for flow in equivFlow:
 			self.tabs.append(MyTableView(core, flow, self.sidePanel, parent))
 			self.addTab(self.tabs[i], flow)
 			i = i +1
-		
+
 		self.setUI()
-		
+
 	def setUI(self):
 		self.setMinimumSize(300,300)
 
@@ -94,12 +96,36 @@ class TableData(QAbstractTableModel):
 			return QVariant(self.hheader[section])
 
 	def setData(self, index, value):
+		""" change data in the array containing all the required information """
 		if index.isValid():
 			self.arraydata[index.row()][index.column()] = value
 			#show to the world the update
 			self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
 
+
+	def setDataNoDisplayUpdate(self, row, col, value):
+		"""change data in the data model without updating the gui """
+		self.arraydata[row][col] = value
+		
+	def updateDisplay(self, index1, index2):
+		self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index1, index2)
 	
+	#self.index(0,0), self.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+	
+	def setData2(self, row, col, value):
+		""" test only """
+		self.setData(self.index(row, col), value)
+	
+		
+	def index(self, row, col, parent = QModelIndex()):
+		""" redefinition of the index function """
+		return self.createIndex(row, col)
+		
+	# def flags(self, index):
+		# if index.isValid() and index.row < self.rowCount(None) and index.col < self.columCount(None):
+			# return Qt.ItemFlags(Qt.ItemIsEditable | Qt.ItemIsSelectable |Qt.ItemIsEnabled)
+		# else:
+			# return Qt.ItemFlags(Qt.ItemIsSelectable |Qt.ItemIsEnabled)
 
 class MyTableView(QTableView):
 	""" table specialisation of QTableView displaying all the data and calculated KPI fetched from db"""
@@ -110,26 +136,30 @@ class MyTableView(QTableView):
 
 		#core engine
 		self.core = core
-		
+
 		#sidePanel
 		self.sidePanel = sidePanel
-		
+
 		#debug parameter
 		self.debug = debug
-		
+
 		#flow represented in this table
 		self.flow =  flow
-		
-		
+
+
 		# define the data to be used
-		self.tableData = []
-		self.retrieveData(self.flow)
-		
+		self.tableData = [[0] * len(TABLE_TITLE)]*len(VERTICAL_HEADER)
+		# self.tableData = []
+		# self.retrieveData_()
+
 		# set consistency for all data
-		self.setDataConsistency()
-		
+		# self.setDataConsistency()
+
 		#define dataModel for MVC
 		self.tableModel = TableData(self.tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
+
+		# get data from coreengine
+		self.retrieveData()
 
 		#define the model to be used by the table
 		self.setModel(self.tableModel)
@@ -147,17 +177,54 @@ class MyTableView(QTableView):
 
 		#connecting events
 		#-----------------
-		
+
 		#new way
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
 		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
+
+	def retrieveData(self):
+		""" get all data from core engine """
+
+		flw = ARRAY_FLOW.index(self.flow)
+
+		for r in VERTICAL_HEADER:
+			row = VERTICAL_HEADER.index(r)
+
+			for c in range(len(TABLE_TITLE)):
+				if DATA_FROM_DB.match(r):
+					end = r[-3:].strip()
+					yld = ARRAY_YIELD.index(r[4:6].strip())
+					type = ARRAY_DATA.index(r[:3].strip())
+					if c < 12: #data is a month
+						# data is either Rev or RPK for CY or ref
+						if end == "CY":
+							#print(self.flow + " r : " + r + " - m:" + str(c+1) + " v: "+   str(self.core.DATA_FCST[type][flw][yld][c + 1]))
+							#self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
+							self.tableModel.setData(self.tableModel.index(row,c),self.core.DATA_FCST[type][flw][yld][c + 1])
+							print(str(self.tableModel.index(row,c).data().toString()))
+						elif end == "Ref":
+							# self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
+							self.tableModel.setData(self.tableModel.index(row,c),self.core.DATA_REF[type][flw][yld][c + 1])
+					else:
+						# self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+						self.tableModel.setData(self.tableModel.index(row,c),0)
+				else:
+						# self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+						self.tableModel.setData(self.tableModel.index(row,c),0)
+
+		# calcultate all totals
+
+		#update display
+		# self.tableModel.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+		self.tableModel.updateDisplay(self.tableModel.index(0,0), self.tableModel.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
+		#self.tableModel.dataChanged()
 		
-	def retrieveData(self, flow):
+	def retrieveData_(self):
 		"""retrieve all necessary data from core engine and put them into internal array """
 
 		# clear the array
 		self.tableData = []
-		
+
 		# take all the data
 		# ----------------
 
@@ -165,9 +232,9 @@ class MyTableView(QTableView):
 		for data in ["ASK", "RPK"]:
 			for yld in ARRAY_YIELD:
 				# for forecast
-				self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index(data)][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+				self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index(data)][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
 				# for ref
-				self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index(data)][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+				self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index(data)][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
 				# for yoy
 				self.tableData.append([0]*17)
 
@@ -194,9 +261,9 @@ class MyTableView(QTableView):
 		# populate rev data
 		for yld in ARRAY_YIELD:
 			# for forecast
-			self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index("Rev")][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+			self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index("Rev")][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
 			# for ref
-			self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index("Rev")][equivFlow[flow]][ARRAY_YIELD.index(yld)][1:18])
+			self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index("Rev")][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
 			# for yoy
 			self.tableData.append([0]*17)
 
@@ -286,19 +353,20 @@ class MyTableView(QTableView):
 		print("Display should be updated ")
 
 	def cell_clicked_event(self, index):
-		
+
 		#for debuggin purpose only
-		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString())
-		
+		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.data(index, Qt.DisplayRole).toString()))
+
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
-		
-		
+
+
 		#open pop up window
 		header = VERTICAL_HEADER[index.row()]
 		regexp = re.compile("(RPK|Yield).*")
 		if regexp.match(header) and index.column() < 12:
 			Window_modif(self, index)
+			#pass
 
 	def center(self):
 
@@ -306,4 +374,3 @@ class MyTableView(QTableView):
 		cp = QDesktopWidget().availableGeometry().center()
 		qr.moveCenter(cp)
 		self.move(qr.topLeft())
-	

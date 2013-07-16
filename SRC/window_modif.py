@@ -23,7 +23,7 @@ class Window_modif(QDialog):
 		self.yoy = self.calcyoY(self.cy, self.ref)
 		
 		#side panel to send the events
-		self.sidePanel = self.parentTable.parentTableWidget.sidePanel
+		self.sidePanel = self.parentTable.sidePanel
 
 		
 		#set the UI
