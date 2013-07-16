@@ -15,14 +15,19 @@ from file_manager import *
 
 class SidePanel(QWidget):
 	""" a class for including a side panel allowing to select several options in the gui """
-	def __init__(self, fm, core, parent, platform = PLATFORM_WINDOWS):
+	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS):
 		QWidget.__init__(self)
-		self.layout = QVBoxLayout()
 		
+		#operation system
 		self.platform = platform
 		
+		#status bar
+		self.status = status
+		
+		self.layout = QVBoxLayout()
+		
 		# user interaction
-		self.layout.addWidget(UserInteraction(core, self))
+		self.layout.addWidget(UserInteraction(core, self.status, self))
 		# reference
 		self.layout.addWidget(ReferenceWidget(core, self, self.platform))
 		# route perimeter
@@ -38,12 +43,15 @@ class UserInteraction(QGroupBox):
 		""" a class for the user to interact with the database / core engine 
 			this class allow to apply all pending actions to the database behind all calculations
 		"""
-		def __init__(self, core, *args):
+		def __init__(self, core, status, *args):
 			QGroupBox.__init__(self, *args)
 			
 			# core engine to process all requests
 			self.core = core
 			self.nbrPending = 0
+			
+			#status bar
+			self.status = status
 			
 			self.setTitle(QString("User actions"))
 			self.layout = QVBoxLayout()
@@ -53,7 +61,7 @@ class UserInteraction(QGroupBox):
 			self.layout.addWidget(self.labelNbrPending)
 
 			#save button
-			self.save = QPushButton("Discard", self)
+			self.save = QPushButton("Apply", self)
 			self.layout.addWidget(self.save)
 			#discard button
 			self.discard = QPushButton("Discard", self)
@@ -82,14 +90,18 @@ class UserInteraction(QGroupBox):
 			print("Action added")
 			
 		def saveActions(self):
+			self.status.showMessage("Processing actions")
 			print("Processing actions")
 			if self.core.process_events() == 0:
+				self.status.showMessage("Actions saved")
 				print("Actions saved")
 			else:
+				self.status.showMessage("Error processing data")
 				print("Error processing data")
 		
 		def discardActions(self):
 			self.core.clear_events()
+			self.status.showMessage("Actions discarded")
 			print("Actions discarded")
 
 

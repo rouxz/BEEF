@@ -43,7 +43,7 @@ class Tabs(QTabWidget):
 
 	def updateTabs(self):
 		""" update the data displayed in all the present tabs"""
-		for tab in self.tabs
+		for tab in self.tabs:
 			tab.updateDisplay()
 
 

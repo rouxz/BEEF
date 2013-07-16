@@ -35,13 +35,7 @@ class TopWindow(QMainWindow):
 	def initTopWindow(self, fm, core):
 
 
-		#######################"
-		# central widget
-		########################
-
-		self.setCentralWidget(CentralWidget(fm, core, self, self.platform))
-
-		########################
+				########################
 		# Status and menu bars
 		########################
 
@@ -58,6 +52,13 @@ class TopWindow(QMainWindow):
 		self.fileMenu = self.menubar.addMenu('&File')
 		self.fileMenu.addAction(exitAction)
 
+		#######################"
+		# central widget
+		########################
+
+		self.setCentralWidget(CentralWidget(fm, core, self, self.statusBar(), self.platform))
+		
+		
 		#pack the window
 		self.setWindowTitle(TITLE_TOPWINDOW)
 
@@ -73,11 +74,16 @@ class TopWindow(QMainWindow):
 class CentralWidget(QWidget):
 	""" a widget being the main widget within the topwindow"""
 	""" this main widget will have all the required tabs and table within """
-	def __init__(self, fm, core, parent, platform = PLATFORM_WINDOWS):
+	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS):
 		QWidget.__init__(self, parent)
 		
+		# operating system
 		self.platform = platform
+		
+		# status bar
+		self.status = status
 
+		#init the central widget
 		self.initCentralWidget(fm, core)
 
 	def initCentralWidget(self, fm, core):
@@ -105,7 +111,7 @@ class CentralWidget(QWidget):
 		self.grid.addWidget(self.title, 0 , 0, 1, -1)
 
 		# set the side panel
-		self.sidePanel = SidePanel(fm, core, self, self.platform)
+		self.sidePanel = SidePanel(fm, core, self, self.status, self.platform)
 		self.grid.addWidget(self.sidePanel, 1, 0)
 
 		#setting the layout
