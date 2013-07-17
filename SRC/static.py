@@ -8,9 +8,7 @@ PROG_LONG_NAME = "BEEF"
 VERSION = 0.2
 
 
-#converting Qstring to float
-def qstr2str(qstr):
-	return float(str(qstr.toUtf8()).strip())
+
 
 # shared parameters
 # ----------------

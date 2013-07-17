@@ -86,6 +86,14 @@ class TableData(QAbstractTableModel):
 			return QVariant()
 		return QVariant(self.arraydata[index.row()][index.column()])
 
+	def getData(self, r, c):
+		""" retrieve data within the data container simple way as a string"""
+		return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
+
+	def getDataFloat(self, r, c):
+		""" retrieve data within the data container simple way as a string"""
+		return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
+
 	def headerData(self, section, orientation, role):
 		if role != Qt.DisplayRole:
 			return QVariant()
@@ -118,6 +126,10 @@ class TableData(QAbstractTableModel):
 		""" redefinition of the index function """
 		return self.createIndex(row, col)
 
+	#converting Qstring to float
+	def qstr2str(self, qstr):
+		return str(qstr.toString()).strip()
+
 	# def flags(self, index):
 		# if index.isValid() and index.row < self.rowCount(None) and index.col < self.columCount(None):
 			# return Qt.ItemFlags(Qt.ItemIsEditable | Qt.ItemIsSelectable |Qt.ItemIsEnabled)
@@ -145,8 +157,12 @@ class MyTableView(QTableView):
 
 
 		# define the data to be used
-		self.tableData = [[0] * len(TABLE_TITLE)]*len(VERTICAL_HEADER)
-		# self.tableData = []
+		# self.tableData = [[0] * len(TABLE_TITLE)]*len(VERTICAL_HEADER)
+		self.tableData = []
+		for r in range(len(VERTICAL_HEADER)):
+			self.tableData.append([])
+			for c in range(len(TABLE_TITLE)):
+				self.tableData[r].append(0)
 		# self.retrieveData_()
 
 		# set consistency for all data
@@ -190,7 +206,7 @@ class MyTableView(QTableView):
 			row = VERTICAL_HEADER.index(r)
 
 			for c in range(len(TABLE_TITLE)):
-				print(str(r) + "-" + str(c) + " " )
+				# print(str(r) + "-" + str(c) + " " )
 				if DATA_FROM_DB.match(r):
 					end = r[-3:].strip()
 					yld = ARRAY_YIELD.index(r[4:6].strip())
@@ -213,73 +229,13 @@ class MyTableView(QTableView):
 						# self.tableModel.setData(self.tableModel.index(row,c),0)
 
 		# calcultate all totals
-
+		self.setDataConsistency()
 
 
 		#update display
 		self.tableModel.updateDisplay()
 
 
-	def retrieveData_(self):
-		"""retrieve all necessary data from core engine and put them into internal array """
-
-		# clear the array
-		self.tableData = []
-
-		# take all the data
-		# ----------------
-
-		#populate ASK and RPK
-		for data in ["ASK", "RPK"]:
-			for yld in ARRAY_YIELD:
-				# for forecast
-				self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index(data)][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
-				# for ref
-				self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index(data)][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
-				# for yoy
-				self.tableData.append([0]*17)
-
-
-
-		# populate LF data with blank line
-		for yld in ARRAY_YIELD:
-			# for forecast
-			self.tableData.append([0]*17)
-			# for ref
-			self.tableData.append([0]*17)
-			# for yoy
-			self.tableData.append([0]*17)
-
-		# populate yield data with blank line
-		for yld in ARRAY_YIELD:
-			# for forecast
-			self.tableData.append([0]*17)
-			# for ref
-			self.tableData.append([0]*17)
-			# for yoy
-			self.tableData.append([0]*17)
-
-		# populate rev data
-		for yld in ARRAY_YIELD:
-			# for forecast
-			self.tableData.append(self.core.DATA_FCST[ARRAY_DATA.index("Rev")][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
-			# for ref
-			self.tableData.append(self.core.DATA_REF[ARRAY_DATA.index("Rev")][equivFlow[self.flow]][ARRAY_YIELD.index(yld)][1:18])
-			# for yoy
-			self.tableData.append([0]*17)
-
-		# populate RASK data with blank line
-		for yld in ARRAY_YIELD:
-			# for forecast
-			self.tableData.append([0]*17)
-			# for ref
-			self.tableData.append([0]*17)
-			# for yoy
-			self.tableData.append([0]*17)
-
-		#check array consistency
-		#for r in VERTICAL_HEADER:
-		#	print(r + " len " + str(len(self.tableData[VERTICAL_HEADER.index(r)])))
 
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
@@ -294,14 +250,14 @@ class MyTableView(QTableView):
 				# annual sum
 				sum = 0
 				for i in range(0,12):
-					sum += self.tableData[VERTICAL_HEADER.index(r)][i]
-				self.tableData[VERTICAL_HEADER.index(r)][12] = sum
+					sum += float(self.tableModel.getData(VERTICAL_HEADER.index(r),i))
+				self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
 				# quarterly sum
 				for q in ARRAY_QUARTERS:
 					sum = 0
 					for m in q:
-						sum += self.tableData[VERTICAL_HEADER.index(r)][m-1]
-					self.tableData[VERTICAL_HEADER.index(r)][13 + ARRAY_QUARTERS.index(q)] = sum
+						sum += float(self.tableModel.getData(VERTICAL_HEADER.index(r), m - 1))
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
 
 		# 3 - calculate data for AY RPK and REV
 		regexp2 = re.compile("(Rev|RPK).AY.(?!YoY).*")
@@ -312,7 +268,7 @@ class MyTableView(QTableView):
 				for i in range(0,17):
 					deb = r[:3]
 					fin = r[-3:].strip()
-					self.tableData[VERTICAL_HEADER.index(r)][i]  =  self.tableData[VERTICAL_HEADER.index(deb + " HY " + fin)][i] + self.tableData[VERTICAL_HEADER.index(deb + " LY " + fin)][i]
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, float(self.tableModel.getData(VERTICAL_HEADER.index(deb + " HY " + fin),i)) + float(self.tableModel.getData(VERTICAL_HEADER.index(deb + " LY " + fin),i)))
 
 
 		# 3 - populate yield, lF and RASK
@@ -325,26 +281,31 @@ class MyTableView(QTableView):
 					#verif de division par 0
 					fin = r[5:]
 					for i in range(0,17):
-						if  self.tableData[VERTICAL_HEADER.index("RPK" + r[5:])][i] > 0:
-							self.tableData[VERTICAL_HEADER.index(r)][i]  = self.tableData[VERTICAL_HEADER.index("Rev" + fin)][i] /  self.tableData[VERTICAL_HEADER.index("RPK" + fin )][i]
+						if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + r[5:]),i) > 0:
+							self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin ),i))
 				#calculation LF
+				# if r[:2] == "LF":
+					# for i in range(0,17):
+						# if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + r[2:]),i) > 0:
+							# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin ),i))
+
 				#calculation RASK
 
 
 		# 4 - calculate YoY for ASK/RPK/Yield/Rev
 		# -------------------
 
-		regexp = re.compile("(ASK|RPK|Yield|Rev).(AY|LY|AY).(YoY).*")
+		regexp = re.compile("(RPK|Yield|Rev).(AY|LY|HY).(YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for all YoY except LF
 			if regexp.match(r):
 				prefix = r[:-3].strip()
 				for i in range(0,17):
-					if  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] > 0:
-						self.tableData[VERTICAL_HEADER.index(r)][i]  = str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%"
-						if self.debug == True:
-							print(r + ": " + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i]))
-							print (r + " :" + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%")
+					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i)> 0:
+						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, str((self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100 )+ "%")
+						# if self.debug == True:
+							# print(r + ": " + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i]))
+							# print (r + " :" + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%")
 
 		# 5 - calculate CY-PY for LF
 		# --------------------------
