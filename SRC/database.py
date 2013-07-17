@@ -149,6 +149,7 @@ class Database():
 	def set_data_value(self, type, flow, yld, month, value):
 		""" modify data within table according to provided value"""
 		""" can only be used when one route is selected """
+		print("Commiting change in db")
 		if type == "Rev":
 			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
 		elif type == "RPK":

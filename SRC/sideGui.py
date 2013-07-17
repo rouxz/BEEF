@@ -36,7 +36,7 @@ class SidePanel(QWidget):
 
 		self.setLayout(self.layout)
 		self.sizeHint()
-		self.setMinimumSize(50,10)
+		self.setMinimumSize(100,10)
 		
 
 
@@ -97,6 +97,8 @@ class UserInteraction(QGroupBox):
 			#print("Processing actions")
 			if self.core.process_events() == 0:
 				self.status.showMessage("Actions saved")
+				#zero the display
+				self.zeroPending()
 				print("Actions saved")
 			else:
 				self.status.showMessage("Error processing data")

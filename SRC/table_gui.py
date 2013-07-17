@@ -181,18 +181,16 @@ class MyTableView(QTableView):
 		self.retrieveData()
 
 		 # set the minimum size
-		# self.setMinimumSize(1000, 300)
+		self.setMinimumSize(1000, 600)
 
 
 
 		# set row height
-		# nrows = len(my_array)
-		# for row in xrange(nrows):
-			# self.table.setRowHeight(row, 18)
+		for row in xrange(len(VERTICAL_HEADER)):
+			self.setRowHeight(row, HEIGHT_ROW)
 
 		#connecting events
 		#-----------------
-
 		#new way
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
 		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
@@ -214,19 +212,18 @@ class MyTableView(QTableView):
 					if c < 12: #data is a month
 						# data is either Rev or RPK for CY or ref
 						if end == "CY":
-							#print(self.flow + " r : " + r + " - m:" + str(c+1) + " v: "+   str(self.core.DATA_FCST[type][flw][yld][c + 1]))
+
 							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
-							# self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_FCST[type][flw][yld][c + 1])
-							# print(str(self.tableModel.index(row,c).data().toString()))
+
 						elif end == "Ref":
 							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
-							# self.tableModel.setData(self.tableModel.index(row,c), self.core.DATA_REF[type][flw][yld][c + 1])
+
 					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
-						# self.tableModel.setData(self.tableModel.index(row,c),0)
+
 				else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
-						# self.tableModel.setData(self.tableModel.index(row,c),0)
+
 
 		# calcultate all totals
 		self.setDataConsistency()
@@ -303,9 +300,7 @@ class MyTableView(QTableView):
 				for i in range(0,17):
 					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i)> 0:
 						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, str((self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100 )+ "%")
-						# if self.debug == True:
-							# print(r + ": " + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i]))
-							# print (r + " :" + str(self.tableData[VERTICAL_HEADER.index(prefix+" CY")][i] /  self.tableData[VERTICAL_HEADER.index(prefix+" Ref")][i] - 1) * 100 + "%")
+
 
 		# 5 - calculate CY-PY for LF
 		# --------------------------

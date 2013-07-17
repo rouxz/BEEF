@@ -3,13 +3,28 @@ TODO
 In window_modif.py
 ------------------
 Move to next case
-Create an event for the core after validation
+allow absolute data
+
 
 In sideGui.py
 -------------
-Handle an event sent through a slot
+Change in the reference
+Change in the route lists
 
 In tableGui.py
 -------------
-
+improve layout
+	- colors
+	- size
 Finish data consistency
+Propagate yield modification
+calculate total for all the tabs
+
+In database.py
+--------------
+integrate all that is db structure related
+develop sqlite3 capability for non windows platform
+
+In event.py
+----------
+apply change

@@ -14,13 +14,8 @@ class Window_modif(QDialog):
 		#parent - MyTableView
 		self.parentTable = parent
 		
-		# index QModelIndex representing the cell launching this pop up
-		self.index = index
-		
-		#data used
-		self.getData(self.index)
-		
-		self.yoy = self.calcyoY(self.cy, self.ref)
+		#initiate data
+		self.initData(index)
 		
 		#side panel to send the events
 		self.sidePanel = self.parentTable.sidePanel
@@ -36,6 +31,21 @@ class Window_modif(QDialog):
 		self.exec_()
 	
 	
+	def initData(self, index):
+		# index QModelIndex representing the cell launching this pop up
+		self.index = index
+		# define the index for CY, Ref and YoY
+		self.defineIndexes(index)
+		
+		# flag to know if an action has been sent to the gui
+		self.actionSent = 0
+		
+		#data used
+		self.getData()
+		
+		#set the first yoy
+		self.yoy = self.calcyoY(self.cy, self.ref)
+	
 	def initUI(self):
 		""" display the window properly """
 		
@@ -47,8 +57,11 @@ class Window_modif(QDialog):
 		self.evolGroupBox.setTitle(QString("Choose type of modification"))
 		
 		self.evolGroupBoxLayout = QVBoxLayout()
-		self.evolGroupBoxLayout.addWidget(QRadioButton(QString("Absolute"), self))
-		self.evolGroupBoxLayout.addWidget(QRadioButton(QString("Relative evolution"), self))
+		
+		self.radioButtonAbsolute = QRadioButton(QString("Absolute"), self)
+		self.evolGroupBoxLayout.addWidget(self.radioButtonAbsolute)
+		self.radioButtonRelative = QRadioButton(QString("Relative evolution"), self)
+		self.evolGroupBoxLayout.addWidget(self.radioButtonRelative)
 		
 		self.evolGroupBox.setLayout(self.evolGroupBoxLayout)
 		
@@ -107,11 +120,9 @@ class Window_modif(QDialog):
 		# connect slots and signals
 		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
 		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
+		self.connect(self.buttonValidate, SIGNAL("released()"), self.validateAndClose)
 		# void	editingFinished ()
-# void	returnPressed ()
-# void	selectionChanged ()
-# void	textChanged ( const QString & text )
-# void	textEdited ( co
+
 		
 		#setting the main layout
 		self.setLayout(self.layout)
@@ -119,23 +130,34 @@ class Window_modif(QDialog):
 		self.setWindowTitle("Da Du Run")
 		self.show()
 	
-	def getData(self, index):
-	
+	def defineIndexes(self, index):
+		""" define the index for the CY, ref and YoY cells in the tableView """ 
 		self.header = VERTICAL_HEADER[index.row()]
 		
 		if self.header[-3:].strip() == "CY":
-			self.cy = index.data(Qt.DisplayRole).toPyObject()
-			self.ref = index.sibling(index.row()+1, index.column()).data(Qt.DisplayRole).toPyObject()
+			self.cyIndex = index
+			self.refIndex = index.sibling(index.row()+1, index.column())
+			self.YoYIndex = index.sibling(index.row()+2, index.column())
 		elif self.header[-3:].strip() == "Ref":
-			self.cy = index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
-			self.ref =  index.data(Qt.DisplayRole).toPyObject()
+			self.cyIndex = index.sibling(index.row()-1, index.column())
+			self.refIndex = index
+			self.YoYIndex = index.sibling(index.row()+1, index.column())
 		else:
-			self.cy = index.sibling(index.row()-2, index.column()).data(Qt.DisplayRole).toPyObject()
-			self.ref =  index.sibling(index.row()-1, index.column()).data(Qt.DisplayRole).toPyObject()
+			self.cyIndex = index.sibling(index.row()-2, index.column())
+			self.refIndex = index.sibling(index.row()-1, index.column())
+			self.YoYIndex = index
+	
+	
+	def getData(self):
+		""" retrieve cy and ref data """
+		self.cy = self.cyIndex.data(Qt.DisplayRole).toPyObject()
+		self.ref = self.refIndex.data(Qt.DisplayRole).toPyObject()
+		
 		#print("Popup " + str(self.cy)  + "-" + str(self.ref))
 
 	
 	def calcyoY(self, cy, ref):
+		""" define yoy data """
 		if ref != 0:
 			return (self.cy / self.ref - 1) * 100
 		else:
@@ -144,11 +166,17 @@ class Window_modif(QDialog):
 	def switchAbsoluteRelative(self, bool):
 		""" define if the display should be set for relative evolution or absolute data """
 		if bool == True:
+			# allow proper text edit to be editable or not
 			self.cy_LE.setReadOnly(True)
 			self.ref_LE.setReadOnly(True)
+			# check the right radiobutton
+			self.radioButtonRelative.setChecked(True)
+			self.radioButtonAbsolute.setChecked(False)
 		else:
 			self.ref_LE.setReadOnly(True)
 			self.yoy_LE.setReadOnly(True)
+			self.radioButtonRelative.setChecked(False)
+			self.radioButtonAbsolute.setChecked(True)
 			
 	def toAbsolute(self):
 		""" set mode of input as absolute """
@@ -176,9 +204,22 @@ class Window_modif(QDialog):
 		#odd behaviour on converting Qstring to float !!
 		#print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
 		self.recalculate_cy(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
-		#update the table view
-		self.parentTable.tableModel.setData(self.index, self.cy)
 		
-		#create a modif event
-		self.sidePanel.user_interaction.addPendingActions(event.Event())
+		
+	def validate(self):
+		""" send the data to the tableview and the required action to the gui """
+		if self.actionSent == 0 and self.yoy != float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100:
+			self.parentTable.tableModel.setData(self.cyIndex, self.cy)
+			self.parentTable.tableModel.setData(self.YoYIndex, self.yoy_LE.text())
+			
+			#create a modif event
+			self.sidePanel.user_interaction.addPendingActions(event.Event())
+			
+			self.actionSent = 1
+		
+	def validateAndClose(self):
+		self.validate()
+		#close the window
+		self.done(0)
+					
 		
