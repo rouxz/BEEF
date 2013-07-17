@@ -17,7 +17,6 @@ improve layout
 	- colors
 	- size
 Finish data consistency
-Propagate yield modification
 calculate total for all the tabs
 
 In database.py
@@ -27,4 +26,9 @@ develop sqlite3 capability for non windows platform
 
 In event.py
 ----------
-apply change
+
+
+
+Functional improvements
+-----------------------
+Courbes

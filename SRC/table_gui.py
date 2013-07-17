@@ -9,9 +9,7 @@ from window_modif import *
 import re
 
 
-# regexp
-# ------
-DATA_FROM_DB = re.compile("(Rev|RPK|ASK).(HY|LY).(?!YoY).*")
+
 
 # data to display
 my_array = [['00','01','02'],
@@ -47,6 +45,7 @@ class Tabs(QTabWidget):
 		for flow in equivFlow:
 			self.tabs.append(MyTableView(core, flow, self.sidePanel, parent))
 			self.addTab(self.tabs[i], flow)
+			# self.insertTab(i, self.tabs[i], flow)
 			i = i +1
 
 		self.setUI()
@@ -92,8 +91,9 @@ class TableData(QAbstractTableModel):
 
 	def getDataFloat(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
-		return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
-
+		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
+		return self.data(self.index(r, c), Qt.DisplayRole).toFloat()[0]
+		
 	def headerData(self, section, orientation, role):
 		if role != Qt.DisplayRole:
 			return QVariant()
@@ -199,13 +199,15 @@ class MyTableView(QTableView):
 		""" get all data from core engine """
 
 		flw = ARRAY_FLOW.index(self.flow)
-
+		regexp = re.compile("(Rev|RPK|ASK).(HY|LY).(?!YoY).*")
+		
 		for r in VERTICAL_HEADER:
 			row = VERTICAL_HEADER.index(r)
-
+			res = regexp.match(r)
+			
 			for c in range(len(TABLE_TITLE)):
 				# print(str(r) + "-" + str(c) + " " )
-				if DATA_FROM_DB.match(r):
+				if res != None:
 					end = r[-3:].strip()
 					yld = ARRAY_YIELD.index(r[4:6].strip())
 					type = ARRAY_DATA.index(r[:3].strip())
@@ -261,7 +263,7 @@ class MyTableView(QTableView):
 		for r in VERTICAL_HEADER:
 			#looking for AY RPK and REV info
 			if regexp2.match(r) != None:
-				#summing LY and HY for each column
+				# summing LY and HY for each column
 				for i in range(0,17):
 					deb = r[:3]
 					fin = r[-3:].strip()
@@ -269,7 +271,7 @@ class MyTableView(QTableView):
 
 
 		# 3 - populate yield, lF and RASK
-		regexp3 = re.compile("(Yield|LF|RASK).(AY|LY|AY).(?!YoY).*")
+		regexp3 = re.compile("(Yield|LF|RASK).(AY|LY|HY).(?!YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for yield LF ans RASK
 			if regexp3.match(r):
@@ -280,7 +282,7 @@ class MyTableView(QTableView):
 					for i in range(0,17):
 						if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + r[5:]),i) > 0:
 							self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin ),i))
-				#calculation LF
+				# calculation LF
 				# if r[:2] == "LF":
 					# for i in range(0,17):
 						# if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + r[2:]),i) > 0:
@@ -307,13 +309,16 @@ class MyTableView(QTableView):
 
 	def updateDisplay(self):
 		""" update the display of this tabs """
-		print("Display should be updated ")
+		self.tableModel.updateDisplay()
+		# for debug purpose
+		#print("Display should be updated ")
 
 	def cell_clicked_event(self, index):
 
 		#for debuggin purpose only
 		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
-
+		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + str(index.data(Qt.DisplayRole).toFloat()) + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
+		
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
 

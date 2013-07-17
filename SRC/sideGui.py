@@ -95,7 +95,8 @@ class UserInteraction(QGroupBox):
 		def saveActions(self):
 			self.status.showMessage("Processing actions")
 			#print("Processing actions")
-			if self.core.process_events() == 0:
+			res = self.core.process_events()
+			if res == 0:
 				self.status.showMessage("Actions saved")
 				#zero the display
 				self.zeroPending()

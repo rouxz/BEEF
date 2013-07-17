@@ -27,21 +27,21 @@ class EventModifValue(Event):
 	
 	def __init__(self, valueRev, valueRPK, month, yld, flow):
 		Event.__init__(self)
-		self.__type = MODIFICATION
-		self.__month = month
-		self.__yld = yld
-		self.__flow = flow
-		self.__valueRev = valueRev
-		self.__valueRPK = valueRPK
+		self.type = MODIFICATION
+		self.month = month
+		self.yld = yld
+		self.flow = flow
+		self.valueRev = valueRev
+		self.valueRPK = valueRPK
 		
 	def handle(self, core):
-		Event.handle(core);
+		#Event.handle(core);
 		# calculate the % of modif versus the data
-		percentageRev = self.valueRev / core.DATA_FCST[equivData["Rev"]][equivFlow[self.__flow]][equivYld[self.__yld]][self.__month]
-		percentageRPK = self.valueRPK / core.DATA_FCST[equivData["Rev"]][equivFlow[self.__flow]][equivYld[self.__yld]][self.__month]
+		percentageRev = self.valueRev / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
+		percentageRPK = self.valueRPK / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
 		# commit these data into the db
-		res1 = core.db.set_data_percentage("Rev", self.__flow, self.__yld, self.__month, percentageRev)
-		res2 = core.db.set_data_percentage("RPK", self.__flow, self.__yld, self.__month, percentageRev)
+		res1 = core.db.set_data_percentage("Rev", self.flow, self.yld, self.month, percentageRev)
+		res2 = core.db.set_data_percentage("RPK", self.flow, self.yld, self.month, percentageRev)
 		#results of the commit
 		return (res1 + res2)
 		

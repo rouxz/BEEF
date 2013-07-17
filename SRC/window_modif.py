@@ -34,6 +34,10 @@ class Window_modif(QDialog):
 	def initData(self, index):
 		# index QModelIndex representing the cell launching this pop up
 		self.index = index
+		
+		#line from where the pop up has been called
+		self.header = VERTICAL_HEADER[index.row()]
+		
 		# define the index for CY, Ref and YoY
 		self.defineIndexes(index)
 		
@@ -132,7 +136,7 @@ class Window_modif(QDialog):
 	
 	def defineIndexes(self, index):
 		""" define the index for the CY, ref and YoY cells in the tableView """ 
-		self.header = VERTICAL_HEADER[index.row()]
+		
 		
 		if self.header[-3:].strip() == "CY":
 			self.cyIndex = index
@@ -209,11 +213,35 @@ class Window_modif(QDialog):
 	def validate(self):
 		""" send the data to the tableview and the required action to the gui """
 		if self.actionSent == 0 and self.yoy != float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100:
+			#modify the value according to what has been put in
 			self.parentTable.tableModel.setData(self.cyIndex, self.cy)
 			self.parentTable.tableModel.setData(self.YoYIndex, self.yoy_LE.text())
 			
+			#modify revenue accordingly
+			# RPK change revenue with constant yield
+			if self.header[:3] == "RPK":
+				print("Yield" + self.header[3:7] + "CY")
+				print(str(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY")))
+				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()) * self.cy
+			# Yield change revenue with constant RPK
+			elif self.header[:5] == "Yield":
+				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + self.header[3:7] + "CY"), self.index.column()) * self.cy
+			#insert the new revenue value
+			print(str(self.cy) + "x" + str(self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()))+ "= " + str(valRev))
+			self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[3:7] + "CY"), self.index.column()), valRev)
+			
+			#update totals
+			self.parentTable.setDataConsistency()
+			
+			#update the gui
+			self.parentTable.updateDisplay()
+			
 			#create a modif event
-			self.sidePanel.user_interaction.addPendingActions(event.Event())
+			if  self.header[:3] == "RPK":
+				e = event.EventModifValue(valRev, self.cy, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
+			else:
+				e = event.Event()
+			self.sidePanel.user_interaction.addPendingActions(e)
 			
 			self.actionSent = 1
 		
