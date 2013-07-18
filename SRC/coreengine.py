@@ -20,7 +20,7 @@ class Core():
 		# - events lists (FIFO)
 		self.EVENTS_LIST = []
 		# - type of treatment
-		self.TREATMENT = NON_RETREATMENT
+		self.treatment = NON_RETREATMENT
 		# - a database to get & store data
 		self.db = database
 		# - a reference table
@@ -35,7 +35,7 @@ class Core():
 
 	def set_treatment(treatment):
 		""" specify which treatment will be done on the data """
-		self.TREATMENT = treatment
+		self.treatment = treatment
 
 
 
@@ -44,7 +44,7 @@ class Core():
 		self.db.populate_table(self.DATA_FCST, self.db.get_data_CY())
 
 	def get_data_ref(self):
-		if self.TREATMENT == RETREATMENT:
+		if self.treatment == RETREATMENT:
 			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_rt(self.referenceTable))
 		else:
 			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_nrt(self.referenceTable))

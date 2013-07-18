@@ -2,30 +2,30 @@ try:
 	from pyodbc import *
 except ImportError:
 	from sqlite3 import *
-from static import *
+import static
 
 class Database():
-	def __init__(self, platform=PLATFORM_WINDOWS, debug=True):
+	def __init__(self, platform=static.PLATFORM_WINDOWS, debug=True):
 		# Connect to an access database using pyodbc
 
 		self.debug = debug
 		self.platform = platform
 
-		if self.platform == PLATFORM_WINDOWS:
-			self.dbname = DBNAME
+		if self.platform == static.PLATFORM_WINDOWS:
+			self.dbname = static.DBNAME
 		else:
-			self.dbname = DBNAME_UNIX
+			self.dbname = static.DBNAME_UNIX
 
-		
+
 		try:
 
-			if self.platform == PLATFORM_WINDOWS:
+			if self.platform == static.PLATFORM_WINDOWS:
 				#connection MS ACCESS
-				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + static.DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
 			else:
 				# Connection to sqlite3
 				print("Platform different than windows / switching to SQLite")
-				self.cnx = connect(DBPATH_UNIX + "/" + self.dbname)
+				self.cnx = connect(static.DBPATH_UNIX + "/" + self.dbname)
 
 			print("Connection to db " + self.dbname + " successfull")
 			# clear RFS used for consistency purpose
@@ -86,12 +86,15 @@ class Database():
 		""" get all tables that can be used by the programm """
 		lst = []
 		for chunk in self.__execute_query("SELECT TABLE_NAME, NICK_NAME FROM TABLE_REF WHERE NICK_NAME <> '';"):
-			lst.append(chunk)
+			if self.platform == static.PLATFORM_WINDOWS:
+				lst.append([chunk.TABLE_NAME, chunk.NICK_NAME])
+			else:
+				lst.append(chunk)
 		return lst
 
 	def clear_rfs_used(self):
 		""" clear the list of RFS currently handled """
-		if self.platform == PLATFORM_WINDOWS:
+		if self.platform == static.PLATFORM_WINDOWS:
 			return self.__commit_query("DELETE * FROM RFS_USED;")
 		else:
 			return self.__commit_query("DELETE FROM RFS_USED;")
@@ -103,7 +106,7 @@ class Database():
 
 	def get_data_CY(self):
 		""" will fetch all data for routes defined in the RFS_USED table """
-		if self.platform == PLATFORM_WINDOWS:
+		if self.platform == static.PLATFORM_WINDOWS:
 			return self.__execute_query("SELECT MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK FROM R_G_DATA_RAW;")
 		else:
 			return self.__execute_query("SELECT DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK FROM DATA_RAW INNER JOIN RFS_USED ON DATA_RAW.RFS = RFS_USED.RFS GROUP BY DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW;")
@@ -123,11 +126,11 @@ class Database():
 		for value in values:
 			#print (str(value.MONTH) + " " + value.FLOW + " " + value.CONTRIB + " ")
 			# rev ex rox
-			table[equivData["Rev"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.REV_EX_ROX
+			table[static.equivData["Rev"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.REV_EX_ROX
 			# rpk
-			table[equivData["RPK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.RPK
+			table[static.equivData["RPK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.RPK
 			# ask
-			table[equivData["ASK"]][equivFlow[value.FLOW]][equivYield[value.CONTRIB]][value.MONTH] = value.ASK
+			table[static.equivData["ASK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.ASK
 
 	###################################
 	# setting data
@@ -140,9 +143,9 @@ class Database():
 	def set_data_percentage(self, type, flow, yld, month, percentage):
 		""" modify data within table according to provided percentage """
 		if type == "Rev":
-			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		elif type == "RPK":
-			return self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		else:
 			return 1
 
@@ -151,9 +154,9 @@ class Database():
 		""" can only be used when one route is selected """
 		print("Commiting change in db")
 		if type == "Rev":
-			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(value) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		elif type == "RPK":
-			return self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED);")
+			return self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(value) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		else:
 			return 1
 

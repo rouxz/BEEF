@@ -9,8 +9,10 @@ allow absolute data
 In sideGui.py
 -------------
 Change in the reference
+	define behaviour
 Change in the route lists
-
+	define behaviour
+	
 In tableGui.py
 -------------
 improve layout
@@ -23,10 +25,16 @@ In database.py
 --------------
 integrate all that is db structure related
 develop sqlite3 capability for non windows platform
+Correction in change percentage
 
 In event.py
 ----------
 
+in About.py
+-----------
+Add text about
+	technologies
+	copyright
 
 
 Functional improvements

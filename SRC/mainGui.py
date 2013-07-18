@@ -6,7 +6,7 @@ from PyQt4.QtCore import *
 from sideGui import *
 from file_manager import *
 from table_gui import *
-
+import about
 
 
 
@@ -43,14 +43,7 @@ class TopWindow(QMainWindow):
 		self.statusBar().showMessage('Ready')
 
 		# set the menu bar
-		exitAction = QAction('&Exit', self)
-		exitAction.setShortcut('Ctrl+Q')
-		exitAction.setStatusTip('Exit application')
-		exitAction.triggered.connect(qApp.quit)
-
-		self.menubar = self.menuBar()
-		self.fileMenu = self.menubar.addMenu('&File')
-		self.fileMenu.addAction(exitAction)
+		self.defineMenu()
 
 		#######################"
 		# central widget
@@ -64,7 +57,32 @@ class TopWindow(QMainWindow):
 		self.setWindowTitle(TITLE_TOPWINDOW)
 
 		self.show()
+		
+	def defineMenu(self):
+		""" define menu of the application"""
+		# exit button
+		exitAction = QAction('&Exit', self)
+		exitAction.setShortcut('Ctrl+Q')
+		exitAction.setStatusTip('Exit application')
+		exitAction.triggered.connect(qApp.quit)
 
+		#about button
+		aboutAction = QAction("&About " + PROG_SHORT_NAME, self)
+		aboutAction.setStatusTip('About')
+		self.connect(aboutAction, SIGNAL("triggered()"), self.launchAbout)
+		
+		# main menu bar
+		self.menubar = self.menuBar()
+		# fileMenu
+		self.fileMenu = self.menubar.addMenu('&File')
+		self.fileMenu.addAction(exitAction)
+		#help menu
+		self.helpMenu = self.menubar.addMenu("&?")
+		self.helpMenu.addAction(aboutAction)
+		
+		
+	def launchAbout(self):
+		about.About(self)
 # ###########################################
 #
 #	Central widget
@@ -95,7 +113,7 @@ class CentralWidget(QWidget):
 		self.grid.setSpacing(GRID_LAYOUT_SPACE)
 
 		#SIDE PANEL
-		self.sidePanel = SidePanel(fm, core, self, self.status, self.platform)
+		self.sidePanel = SidePanel(fm, core, self, self.status)
 		
 		#######################"
 		# Place all the itemes

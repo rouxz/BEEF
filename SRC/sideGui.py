@@ -15,11 +15,8 @@ from file_manager import *
 
 class SidePanel(QWidget):
 	""" a class for including a side panel allowing to select several options in the gui """
-	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS):
+	def __init__(self, fm, core, parent, status):
 		QWidget.__init__(self)
-		
-		#operation system
-		self.platform = platform
 		
 		#status bar
 		self.status = status
@@ -30,7 +27,7 @@ class SidePanel(QWidget):
 		self.user_interaction = UserInteraction(core, self.status, self)
 		self.layout.addWidget(self.user_interaction)
 		# reference
-		self.layout.addWidget(ReferenceWidget(core, self, self.platform))
+		self.layout.addWidget(ReferenceWidget(core, self))
 		# route perimeter
 		self.layout.addWidget(PerimeterSelection(fm, self))
 
@@ -115,13 +112,15 @@ class UserInteraction(QGroupBox):
 			self.core.get_data_CY()
 			print("Actions discarded")
 
+		
 
 class ReferenceWidget(QGroupBox):
 	""" allow selection of the type of ref for calculation and setting parameters for the ref"""
-	def __init__(self, core, parent, platform = STATIC.PLATFORM_WINDOWS):
+	def __init__(self, core, parent):
 		QGroupBox.__init__(self, parent)
 		
-		self.platform = platform
+		self.core = core
+		self.parent = parent
 		
 		self.setTitle(QString("Reference"))
 
@@ -134,13 +133,18 @@ class ReferenceWidget(QGroupBox):
 		self.layout.addWidget(self.trButton)
 		self.layout.addWidget(self.ntrButton)
 		
+		#set treatment according to core engine parameter
+		self.changeTreatment(self.core.treatment)
+		
 		#which reference to choose
 		self.layout.addWidget(QLabel("Choose reference data", self))
 		self.listRef = QListWidget(self)
-		# add the reference table in the widtet
+		# add the reference table in the widget
 		self.addReference(core)
 		self.layout.addWidget(self.listRef)
 
+		#connect slot and signal
+		self.connect(self.listRef, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changeReference)
 		
 		
 		self.setLayout(self.layout)
@@ -150,20 +154,29 @@ class ReferenceWidget(QGroupBox):
 		# retrieve the list of reference form the core engine
 
 		lst = core.referenceList
-		if self.platform == STATIC.PLATFORM_WINDOWS:
-			for i in lst:
-				if i.TABLE_NAME != "DATA_RAW":
-					self.listRef.addItem(QListWidgetItem(i.NICK_NAME, self.listRef))
-		else:
-			for i in lst:
-				if i[0] != "DATA_RAW":
-					self.listRef.addItem(QListWidgetItem(i[1], self.listRef))
-
+		for table in lst:
+				if table[0] != "DATA_RAW":
+					self.listRef.addItem(QListWidgetItem(table[1], self.listRef))
+					
+	def changeReference(self):
+		""" change reference in the data sent to the GUI """
+		print("reference changed")
+		self.parent.status.showMessage("reference changed")
 		
+	def changeTreatment(self, treatment):
+		if treatment == STATIC.NON_RETREATMENT:
+			self.ntrButton.setChecked(True)
+		else:
+			self.trButton.setChecked(True)
+			
+			
 class PerimeterSelection(QGroupBox):
 	""" allow to select the route perimeter """
 	def __init__(self, fm, parent):
 		QGroupBox.__init__(self, parent)
+		
+		self.parent = parent
+		
 		self.setTitle(QString("Route perimeter"))
 		self.layout = QVBoxLayout()
 		
@@ -176,7 +189,16 @@ class PerimeterSelection(QGroupBox):
 
 		self.setLayout(self.layout)
 
+		# signal & slots
+		self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changePerimeter)
+		
+		
 	def defineList(self, fm):
 		""" get the lists of files within the directory specified """
 		for i in fm.getHierarchies():
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
+			
+	def changePerimeter(self):
+		""" change perimeter in the data sent to the GUI / clear all pending actions as well"""
+		print("Perimeter changed")
+		self.parent.status.showMessage("Perimeter changed")
