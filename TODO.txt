@@ -4,7 +4,7 @@ In window_modif.py
 ------------------
 Move to next case
 allow absolute data
-
+correct yield modification
 
 In sideGui.py
 -------------

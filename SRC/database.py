@@ -123,6 +123,7 @@ class Database():
 
 	def populate_table(self, table, values):
 		""" populate a table with the provided values """
+		# to be conpleted according to sqlite3 requirements
 		for value in values:
 			#print (str(value.MONTH) + " " + value.FLOW + " " + value.CONTRIB + " ")
 			# rev ex rox

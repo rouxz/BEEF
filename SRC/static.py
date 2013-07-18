@@ -4,8 +4,8 @@
 # ----------
 
 PROG_SHORT_NAME = "BEEF"
-PROG_LONG_NAME = "BEEF"
-VERSION = 0.2
+PROG_LONG_NAME = "BEEF - Budget Estimation for Each Flow"
+VERSION = 0.5
 
 
 
@@ -88,4 +88,14 @@ MAX_NUM_LINES = 53
 
 # for about.py
 # ------------
+
+EXPLANATIONS = "......"
+LICENSE_WORDING = "This program is under license :"
+LICENSE = "(c) - 2013"
+
+TECHNOLOGY_HEADER = "Program using :"
+TECHNOLOGIES_LIST = ["Python v2.6.7", "pyodbc library"]
+
+
+
 

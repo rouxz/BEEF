@@ -223,12 +223,11 @@ class Window_modif(QDialog):
 				print("Yield" + self.header[3:7] + "CY")
 				print(str(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY")))
 				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()) * self.cy
+				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[3:7] + "CY"), self.index.column()), valRev)
 			# Yield change revenue with constant RPK
 			elif self.header[:5] == "Yield":
-				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + self.header[3:7] + "CY"), self.index.column()) * self.cy
-			#insert the new revenue value
-			print(str(self.cy) + "x" + str(self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()))+ "= " + str(valRev))
-			self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[3:7] + "CY"), self.index.column()), valRev)
+				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + self.header[5:9] + "CY"), self.index.column()) * self.cy
+				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[5:9] + "CY"), self.index.column()), valRev)
 			
 			#update totals
 			self.parentTable.setDataConsistency()
