@@ -15,12 +15,13 @@ import about
 # création de la vue et du conteneur
 class TopWindow(QMainWindow):
 	""" create a window being the main window of the gui """
-	def __init__(self, core, platform = PLATFORM_WINDOWS):
+	def __init__(self, core, platform = PLATFORM_WINDOWS, debug = True):
 		# initiate the main widget
 		QMainWindow.__init__(self)
 		
 		self.platform = platform
-
+		self.debug = debug
+		
 		#core
 		self.core = core
 
@@ -49,7 +50,7 @@ class TopWindow(QMainWindow):
 		# central widget
 		########################
 
-		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.platform)
+		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.platform, self.debug)
 		self.setCentralWidget(self.centralWidget)
 		
 		
@@ -93,7 +94,7 @@ class TopWindow(QMainWindow):
 class CentralWidget(QWidget):
 	""" a widget being the main widget within the topwindow"""
 	""" this main widget will have all the required tabs and table within """
-	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS):
+	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS, debug = True):
 		QWidget.__init__(self, parent)
 		
 		# operating system
@@ -103,9 +104,9 @@ class CentralWidget(QWidget):
 		self.status = status
 
 		#init the central widget
-		self.initCentralWidget(fm, core)
+		self.initCentralWidget(fm, core, debug)
 
-	def initCentralWidget(self, fm, core):
+	def initCentralWidget(self, fm, core, debug):
 		#the top grid layout and tweak it
 
 
@@ -113,7 +114,7 @@ class CentralWidget(QWidget):
 		self.grid.setSpacing(GRID_LAYOUT_SPACE)
 
 		#SIDE PANEL
-		self.sidePanel = SidePanel(fm, core, self, self.status)
+		self.sidePanel = SidePanel(fm, core, self, self.status, debug)
 		
 		#######################"
 		# Place all the itemes

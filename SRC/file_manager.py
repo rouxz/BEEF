@@ -37,6 +37,7 @@ class MyFileManager():
 		return self.listFiles
 
 	def getSublines(self, file):
+		""" read all lines in a specified file """
 		try:
 			#setting repertory serapator
 			if sys.platform == "linux2":

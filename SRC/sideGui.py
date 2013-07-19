@@ -15,11 +15,12 @@ from file_manager import *
 
 class SidePanel(QWidget):
 	""" a class for including a side panel allowing to select several options in the gui """
-	def __init__(self, fm, core, parent, status):
+	def __init__(self, fm, core, parent, status, debug=True):
 		QWidget.__init__(self)
 		
 		#status bar
 		self.status = status
+		self.parent = parent
 		
 		self.layout = QVBoxLayout()
 		
@@ -27,9 +28,9 @@ class SidePanel(QWidget):
 		self.user_interaction = UserInteraction(core, self.status, self)
 		self.layout.addWidget(self.user_interaction)
 		# reference
-		self.layout.addWidget(ReferenceWidget(core, self))
+		self.layout.addWidget(ReferenceWidget(core, self, debug))
 		# route perimeter
-		self.layout.addWidget(PerimeterSelection(fm, self))
+		self.layout.addWidget(PerimeterSelection(core, fm, self))
 
 		self.setLayout(self.layout)
 		self.sizeHint()
@@ -116,11 +117,12 @@ class UserInteraction(QGroupBox):
 
 class ReferenceWidget(QGroupBox):
 	""" allow selection of the type of ref for calculation and setting parameters for the ref"""
-	def __init__(self, core, parent):
+	def __init__(self, core, parent, debug=True):
 		QGroupBox.__init__(self, parent)
 		
 		self.core = core
 		self.parent = parent
+		self.debug = debug
 		
 		self.setTitle(QString("Reference"))
 
@@ -153,16 +155,28 @@ class ReferenceWidget(QGroupBox):
 		""" add the reference table to be used """
 		# retrieve the list of reference form the core engine
 
-		lst = core.referenceList
-		for table in lst:
-				if table[0] != "DATA_RAW":
-					self.listRef.addItem(QListWidgetItem(table[1], self.listRef))
+		lst = core.referenceDict
+		for nick_name, table in lst.items():
+				if table != "DATA_RAW":
+					self.listRef.addItem(QListWidgetItem(nick_name, self.listRef))
 					
-	def changeReference(self):
+	def changeReference(self, itemOri, itemFin):
 		""" change reference in the data sent to the GUI """
-		print("reference changed")
 		self.parent.status.showMessage("reference changed")
 		
+		#new reference
+		ref = str(itemOri.text().toUtf8())
+		if self.debug == True:
+			print("reference changed to  " + ref)
+		
+		#change ref in the core and get  data to the core
+		self.core.setRef(ref)
+		
+		#update layout - sending data to the gui
+		if self.debug == True:
+			print("Sending update to display")
+		self.parent.parent.tabsWidget.changeRef()
+			
 	def changeTreatment(self, treatment):
 		if treatment == STATIC.NON_RETREATMENT:
 			self.ntrButton.setChecked(True)
@@ -172,10 +186,13 @@ class ReferenceWidget(QGroupBox):
 			
 class PerimeterSelection(QGroupBox):
 	""" allow to select the route perimeter """
-	def __init__(self, fm, parent):
+	def __init__(self, core, fm, parent, debug = True):
 		QGroupBox.__init__(self, parent)
 		
 		self.parent = parent
+		self.debug = debug
+		self.fm = fm
+		self.core = core
 		
 		self.setTitle(QString("Route perimeter"))
 		self.layout = QVBoxLayout()
@@ -198,7 +215,28 @@ class PerimeterSelection(QGroupBox):
 		for i in fm.getHierarchies():
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
 			
-	def changePerimeter(self):
+	def changePerimeter(self, item, itemVoid):
 		""" change perimeter in the data sent to the GUI / clear all pending actions as well"""
-		print("Perimeter changed")
+		if self.debug == True:
+			print("Perimeter changed")
+		
+		#clear rfs list in the db
+		self.core.clear_rfs_used()
+		
+		file2read = str(item.text().toUtf8())
+		
+		# add lines to the db
+		lstLines = self.fm.getSublines(file2read)
+		for line in lstLines:
+			self.core.set_rfs_used(line)
+			
+		# retrieve new data
+		self.core.get_data_CY()
+		self.core.get_data_ref()
+		
+		self.parent.parent.tabsWidget.updateData()
+		
+		
+		# send message to GUI status bar	
 		self.parent.status.showMessage("Perimeter changed")
+		

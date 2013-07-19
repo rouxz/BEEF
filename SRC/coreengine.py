@@ -6,8 +6,10 @@ from database import *
 
 class Core():
 
-	def __init__(self, database):
+	def __init__(self, database, debug=True):
 
+		self.debug = debug
+	
 		# the core is based on
 		# --------------------
 		# - DATA for forecasting
@@ -25,8 +27,8 @@ class Core():
 		self.db = database
 		# - a reference table
 		self.referenceTable = "DATA_REF_0"
-		# - the list of reference table
-		self.referenceList = self.db.fetch_architecture()
+		# - the dictionnary of reference table
+		self.referenceDict = self.db.fetch_architecture()
 
 
 
@@ -36,8 +38,6 @@ class Core():
 	def set_treatment(treatment):
 		""" specify which treatment will be done on the data """
 		self.treatment = treatment
-
-
 
 
 	def get_data_CY(self):
@@ -58,16 +58,21 @@ class Core():
 	# -----------------
 
 	def set_rfs_used(self, rfs):
-		""" define within the db which rfs we are handling """
+		""" add to the db that we are handling a specific route """
 		self.db.set_rfs_used(rfs)
 
 	def clear_rfs_used(self):
 		""" clear the list of the rfs handled in the db """
+		if self.debug == True:
+			print("Clearing RFS used table")
 		self.db.clear_rfs_used()
 
-	def set_ref(self, ref):
-		self.referenceTable = ref
-
+	def setRef(self, ref):
+		""" set reference table according to its nickname and retrieve data"""
+		self.referenceTable = self.referenceDict[ref]
+		if self.debug == True:
+			print("New reference table set to " + self.referenceTable)
+		self.get_data_ref()
 
 	# Event handling
 	# --------------
@@ -92,6 +97,8 @@ class Core():
 		self.get_data_CY()
 		#flag to make sure process is OK
 		return res
+		# clearing the list
+		self.clear_events()
 		
 	def clear_events(self):
 		self.EVENTS_LIST = []

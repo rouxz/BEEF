@@ -84,13 +84,16 @@ class Database():
 
 	def fetch_architecture(self):
 		""" get all tables that can be used by the programm """
-		lst = []
+		#lst = []
+		dict = {}
 		for chunk in self.__execute_query("SELECT TABLE_NAME, NICK_NAME FROM TABLE_REF WHERE NICK_NAME <> '';"):
 			if self.platform == static.PLATFORM_WINDOWS:
-				lst.append([chunk.TABLE_NAME, chunk.NICK_NAME])
+				#lst.append([chunk.TABLE_NAME, chunk.NICK_NAME])
+				dict[chunk.NICK_NAME] = chunk.TABLE_NAME
 			else:
-				lst.append(chunk)
-		return lst
+				dict[chunk[1]] = chunk[0]
+		#return lst
+		return dict
 
 	def clear_rfs_used(self):
 		""" clear the list of RFS currently handled """

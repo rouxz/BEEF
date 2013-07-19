@@ -53,6 +53,16 @@ class Tabs(QTabWidget):
 	def setUI(self):
 		self.setMinimumSize(300,300)
 
+		
+	def changeRef(self):
+		""" change all reference data in the tableviews """
+		for tab in self.tabs:
+			tab.retrieveDataRefOnly()
+			
+	def updateData(self):
+		""" update data in all the table views """
+		for tab in self.tabs:
+			tab.retrieveData()
 
 	def updateTabs(self):
 		""" update the data displayed in all the present tabs"""
@@ -234,7 +244,36 @@ class MyTableView(QTableView):
 		#update display
 		self.tableModel.updateDisplay()
 
+	def retrieveDataRefOnly(self):
+		""" get all data from core engine """
 
+		flw = ARRAY_FLOW.index(self.flow)
+		regexp = re.compile("(Rev|RPK|ASK).(HY|LY).Ref.*")
+		
+		for r in VERTICAL_HEADER:
+			row = VERTICAL_HEADER.index(r)
+			res = regexp.match(r)
+			
+			for c in range(len(TABLE_TITLE)):
+				# print(str(r) + "-" + str(c) + " " )
+				if res != None:
+					end = r[-3:].strip()
+					yld = ARRAY_YIELD.index(r[4:6].strip())
+					type = ARRAY_DATA.index(r[:3].strip())
+					if c < 12: #data is a month
+						# data is either Rev or RPK for CY or ref
+						self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1])
+					else:
+						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+				else:
+						pass
+
+		# calcultate all totals
+		self.setDataConsistency()
+
+
+		#update display
+		self.tableModel.updateDisplay()
 
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""

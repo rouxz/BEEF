@@ -13,14 +13,17 @@ def main():
 	print(TITLE_TOPWINDOW)
 	print(TITLE_LINE)
 	print("")
+
+	#debugging
+	debug = True
 	
 	#find platform
 	system = find_system()
 
 	# database
-	db = Database(system, True)
+	db = Database(system, debug)
 	# core engine to handle db
-	core = Core(db)
+	core = Core(db, debug)
 
 	#for testing purpose only
 	core.set_rfs_used("FAA")
@@ -31,7 +34,7 @@ def main():
 	# for launching the ui
 	app = QApplication(sys.argv)
 	# topwindow of the gui
-	w = TopWindow(core, system)
+	w = TopWindow(core, system, debug)
 	w.show()
 	sys.exit(app.exec_())
 

@@ -9,7 +9,8 @@ correct yield modification
 In sideGui.py
 -------------
 Change in the reference
-	define behaviour
+	select first one by default
+	make effective retreatment or not
 Change in the route lists
 	define behaviour
 	
