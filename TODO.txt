@@ -41,3 +41,4 @@ Add text about
 Functional improvements
 -----------------------
 Courbes
+Send copy to server
