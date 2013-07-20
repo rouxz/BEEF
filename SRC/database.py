@@ -43,7 +43,7 @@ class Database():
 			pass
 
 	def __execute_query(self, query):
-		"""retrieve values within db """
+		"""retrieve values within db return a list containing all the informations """
 		try:
 			cursor = self.cnx.cursor()
 			#execute the SQL change
@@ -127,14 +127,26 @@ class Database():
 	def populate_table(self, table, values):
 		""" populate a table with the provided values """
 		# to be conpleted according to sqlite3 requirements
-		for value in values:
-			#print (str(value.MONTH) + " " + value.FLOW + " " + value.CONTRIB + " ")
-			# rev ex rox
-			table[static.equivData["Rev"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.REV_EX_ROX
-			# rpk
-			table[static.equivData["RPK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.RPK
-			# ask
-			table[static.equivData["ASK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.ASK
+		if self.platform == static.PLATFORM_WINDOWS:
+			for value in values:
+				#print (str(value.MONTH) + " " + value.FLOW + " " + value.CONTRIB + " ")
+				# rev ex rox
+				table[static.equivData["Rev"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.REV_EX_ROX
+				# rpk
+				table[static.equivData["RPK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.RPK
+				# ask
+				table[static.equivData["ASK"]][static.equivFlow[value.FLOW]][static.equivYield[value.CONTRIB]][value.MONTH] = value.ASK
+		else:
+			for value in values:
+				# rev ex rox
+				table[static.equivData["Rev"]][static.equivFlow[value[2]]][static.equivYield[value[1]]][value[0]] = value[4]
+				# rpk
+				table[static.equivData["RPK"]][static.equivFlow[value[2]]][static.equivYield[value[1]]][value[0]] = value[5]
+				# ask
+				table[static.equivData["ASK"]][static.equivFlow[value[2]]][static.equivYield[value[1]]][value[0]] = value[6]
+			
+	def countNumberOfRoutes(self):
+		return len(self.__execute_query("SELECT RFS FROM RFS_USED;"))
 
 	###################################
 	# setting data
@@ -153,14 +165,12 @@ class Database():
 		else:
 			return 1
 
-	def set_data_value(self, type, flow, yld, month, value):
+	def set_data_value(self, flow, yld, month, valueRev, valueRPK):
 		""" modify data within table according to provided value"""
 		""" can only be used when one route is selected """
 		print("Commiting change in db")
-		if type == "Rev":
-			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(value) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
-		elif type == "RPK":
-			return self.__commit_query("UPDATE DATA_RAW SET RPK = " + str(value) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
-		else:
-			return 1
+		return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(valueRev) + " , RPK= " + str(valueRPK) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
+
+			
+		
 

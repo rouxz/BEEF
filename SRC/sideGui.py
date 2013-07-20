@@ -230,6 +230,9 @@ class PerimeterSelection(QGroupBox):
 		for line in lstLines:
 			self.core.set_rfs_used(line)
 			
+		# update the number of routes in the core
+		self.core.countNumberOfRoutes()
+		
 		# retrieve new data
 		self.core.get_data_CY()
 		self.core.get_data_ref()

@@ -29,6 +29,9 @@ class Core():
 		self.referenceTable = "DATA_REF_0"
 		# - the dictionnary of reference table
 		self.referenceDict = self.db.fetch_architecture()
+		
+		# count numberOfRoutes
+		self.countNumberOfRoutes()
 
 
 
@@ -56,6 +59,10 @@ class Core():
 
 	# scope of treatment
 	# -----------------
+
+	def countNumberOfRoutes(self):
+		self.numberOfRoutes = self.db.countNumberOfRoutes()
+
 
 	def set_rfs_used(self, rfs):
 		""" add to the db that we are handling a specific route """

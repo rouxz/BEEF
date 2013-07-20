@@ -31,10 +31,12 @@ NON_RETREATMENT ="nrt"
 # ------------
 
 # eventType
-MODIFICATION = "mod"
-COMMIT = "commit"
-CHANGE_REF = "change_ref"
-GET_DATA ="get_data"
+MODIFICATION = 0
+ABSOLUTE = 1
+COMMIT = 10
+
+CHANGE_REF = 20
+GET_DATA = 30
 
 # dataType
 YLD = "yld"

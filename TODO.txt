@@ -4,7 +4,7 @@ In window_modif.py
 ------------------
 Move to next case
 allow absolute data
-correct yield modification
+Finish yield modification
 
 In sideGui.py
 -------------
@@ -21,12 +21,14 @@ improve layout
 	- size
 Finish data consistency
 calculate total for all the tabs
+set table all to non modifiable
 
 In database.py
 --------------
 integrate all that is db structure related
 develop sqlite3 capability for non windows platform
 Correction in change percentage
+Absolute definition
 
 In event.py
 ----------

@@ -355,8 +355,9 @@ class MyTableView(QTableView):
 	def cell_clicked_event(self, index):
 
 		#for debuggin purpose only
-		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
-		print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + str(index.data(Qt.DisplayRole).toFloat()) + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
+		if self.debug == True:
+			print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
+		#print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + str(index.data(Qt.DisplayRole).toFloat()) + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
 		
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
@@ -366,7 +367,7 @@ class MyTableView(QTableView):
 		header = VERTICAL_HEADER[index.row()]
 		regexp = re.compile("(RPK|Yield).*")
 		if regexp.match(header) and index.column() < 12:
-			Window_modif(self, index)
+			Window_modif(self, index, self.debug)
 			#pass
 
 	def center(self):

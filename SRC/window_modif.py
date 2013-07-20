@@ -8,11 +8,16 @@ import event
 class Window_modif(QDialog):
 	""" windows to modif values with a tableView """
 	
-	def __init__(self, parent, index):
+	def __init__(self, parent, index, debug = True):
 		QWidget.__init__(self, parent)
+		
+		self.debug = debug
 		
 		#parent - MyTableView
 		self.parentTable = parent
+		
+		# number of routes on which the evolution will be applied
+		self.numberOfRoutes = self.parentTable.core.numberOfRoutes
 		
 		#initiate data
 		self.initData(index)
@@ -21,11 +26,12 @@ class Window_modif(QDialog):
 		self.sidePanel = self.parentTable.sidePanel
 
 		
+		
 		#set the UI
 		self.initUI()
 		
 		#set to relative by default
-		self.toRelative()
+		self.toRelative(True)
 		
 		#launch the UI
 		self.exec_()
@@ -44,6 +50,9 @@ class Window_modif(QDialog):
 		# flag to know if an action has been sent to the gui
 		self.actionSent = 0
 		
+		#flag for modification tracking
+		self.modifFlag = False
+		
 		#data used
 		self.getData()
 		
@@ -56,18 +65,25 @@ class Window_modif(QDialog):
 		#global layout for the widget
 		self.layout = QVBoxLayout()
 		
-		# a group box for selecting how we want to proceed (relative evolution or absolute value)
-		self.evolGroupBox = QGroupBox(self)
-		self.evolGroupBox.setTitle(QString("Choose type of modification"))
 		
-		self.evolGroupBoxLayout = QVBoxLayout()
 		
-		self.radioButtonAbsolute = QRadioButton(QString("Absolute"), self)
-		self.evolGroupBoxLayout.addWidget(self.radioButtonAbsolute)
-		self.radioButtonRelative = QRadioButton(QString("Relative evolution"), self)
-		self.evolGroupBoxLayout.addWidget(self.radioButtonRelative)
+		# if the numberOfRoutes handled is superior to 1, you cannot feed absolute data !
 		
-		self.evolGroupBox.setLayout(self.evolGroupBoxLayout)
+		
+		if  self.numberOfRoutes <= 1:
+			
+			# a group box for selecting how we want to proceed (relative evolution or absolute value)
+			self.evolGroupBox = QGroupBox(self)
+			self.evolGroupBox.setTitle(QString("Choose type of modification"))
+		
+			self.evolGroupBoxLayout = QVBoxLayout()
+			self.radioButtonAbsolute = QRadioButton(QString("Absolute"), self)
+			self.evolGroupBoxLayout.addWidget(self.radioButtonAbsolute)
+		
+			self.radioButtonRelative = QRadioButton(QString("Relative evolution"), self)
+			self.evolGroupBoxLayout.addWidget(self.radioButtonRelative)
+			
+			self.evolGroupBox.setLayout(self.evolGroupBoxLayout)
 		
 		# a group box for defining the data
 		self.dataGroupBox = QGroupBox(self)
@@ -113,9 +129,10 @@ class Window_modif(QDialog):
 		self.layout.addWidget(self.topLabel)
 		
 		#adding the groupbox of user action selection
-		self.layout.addWidget(self.evolGroupBox)
+		if self.numberOfRoutes <= 1:
+			self.layout.addWidget(self.evolGroupBox)
 		
-		#adding the groupbox of user action selection
+		#adding the groupbox of data
 		self.layout.addWidget(self.dataGroupBox)
 		
 		#adding the groupbox of moving
@@ -125,6 +142,15 @@ class Window_modif(QDialog):
 		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
 		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
 		self.connect(self.buttonValidate, SIGNAL("released()"), self.validateAndClose)
+		
+		# for switching between absolute and relative
+		if self.numberOfRoutes <= 1:
+			self.connect(self.radioButtonAbsolute, SIGNAL("toggled(bool)"),self.toAbsolute)
+			self.connect(self.radioButtonRelative, SIGNAL("toggled(bool)"),self.toRelative)
+			#Updating CY for absolute
+			self.connect(self.cy_LE, SIGNAL("editingFinished()"), self.callbackModifCY)
+			
+		
 		# void	editingFinished ()
 
 		
@@ -169,26 +195,35 @@ class Window_modif(QDialog):
 			
 	def switchAbsoluteRelative(self, bool):
 		""" define if the display should be set for relative evolution or absolute data """
+		
 		if bool == True:
 			# allow proper text edit to be editable or not
 			self.cy_LE.setReadOnly(True)
 			self.ref_LE.setReadOnly(True)
+			self.yoy_LE.setReadOnly(False)
 			# check the right radiobutton
-			self.radioButtonRelative.setChecked(True)
-			self.radioButtonAbsolute.setChecked(False)
+			if self.numberOfRoutes <= 1:
+				self.radioButtonRelative.setChecked(True)
+			if self.debug == True:
+				print("Going to relative")
 		else:
 			self.ref_LE.setReadOnly(True)
 			self.yoy_LE.setReadOnly(True)
-			self.radioButtonRelative.setChecked(False)
-			self.radioButtonAbsolute.setChecked(True)
+			self.cy_LE.setReadOnly(False)
+			if self.numberOfRoutes <= 1:
+				self.radioButtonAbsolute.setChecked(True)
+			if self.debug == True:
+				print("Going to absolute")
 			
-	def toAbsolute(self):
+	def toAbsolute(self, checked):
 		""" set mode of input as absolute """
-		self.switchAbsoluteRelative(False)
+		if (checked):
+			self.switchAbsoluteRelative(False)
 		
-	def toRelative(self):
+	def toRelative(self, checked):
 		""" set mode of input as relative """
-		self.switchAbsoluteRelative(True)
+		if (checked):
+			self.switchAbsoluteRelative(True)
 		
 		
 	def recalculate_cy(self, yoy):
@@ -197,6 +232,9 @@ class Window_modif(QDialog):
 			#changing data
 			self.cy = self.ref * (1 + yoy)
 			#print(self.cy)
+			#Update the modif flag if the yoy is different than the previous one
+			if self.yoy != yoy:
+				self.modifFlag = True
 			
 			#changing display
 			self.cy_LE.setText(str(self.cy))
@@ -209,10 +247,25 @@ class Window_modif(QDialog):
 		#print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
 		self.recalculate_cy(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
 		
+	def callbackModifCY(self):
+		""" callback function launched once self.cy_LE has been modified """
+		# for debuggin purpose
+		if self.debug == True:
+			print("Callback on cy modification")
+		
+		# update data model in the system
+		self.cy = float(self.cy_LE.text())
+		
+		# tell the class something has been modified
+		self.modifFlag = True
+		
 		
 	def validate(self):
 		""" send the data to the tableview and the required action to the gui """
-		if self.actionSent == 0 and self.yoy != float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100:
+		
+		if self.actionSent == 0 and self.modifFlag == True:
+			
+			
 			#modify the value according to what has been put in
 			self.parentTable.tableModel.setData(self.cyIndex, self.cy)
 			self.parentTable.tableModel.setData(self.YoYIndex, self.yoy_LE.text())
@@ -222,10 +275,12 @@ class Window_modif(QDialog):
 			if self.header[:3] == "RPK":
 				print("Yield" + self.header[3:7] + "CY")
 				print(str(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY")))
+				valRPK = self.cy
 				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()) * self.cy
 				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[3:7] + "CY"), self.index.column()), valRev)
 			# Yield change revenue with constant RPK
 			elif self.header[:5] == "Yield":
+				valRPK = 00000
 				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + self.header[5:9] + "CY"), self.index.column()) * self.cy
 				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[5:9] + "CY"), self.index.column()), valRev)
 			
@@ -236,10 +291,21 @@ class Window_modif(QDialog):
 			self.parentTable.updateDisplay()
 			
 			#create a modif event
-			if  self.header[:3] == "RPK":
-				e = event.EventModifValue(valRev, self.cy, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
+			
+			#for yoy modification.
+			if (self.numberOfRoutes <= 1 and self.radioButtonRelative.isChecked()) or self.numberOfRoutes > 1:
+			
+				if  self.header[:3] == "RPK":
+					e = event.EventModifValue(valRev, valRPK, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
+				else:
+					e = event.Event()
+			
 			else:
-				e = event.Event()
+				#absolute modification
+				e = event.EventAddAbsoluteData(valRev, valRPK, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
+				if self.debug == True:
+					print("Value sent to the action handler is : " + str(self.cy))
+			
 			self.sidePanel.user_interaction.addPendingActions(e)
 			
 			self.actionSent = 1
