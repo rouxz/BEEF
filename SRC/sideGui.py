@@ -193,6 +193,7 @@ class PerimeterSelection(QGroupBox):
 		self.debug = debug
 		self.fm = fm
 		self.core = core
+		self.validation = false
 		
 		self.setTitle(QString("Route perimeter"))
 		self.layout = QVBoxLayout()
@@ -215,31 +216,57 @@ class PerimeterSelection(QGroupBox):
 		for i in fm.getHierarchies():
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
 			
-	def changePerimeter(self, item, itemVoid):
+	def changePerimeter(self, item, itemInit):
 		""" change perimeter in the data sent to the GUI / clear all pending actions as well"""
-		if self.debug == True:
-			print("Perimeter changed")
 		
-		#clear rfs list in the db
-		self.core.clear_rfs_used()
 		
-		file2read = str(item.text().toUtf8())
-		
-		# add lines to the db
-		lstLines = self.fm.getSublines(file2read)
-		for line in lstLines:
-			self.core.set_rfs_used(line)
+		# pending actions still not processed
+		if len(self.core.events_list) > 0:
+			#ask for validation
+			validate = QMessageBox.warning(self, "Validation required", "Pending actions have been processed\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
+			if validate == QMessageBox.Ok:
+				# enable validation
+				self.validation = True
+				# clear actions list
+				self.parent.user_interaction.discardActions()
+			else:
+				self.validation = False
 			
-		# update the number of routes in the core
-		self.core.countNumberOfRoutes()
-		
-		# retrieve new data
-		self.core.get_data_CY()
-		self.core.get_data_ref()
-		
-		self.parent.parent.tabsWidget.updateData()
-		
-		
-		# send message to GUI status bar	
-		self.parent.status.showMessage("Perimeter changed")
-		
+			
+		if validation == True:
+			
+			if self.debug == True:
+				print("Perimeter changed")
+			
+			#clear rfs list in the db
+			self.core.clear_rfs_used()
+			
+			file2read = str(item.text().toUtf8())
+			
+			# add lines to the db
+			lstLines = self.fm.getSublines(file2read)
+			for line in lstLines:
+				self.core.set_rfs_used(line)
+				
+			# update the number of routes in the core
+			self.core.countNumberOfRoutes()
+			
+			# retrieve new data
+			self.core.get_data_CY()
+			self.core.get_data_ref()
+			
+			self.parent.parent.tabsWidget.updateData()
+			
+			
+			# send message to GUI status bar	
+			self.parent.status.showMessage("Perimeter changed")
+			
+			self.validation = False
+			
+		else:
+			# reselect previous item
+			self.listPerimeter.setCurrentItem(itemInit)
+			if self.debug == True:
+				print("Switching to : " + itemInit.text())
+			self.validation = False
+	

@@ -20,7 +20,7 @@ class Core():
 		
 		
 		# - events lists (FIFO)
-		self.EVENTS_LIST = []
+		self.events_list = []
 		# - type of treatment
 		self.treatment = NON_RETREATMENT
 		# - a database to get & store data
@@ -85,16 +85,16 @@ class Core():
 	# --------------
 
 	def add_event(self, ev):
-		self.EVENTS_LIST.append(ev)
+		self.events_list.append(ev)
 
 	def __events_handler(self):
 		# take an event and apply what is needed
 		res = 0
 		
-		for e in self.EVENTS_LIST:
+		for e in self.events_list:
 		# for each event handle it and then remove it
 			res = e.handle(self)
-			self.EVENTS_LIST.pop(0)
+			self.events_list.pop(0)
 		return res
 			
 	def process_events(self):
@@ -108,5 +108,5 @@ class Core():
 		self.clear_events()
 		
 	def clear_events(self):
-		self.EVENTS_LIST = []
+		self.events_list = []
 

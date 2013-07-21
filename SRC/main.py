@@ -26,9 +26,9 @@ def main():
 	core = Core(db, debug)
 
 	#for testing purpose only
-	core.set_rfs_used("FAA")
-	core.get_data_CY()
-	core.get_data_ref()
+	#~ core.set_rfs_used("FAA")
+	#~ core.get_data_CY()
+	#~ core.get_data_ref()
 
 
 	# for launching the ui

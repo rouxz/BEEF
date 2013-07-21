@@ -12,7 +12,8 @@ Change in the reference
 	select first one by default
 	make effective retreatment or not
 Change in the route lists
-	define behaviour
+	improve control when changing route perimeters
+	improved validation control
 	
 In tableGui.py
 -------------
