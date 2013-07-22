@@ -145,6 +145,10 @@ class ReferenceWidget(QGroupBox):
 		self.addReference(core)
 		self.layout.addWidget(self.listRef)
 
+		#select first element in the list by default
+		self.listRef.setCurrentItem(self.listRef.item(0))
+		
+		
 		#connect slot and signal
 		self.connect(self.listRef, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changeReference)
 
@@ -195,7 +199,7 @@ class PerimeterSelection(QGroupBox):
 		self.core = core
 		self.validation = True
 		self.mechanicalMove = False
-		
+
 		self.setTitle(QString("Route perimeter"))
 		self.layout = QVBoxLayout()
 
@@ -207,6 +211,9 @@ class PerimeterSelection(QGroupBox):
 
 
 		self.setLayout(self.layout)
+
+		#set the first item by default
+		self.listPerimeter.setCurrentItem(self.listPerimeter.item(0))
 
 		# signal & slots
 		self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changePerimeter)
@@ -272,8 +279,8 @@ class PerimeterSelection(QGroupBox):
 					print("Switching back to : " + itemInit.text())
 				self.listPerimeter.setCurrentItem(itemInit)
 				itemInit.setSelected(True)
-				
-				
+
+
 		else:
 			self.mechanicalMove = False
 			if self.debug == True:

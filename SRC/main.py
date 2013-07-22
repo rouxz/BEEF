@@ -35,7 +35,7 @@ def main():
 	app = QApplication(sys.argv)
 	# topwindow of the gui
 	w = TopWindow(core, system, debug)
-	w.show()
+	w.showMaximized()
 	sys.exit(app.exec_())
 
 	db.__del__()

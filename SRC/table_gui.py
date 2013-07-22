@@ -10,12 +10,6 @@ import re
 
 
 
-
-# data to display
-my_array = [['00','01','02'],
-			['10','11','12'],
-			['20','21','22']]
-
 # ###################################
 #
 #    DATA HANDLING WITHIN THE GUI   #
@@ -56,12 +50,12 @@ class Tabs(QTabWidget):
 	def setUI(self):
 		self.setMinimumSize(300,300)
 
-		
+
 	def changeRef(self):
 		""" change all reference data in the tableviews """
 		for tab in self.tabs:
 			tab.retrieveDataRefOnly()
-			
+
 	def updateData(self):
 		""" update data in all the table views """
 		for tab in self.tabs:
@@ -108,7 +102,7 @@ class TableData(QAbstractTableModel):
 		""" retrieve data within the data container simple way as a string"""
 		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
 		return self.data(self.index(r, c), Qt.DisplayRole).toFloat()[0]
-		
+
 	def headerData(self, section, orientation, role):
 		if role != Qt.DisplayRole:
 			return QVariant()
@@ -157,10 +151,10 @@ class MyTableView(QTableView):
 	def __init__(self, editable, core, flow, sidePanel, parent, debug = True):
 
 		QTableView.__init__(self)
-	
+
 		# editability of the table
 		self.editable = editable
-		
+
 		#core engine
 		self.core = core
 
@@ -199,11 +193,11 @@ class MyTableView(QTableView):
 		self.retrieveData()
 
 		 # set the minimum size
-		self.setMinimumSize(1000, 600)
+		self.setMinimumSize(1200, 600)
 
 		# look and feel
 		self.lookAndFeel()
-		
+
 
 		#connecting events
 		#-----------------
@@ -211,31 +205,33 @@ class MyTableView(QTableView):
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
 		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
 
-		
+
 	def lookAndFeel(self):
-		
+
 		# set row height
 		for row in xrange(len(VERTICAL_HEADER)):
 			self.setRowHeight(row, HEIGHT_ROW)
-			
+
 		# add color for changeable data
 		if self.editable == True:
-			pass
-		
+			for r in xrange(len(VERTICAL_HEADER)):
+				for c in xrange(len(TABLE_TITLE)):
+					# self.item(r,c).setBackgroundColor(QColor(225, 0, 225))
+					pass
 		# add color for LF/Yield/RASK
-		
-		
-		
+		# cell.setBackgroundColor(QColor(225, 0, 225))
+
+
 	def retrieveData(self):
 		""" get all data from core engine """
 
 		flw = ARRAY_FLOW.index(self.flow)
 		regexp = re.compile("(Rev|RPK|ASK).(HY|LY).(?!YoY).*")
-		
+
 		for r in VERTICAL_HEADER:
 			row = VERTICAL_HEADER.index(r)
 			res = regexp.match(r)
-			
+
 			for c in range(len(TABLE_TITLE)):
 				# print(str(r) + "-" + str(c) + " " )
 				if res != None:
@@ -270,11 +266,11 @@ class MyTableView(QTableView):
 
 		flw = ARRAY_FLOW.index(self.flow)
 		regexp = re.compile("(Rev|RPK|ASK).(HY|LY).Ref.*")
-		
+
 		for r in VERTICAL_HEADER:
 			row = VERTICAL_HEADER.index(r)
 			res = regexp.match(r)
-			
+
 			for c in range(len(TABLE_TITLE)):
 				# print(str(r) + "-" + str(c) + " " )
 				if res != None:
@@ -379,7 +375,7 @@ class MyTableView(QTableView):
 		if self.debug == True:
 			print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
 		#print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + str(index.data(Qt.DisplayRole).toFloat()) + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
-		
+
 		#determine if the clicked cell what kind of data is it and if it is editable or not
 		# RPK or yield are the only editable cells
 
