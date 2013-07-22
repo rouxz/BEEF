@@ -43,9 +43,12 @@ class Tabs(QTabWidget):
 
 		# add new tabs
 		for flow in equivFlow:
-			self.tabs.append(MyTableView(core, flow, self.sidePanel, parent))
+			if flow != "All":
+				editable = True
+			else:
+				editable = False
+			self.tabs.append(MyTableView(editable, core, flow, self.sidePanel, parent))
 			self.addTab(self.tabs[i], flow)
-			# self.insertTab(i, self.tabs[i], flow)
 			i = i +1
 
 		self.setUI()
@@ -69,6 +72,8 @@ class Tabs(QTabWidget):
 		for tab in self.tabs:
 			tab.updateDisplay()
 
+	def dataConsistency(self):
+		pass
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabs """
@@ -149,10 +154,13 @@ class TableData(QAbstractTableModel):
 class MyTableView(QTableView):
 	""" table specialisation of QTableView displaying all the data and calculated KPI fetched from db"""
 
-	def __init__(self, core, flow, sidePanel, parent, debug = True):
+	def __init__(self, editable, core, flow, sidePanel, parent, debug = True):
 
 		QTableView.__init__(self)
-
+	
+		# editability of the table
+		self.editable = editable
+		
 		#core engine
 		self.core = core
 
@@ -193,11 +201,9 @@ class MyTableView(QTableView):
 		 # set the minimum size
 		self.setMinimumSize(1000, 600)
 
-
-
-		# set row height
-		for row in xrange(len(VERTICAL_HEADER)):
-			self.setRowHeight(row, HEIGHT_ROW)
+		# look and feel
+		self.lookAndFeel()
+		
 
 		#connecting events
 		#-----------------
@@ -205,6 +211,21 @@ class MyTableView(QTableView):
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
 		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
 
+		
+	def lookAndFeel(self):
+		
+		# set row height
+		for row in xrange(len(VERTICAL_HEADER)):
+			self.setRowHeight(row, HEIGHT_ROW)
+			
+		# add color for changeable data
+		if self.editable == True:
+			pass
+		
+		# add color for LF/Yield/RASK
+		
+		
+		
 	def retrieveData(self):
 		""" get all data from core engine """
 
@@ -364,11 +385,12 @@ class MyTableView(QTableView):
 
 
 		#open pop up window
-		header = VERTICAL_HEADER[index.row()]
-		regexp = re.compile("(RPK|Yield).*")
-		if regexp.match(header) and index.column() < 12:
-			Window_modif(self, index, self.debug)
-			#pass
+		if self.editable == True:
+			header = VERTICAL_HEADER[index.row()]
+			regexp = re.compile("(RPK|Yield).(HY|LY).*")
+			if regexp.match(header) and index.column() < 12:
+				Window_modif(self, index, self.debug)
+				#pass
 
 	def center(self):
 
