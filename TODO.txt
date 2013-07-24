@@ -3,27 +3,26 @@ TODO
 In window_modif.py
 ------------------
 Move to next case
-allow absolute data
 Finish yield modification
 
 In sideGui.py
 -------------
 Change in the reference
-	select first one by default
 	make effective retreatment or not
 Change in the route lists
-	select first one by default
+	select first one by default and retrieve data
 	improve control when changing route perimeters
 	improved validation control
+Improve selection check	
+	
 	
 In tableGui.py
 -------------
 improve layout
-	- colors
 	- size
 Finish data consistency
-calculate total for all the tabs
-set table all to non modifiable
+	calculate total for all the tabs
+hide non necessary rows
 
 
 In database.py

@@ -77,6 +77,10 @@ GRID_LAYOUT_SPACE = 10
 TABLE_TITLE = ["1","2","3","4","5","6","7","8","9","10","11","12","Total","Q1","Q2","Q3","Q4"]
 HEIGHT_ROW = 18
 
+
+COLOR_EDITABLE = {"r": 223, "v":241, "b": 216}
+COLOR_RES = {"r": 210, "v":252, "b": 255}
+
 VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY YoY" , "ASK LY CY" ,"ASK LY Ref" ,"ASK LY YoY" ,"ASK AY CY" ,"ASK AY Ref" , \
 		"ASK AY YoY" , "RPK HY CY"  , "RPK HY Ref"  , "RPK HY YoY" , "RPK LY CY" , "RPK LY Ref" , "RPK LY YoY"  , \
 		"RPK AY CY"  , "RPK AY Ref" , "RPK AY YoY"  , "LF HY CY" , "LF HY Ref"  , "LF HY CY-Ref" , \

@@ -16,6 +16,10 @@ import re
 #
 # ###################################
 
+def color(color_dict):
+	return QColor(color_dict["r"],color_dict["v"],color_dict["b"])
+
+
 
 class Tabs(QTabWidget):
 	""" class for defining the tabs including all the tables """
@@ -88,11 +92,40 @@ class TableData(QAbstractTableModel):
 
 	def data(self, index, role):
 		""" retrieve data within the data container """
-		if not index.isValid():
+		if index.isValid() and role == Qt.BackgroundRole:
+			# colors in the table
+			return self.setBackground(index.row(), role)
+		elif index.isValid() and role == Qt.DisplayRole:
+			return QVariant(self.arraydata[index.row()][index.column()])
+		else:
 			return QVariant()
-		elif role != Qt.DisplayRole:
+	
+	def headerData(self, section, orientation, role):
+		""" return header for the table model"""
+		if orientation == Qt.Vertical and role == Qt.BackgroundRole:
+			return self.setBackground(section, role)
+		elif orientation == Qt.Vertical and role == Qt.DisplayRole:
+			return QVariant(self.vheader[section])
+		elif orientation == Qt.Horizontal and role == Qt.DisplayRole:
+			return QVariant(self.hheader[section])
+		else:
+			QVariant()
+	
+	
+	
+	def setBackground(self, col, role):
+		""" Allow to define background of the cells """
+		header = self.vheader[col]
+		regex_modifiable = re.compile("(RPK|Yield).(HY|LY).*")
+		regex_res = re.compile("(LF|RASK).AY.*")
+		# modifiable value
+		if regex_modifiable.match(header) != None:
+			return QBrush(color(COLOR_EDITABLE))
+		elif regex_res.match(header) != None:
+			return QBrush(color(COLOR_RES))
+		else:
 			return QVariant()
-		return QVariant(self.arraydata[index.row()][index.column()])
+	
 
 	def getData(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
@@ -103,20 +136,17 @@ class TableData(QAbstractTableModel):
 		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
 		return self.data(self.index(r, c), Qt.DisplayRole).toFloat()[0]
 
-	def headerData(self, section, orientation, role):
-		if role != Qt.DisplayRole:
-			return QVariant()
-		if orientation == Qt.Vertical:
-			return QVariant(self.vheader[section])
-		if orientation == Qt.Horizontal:
-			return QVariant(self.hheader[section])
+	
 
-	def setData(self, index, value):
+	def setData(self, index, value, role):
 		""" change data in the array containing all the required information """
-		if index.isValid():
+		if index.isValid() and role == Qt.DisplayRole:
 			self.arraydata[index.row()][index.column()] = value
 			#show to the world the update
 			self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
+			return True
+		else:
+			return False
 
 
 	def setDataNoDisplayUpdate(self, row, col, value):
@@ -126,24 +156,21 @@ class TableData(QAbstractTableModel):
 	def updateDisplay(self):
 		self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(0,0), self.index(len(VERTICAL_HEADER),len(TABLE_TITLE)))
 
-	def setData2(self, row, col, value):
-		""" test only """
-		self.setData(self.index(row, col), value)
 
-
-	def index(self, row, col, parent = QModelIndex()):
-		""" redefinition of the index function """
-		return self.createIndex(row, col)
+	# def index(self, row, col, parent = QModelIndex()):
+		# """ redefinition of the index function """
+		# return self.createIndex(row, col)
 
 	#converting Qstring to float
 	def qstr2str(self, qstr):
 		return str(qstr.toString()).strip()
 
-	# def flags(self, index):
-		# if index.isValid() and index.row < self.rowCount(None) and index.col < self.columCount(None):
-			# return Qt.ItemFlags(Qt.ItemIsEditable | Qt.ItemIsSelectable |Qt.ItemIsEnabled)
-		# else:
-			# return Qt.ItemFlags(Qt.ItemIsSelectable |Qt.ItemIsEnabled)
+	def flags(self, index):
+		if index.isValid():
+			return QAbstractTableModel.flags(self, index) | Qt.ItemIsSelectable | Qt.ItemIsEnabled
+		else:
+			return QAbstractTableModel.flags(self, index)
+
 
 class MyTableView(QTableView):
 	""" table specialisation of QTableView displaying all the data and calculated KPI fetched from db"""
