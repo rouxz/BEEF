@@ -236,7 +236,9 @@ class PerimeterSelection(QGroupBox):
 
 		self.layout.addWidget(self.listPerimeter)
 
-
+		self.reload = QPushButton("Reload")
+		self.layout.addWidget(self.reload)
+		
 		self.setLayout(self.layout)
 
 		#set the first item by default
@@ -244,7 +246,7 @@ class PerimeterSelection(QGroupBox):
 
 		# signal & slots
 		self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changePerimeter)
-
+		self.connect(self.reload, SIGNAL("clicked()"), self.actionReload)
 
 	def defineList(self, fm):
 		""" get the lists of files within the directory specified """
@@ -312,3 +314,7 @@ class PerimeterSelection(QGroupBox):
 			self.mechanicalMove = False
 			if self.debug == True:
 				print("Set mechanical move to False")
+	
+	def actionReload(self):
+		""" function loaded when the user want to reload the list of routes available"""
+		pass

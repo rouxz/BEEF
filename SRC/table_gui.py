@@ -45,7 +45,7 @@ class Tabs(QTabWidget):
 				editable = True
 			else:
 				editable = False
-			self.tabs.append(MyTableView(editable, core, flow, self.sidePanel, parent))
+			self.tabs.append(MyTableView(editable, core, flow, self.sidePanel, self))
 			self.addTab(self.tabs[i], flow)
 			i = i +1
 
@@ -71,7 +71,11 @@ class Tabs(QTabWidget):
 			tab.updateDisplay()
 
 	def dataConsistency(self):
-		pass
+		""" will make the total of all flows in the tabs total if it is not editable """
+		if len(self.tabs) > 1:
+			for tab in self.tabs:
+				if tab.flow == "All":
+					tab.totalForAllFlow(self.tabs)
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabs """
@@ -194,6 +198,7 @@ class MyTableView(QTableView):
 		#flow represented in this table
 		self.flow =  flow
 
+		self.parent = parent
 
 		# define the data to be used
 		# self.tableData = [[0] * len(TABLE_TITLE)]*len(VERTICAL_HEADER)
@@ -300,6 +305,9 @@ class MyTableView(QTableView):
 
 		#update display
 		self.tableModel.updateDisplay()
+		
+		# update global GUI
+		self.parent.dataConsistency()
 
 	def retrieveDataRefOnly(self):
 		""" get all data from core engine """
@@ -342,6 +350,9 @@ class MyTableView(QTableView):
 		#update display
 		self.tableModel.updateDisplay()
 
+		# update global GUI
+		self.parent.dataConsistency()
+		
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
 
@@ -432,9 +443,27 @@ class MyTableView(QTableView):
 						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, str((self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100 )+ "%")
 
 
-		# 5 - calculate CY-PY for LF
+		# 7 - calculate CY-PY for LF
 		# --------------------------
 
+		
+	def totalForAllFlow(self, tabs):
+		""" calculate the sum of all tabs whose flow isn't 'All' for a specific table"""
+		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
+		
+		for r in VERTICAL_HEADER:
+			if regexp.match(r) != None:
+				
+				for i in xrange(12):
+					sum = 0
+					for tab in tabs:
+						if tab.flow != "All":
+							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, sum)
+		
+		self.setDataConsistency()
+		self.tableModel.updateDisplay()
+		
 	def updateDisplay(self):
 		""" update the display of this tabs """
 		self.tableModel.updateDisplay()
@@ -460,9 +489,9 @@ class MyTableView(QTableView):
 				Window_modif(self, index, self.debug)
 				#pass
 
-	def center(self):
+	# def center(self):
 
-		qr = self.frameGeometry()
-		cp = QDesktopWidget().availableGeometry().center()
-		qr.moveCenter(cp)
-		self.move(qr.topLeft())
+		# qr = self.frameGeometry()
+		# cp = QDesktopWidget().availableGeometry().center()
+		# qr.moveCenter(cp)
+		# self.move(qr.topLeft())
