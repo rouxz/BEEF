@@ -3,12 +3,11 @@ TODO
 In window_modif.py
 ------------------
 Move to next case
-Finish yield modification
+Modify yoy when dealing absolute !
 
 In sideGui.py
 -------------
-Change in the reference
-	make effective retreatment or not
+
 Change in the route lists
 	select first one by default and retrieve data
 	improve control when changing route perimeters
@@ -20,9 +19,9 @@ In tableGui.py
 -------------
 improve layout
 	- size
-Finish data consistency
-	calculate total for all the tabs
-hide non necessary rows
+	- display of figures
+Calculate total for all the tabs
+
 
 
 In database.py
@@ -32,6 +31,7 @@ develop sqlite3 capability for non windows platform
 
 In event.py
 ----------
+
 
 in About.py
 -----------

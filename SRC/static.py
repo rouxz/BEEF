@@ -23,8 +23,8 @@ ARRAY_QUARTERS = [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
 
 # for coreengine.py
 # ------------
-RETREATMENT = "rt"
-NON_RETREATMENT ="nrt"
+RETREATMENT = 0
+NON_RETREATMENT = 1
 
 
 # for event.py

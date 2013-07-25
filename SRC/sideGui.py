@@ -93,25 +93,27 @@ class UserInteraction(QGroupBox):
 		def saveActions(self):
 			self.status.showMessage("Processing actions")
 			#print("Processing actions")
-			res = self.core.process_events()
-			if res == 0:
-				self.status.showMessage("Actions saved")
-				#zero the display
-				self.zeroPending()
-				print("Actions saved")
-			else:
-				self.status.showMessage("Error processing data")
-				print("Error processing data")
+			if self.nbrPending > 0:
+				res = self.core.process_events()
+				if res == 0:
+					self.status.showMessage("Actions saved")
+					#zero the display
+					self.zeroPending()
+					print("Actions saved")
+				else:
+					self.status.showMessage("Error processing data")
+					print("Error processing data")
 
 		def discardActions(self):
-			#clear core engine
-			self.core.clear_events()
-			#zero the display
-			self.zeroPending()
-			self.status.showMessage("Actions discarded")
-			#re get all data from db
-			self.core.get_data_CY()
-			print("Actions discarded")
+			if self.nbrPending > 0:
+				#clear core engine
+				self.core.clear_events()
+				#zero the display
+				self.zeroPending()
+				self.status.showMessage("Actions discarded")
+				#re get all data from db
+				self.core.get_data_CY()
+				print("Actions discarded")
 
 
 
@@ -150,6 +152,10 @@ class ReferenceWidget(QGroupBox):
 		
 		
 		#connect slot and signal
+		#reference treatment
+		self.connect(self.trButton, SIGNAL("toggled(bool)"), self.changeTreatmentEventTr)
+		self.connect(self.ntrButton, SIGNAL("toggled(bool)"), self.changeTreatmentEventNTr)
+		# reference data
 		self.connect(self.listRef, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changeReference)
 
 
@@ -166,7 +172,7 @@ class ReferenceWidget(QGroupBox):
 
 	def changeReference(self, itemOri, itemFin):
 		""" change reference in the data sent to the GUI """
-		self.parent.status.showMessage("reference changed")
+		
 
 		#new reference
 		ref = str(itemOri.text().toUtf8())
@@ -179,7 +185,9 @@ class ReferenceWidget(QGroupBox):
 		#update layout - sending data to the gui
 		if self.debug == True:
 			print("Sending update to display")
+		self.parent.status.showMessage("reference changed")
 		self.parent.parent.tabsWidget.changeRef()
+		
 
 	def changeTreatment(self, treatment):
 		if treatment == STATIC.NON_RETREATMENT:
@@ -187,7 +195,26 @@ class ReferenceWidget(QGroupBox):
 		else:
 			self.trButton.setChecked(True)
 
+	
+	def _changeTreatmentEvent(self, bool):
+		""" modify treatment in the core """
+		if bool == True:
+			self.core.set_treatment(STATIC.RETREATMENT)
+		else :
+			self.core.set_treatment(STATIC.NON_RETREATMENT)
+		
+		# update the tabs
+		self.parent.parent.tabsWidget.changeRef()
+		self.parent.status.showMessage("reference treatment changed")
+	
+	def changeTreatmentEventTr(self, bool):
+		if bool == True:
+			self._changeTreatmentEvent(True)
 
+	def changeTreatmentEventNTr(self, bool):
+		if bool == True:
+			self._changeTreatmentEvent(False)		
+	
 class PerimeterSelection(QGroupBox):
 	""" allow to select the route perimeter """
 	def __init__(self, core, fm, parent, debug = True):

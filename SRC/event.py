@@ -20,23 +20,30 @@ class EventModifValue(Event):
 	""" send to coreengine the new value we want to apply """
 	
 	
-	def __init__(self, valueRev, valueRPK, month, yld, flow):
+	def __init__(self, valueRev, valueRPK, month, yld, flow, debug=True):
 		Event.__init__(self)
 		self.type = MODIFICATION
 		self.month = month
 		self.yld = yld
 		self.flow = flow
-		self.valueRev = valueRev
-		self.valueRPK = valueRPK
+		#self.valueRev = valueRev
+		# self.valueRPK = valueRPK
+		self.indexRev = valueRev
+		self.indexRPK = valueRPK
+		self.debug = True
 		
 	def handle(self, core):
 		#Event.handle(core);
 		# calculate the % of modif versus the data
-		percentageRev = self.valueRev / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
-		percentageRPK = self.valueRPK / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
+		# indexRev = self.valueRev / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
+		# indexRPK= self.valueRPK / core.DATA_FCST[equivData["Rev"]][equivFlow[self.flow]][ARRAY_YIELD.index(self.yld)][self.month]
+		if self.debug == True:
+			print("Evol rev : " + str(self.indexRev) +  " RPK " + str(self.indexRPK))
 		# commit these data into the db
-		res1 = core.db.set_data_percentage("Rev", self.flow, self.yld, self.month, percentageRev)
-		res2 = core.db.set_data_percentage("RPK", self.flow, self.yld, self.month, percentageRPK)
+		res1 = core.db.set_data_percentage("Rev", self.flow, self.yld, self.month, self.indexRev)
+		res2 = core.db.set_data_percentage("RPK", self.flow, self.yld, self.month,self.indexRPK)
+		# res1 = 0
+		# res2 =0 
 		#results of the commit
 		return (res1 + res2)
 		
@@ -60,7 +67,7 @@ class EventModifScope(Event):
 class EventAddAbsoluteData(Event):
 	""" class for sending a specific value for one single route in the database """
 	
-	def __init__(self, valueRev, valueRPK, month, yld, flow):
+	def __init__(self, valueRev, valueRPK, month, yld, flow, debug = True):
 		Event.__init__(self)
 		self.type = ABSOLUTE
 		self.month = month
@@ -68,6 +75,7 @@ class EventAddAbsoluteData(Event):
 		self.flow = flow
 		self.valueRev = valueRev
 		self.valueRPK = valueRPK
+		self.debug = True
 		
 	def handle(self, core):
 		res1 = core.db.set_data_value(self.flow, self.yld, self.month, self.valueRev, self.valueRPK)

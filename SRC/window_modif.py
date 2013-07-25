@@ -265,24 +265,34 @@ class Window_modif(QDialog):
 		
 		if self.actionSent == 0 and self.modifFlag == True:
 			
-			
-			#modify the value according to what has been put in
-			self.parentTable.tableModel.setData(self.cyIndex, self.cy)
-			self.parentTable.tableModel.setData(self.YoYIndex, self.yoy_LE.text())
-			
+			# find the contribution 
+			if  self.header[:3] == "RPK":
+					yld  =  self.header[3:7].strip()
+			elif self.header[:5] == "Yield":
+					yld = self.header[5:9].strip()
+
+			# get previous data in the table
+			val_rev_init = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev " + yld + " CY"), self.index.column())
+			val_RPK_init = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK " + yld + " CY"), self.index.column())
+					
 			#modify revenue accordingly
 			# RPK change revenue with constant yield
 			if self.header[:3] == "RPK":
-				print("Yield" + self.header[3:7] + "CY")
-				print(str(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY")))
 				valRPK = self.cy
-				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield" + self.header[3:7] + "CY"), self.index.column()) * self.cy
-				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[3:7] + "CY"), self.index.column()), valRev)
+				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield " + yld + " CY"), self.index.column()) * self.cy
+				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev " + yld + " CY"), self.index.column()), valRev, Qt.DisplayRole)
 			# Yield change revenue with constant RPK
 			elif self.header[:5] == "Yield":
-				valRPK = 00000
-				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + self.header[5:9] + "CY"), self.index.column()) * self.cy
-				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev" + self.header[5:9] + "CY"), self.index.column()), valRev)
+				# current RPK
+				valRPK = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK " + yld + " CY"), self.index.column())
+				# new revenue
+				valRev = valRPK * self.cy
+				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev " + yld + " CY"), self.index.column()), valRev, Qt.DisplayRole)
+			
+			
+			#modify the value according to what has been put in
+			self.parentTable.tableModel.setData(self.cyIndex, self.cy, Qt.DisplayRole)
+			self.parentTable.tableModel.setData(self.YoYIndex, self.yoy_LE.text(), Qt.DisplayRole)
 			
 			#update totals
 			self.parentTable.setDataConsistency()
@@ -293,22 +303,29 @@ class Window_modif(QDialog):
 			#create a modif event
 			
 			#for yoy modification.
+		
 			if (self.numberOfRoutes <= 1 and self.radioButtonRelative.isChecked()) or self.numberOfRoutes > 1:
 			
-				if  self.header[:3] == "RPK":
-					e = event.EventModifValue(valRev, valRPK, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
-				else:
-					e = event.Event()
+					e = event.EventModifValue(valRev / val_rev_init, valRPK / val_RPK_init, self.index.column()+1, yld, self.parentTable.flow )
+
 			
 			else:
 				#absolute modification
-				e = event.EventAddAbsoluteData(valRev, valRPK, self.index.column()+1, self.header[3:7].strip(), self.parentTable.flow )
+				e = event.EventAddAbsoluteData(valRev, valRPK, self.index.column()+1, yld, self.parentTable.flow, self.debug)
+				
 				if self.debug == True:
 					print("Value sent to the action handler is : " + str(self.cy))
 			
-			self.sidePanel.user_interaction.addPendingActions(e)
 			
-			self.actionSent = 1
+			
+			
+			
+			
+			# add event if not null
+			if e != None:
+				self.sidePanel.user_interaction.addPendingActions(e)
+				self.actionSent = 1
+			
 		
 	def validateAndClose(self):
 		self.validate()

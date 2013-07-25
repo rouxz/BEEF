@@ -156,12 +156,12 @@ class Database():
 		""" add a rfs in the list of routes to be handled"""
 		return self.__commit_query("INSERT INTO RFS_USED (RFS) VALUES ('" + rfs + "');")
 
-	def set_data_percentage(self, type, flow, yld, month, percentage):
-		""" modify data within table according to provided percentage """
+	def set_data_percentage(self, type, flow, yld, month, index):
+		""" modify data within table according to provided index """
 		if type == "Rev":
-			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
+			return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = REV_EX_ROX * " + str(index) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		elif type == "RPK":
-			return self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(percentage) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
+			return self.__commit_query("UPDATE DATA_RAW SET RPK = RPK * " + str(index) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 		else:
 			return 1
 

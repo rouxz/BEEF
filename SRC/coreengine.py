@@ -13,36 +13,11 @@ class Core():
 		# the core is based on
 		# --------------------
 		# - DATA for forecasting
-			# 3 type of data * 5 traffic flow * 3 yld * 17 months (12+ 1 year + 4 quarters)
-		self.DATA_FCST = []
-		for type in range(3):
-			typeL = []
-			for flow in range(5):
-				flowL = []
-				for yld in range(3):
-					yldL = []
-					for month in range(14):
-						yldL.append(0)
-					flowL.append(yldL)
-				typeL.append(flowL)
-			self.DATA_FCST.append(typeL)
-		
-		#self.DATA_FCST = [[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]],[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]],[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]]]		
+			
+		self.DATA_FCST = self._define_array()
+	
 		# - reference DATA
-		self.DATA_REF = []
-		for type in range(3):
-			typeL = []
-			for flow in range(5):
-				flowL = []
-				for yld in range(3):
-					yldL = []
-					for month in range(14):
-						yldL.append(0)
-					flowL.append(yldL)
-				typeL.append(flowL)
-			self.DATA_REF.append(typeL)
-		
-		#self.DATA_REF = [[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]],[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]],[[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18],[[0]*18,[0]*18,[0]*18]]]
+		self.DATA_REF = self._define_array()
 		
 		
 		# - events lists (FIFO)
@@ -60,19 +35,44 @@ class Core():
 		self.countNumberOfRoutes()
 
 
+	# defining tables
+	# ---------------
+	def _define_array(self):
+		# 3 type of data * 5 traffic flow * 3 yld * 13 months (month 0 and the others months)
+		array = []
+		for type in range(3):
+			typeL = []
+			for flow in range(5):
+				flowL = []
+				for yld in range(3):
+					yldL = []
+					for month in range(14):
+						yldL.append(0)
+					flowL.append(yldL)
+				typeL.append(flowL)
+			array.append(typeL)
+		return array
 
 	# getting data
 	# ------------
 
-	def set_treatment(treatment):
-		""" specify which treatment will be done on the data """
+	def set_treatment(self, treatment):
+		""" specify which treatment will be done on the data and retrieve new data ref"""
 		self.treatment = treatment
+		# get the data
+		self.get_data_ref()
 
 
 	def get_data_CY(self):
+		# clear data
+		self.DATA_FCST = self._define_array()
+		# get data
 		self.db.populate_table(self.DATA_FCST, self.db.get_data_CY())
 
 	def get_data_ref(self):
+		#clear data
+		self.DATA_REF = self._define_array()
+		#get data
 		if self.treatment == RETREATMENT:
 			self.db.populate_table(self.DATA_REF, self.db.get_data_ref_rt(self.referenceTable))
 		else:
@@ -120,8 +120,10 @@ class Core():
 		for e in self.events_list:
 		# for each event handle it and then remove it
 			res = e.handle(self)
-			self.events_list.pop(0)
+		
+		self.events_list = []
 		return res
+		
 			
 	def process_events(self):
 		#apply all pending change
