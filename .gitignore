@@ -217,3 +217,5 @@ pip-log.txt
 #Perso
 *.accdb
 *.laccdb
+INSTALL/
+INSTALL\

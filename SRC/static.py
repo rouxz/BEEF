@@ -5,7 +5,7 @@
 
 PROG_SHORT_NAME = "BEEF"
 PROG_LONG_NAME = "BEEF - Budget Estimation for Each Flow"
-VERSION = 0.5
+VERSION = 0.6
 
 
 
@@ -46,6 +46,7 @@ RPK = "rpk"
 # ---------------
 DBNAME = "DATA_PERSO.accdb"
 DBPATH = "C:\\Users\\m409577\\Documents\\GitHub\\BEEF\\DATA"
+DATA_DIR = "DATA"
 DBPATH_UNIX = "DATA"
 DBNAME_UNIX = "database_test.db"
 PLATFORM_WINDOWS = 1
@@ -100,7 +101,7 @@ LICENSE_WORDING = "This program is under license :"
 LICENSE = "(c) - 2013"
 
 TECHNOLOGY_HEADER = "Program using :"
-TECHNOLOGIES_LIST = ["Python v2.6.7", "pyodbc library"]
+TECHNOLOGIES_LIST = ["Python v2.6.7", "pyodbc library", "PyQt4", "Mathplotlib"]
 
 
 

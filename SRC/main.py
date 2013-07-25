@@ -22,26 +22,29 @@ def main():
 
 	# database
 	db = Database(system, debug)
-	# core engine to handle db
-	core = Core(db, debug)
+	
+	if db != None:
+		# core engine to handle db
+		core = Core(db, debug)
 
-	#for testing purpose only
-	#~ core.set_rfs_used("FAA")
-	#~ core.get_data_CY()
-	#~ core.get_data_ref()
+		#for testing purpose only
+		#~ core.set_rfs_used("FAA")
+		#~ core.get_data_CY()
+		#~ core.get_data_ref()
 
 
-	# for launching the ui
-	app = QApplication(sys.argv)
-	# topwindow of the gui
-	w = TopWindow(core, system, debug)
-	w.showMaximized()
-	sys.exit(app.exec_())
+		# for launching the ui
+		app = QApplication(sys.argv)
+		# topwindow of the gui
+		w = TopWindow(core, system, debug)
+		w.showMaximized()
+		sys.exit(app.exec_())
 
-	db.__del__()
-	print(TITLE_LINE)
-	print("Quiting " + PROG_LONG_NAME)
-	print(TITLE_LINE)
+		db.__del__()
+		print(TITLE_LINE)
+		print("Quiting " + PROG_LONG_NAME)
+		print(TITLE_LINE)
+
 
 if __name__ == "__main__":
 	main()
