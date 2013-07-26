@@ -19,6 +19,14 @@ class MyFileManager():
 		#looking for param directory
 		self.hierachyDir = self.wd + directorySep + HIERARCHY_DIR
 		
+		# load the hierarchies
+		self.loadHierarchies()
+
+	def getHierarchies(self):
+		return self.listFiles
+		
+	def loadHierarchies(self):
+		""" load the hierarchies data from directory """
 		self.listFiles = []
 		
 		print("changing directory to : " + self.hierachyDir)
@@ -31,10 +39,6 @@ class MyFileManager():
 			print("")
 		except :
 			print("Cannot access subdirectory - check installation")
-
-
-	def getHierarchies(self):
-		return self.listFiles
 
 	def getSublines(self, file):
 		""" read all lines in a specified file """

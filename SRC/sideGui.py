@@ -250,6 +250,9 @@ class PerimeterSelection(QGroupBox):
 
 	def defineList(self, fm):
 		""" get the lists of files within the directory specified """
+		# remove all if necessary
+		self.listPerimeter.clear()
+		# add the list
 		for i in fm.getHierarchies():
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
 
@@ -316,5 +319,10 @@ class PerimeterSelection(QGroupBox):
 				print("Set mechanical move to False")
 	
 	def actionReload(self):
-		""" function loaded when the user want to reload the list of routes available"""
-		pass
+		""" function loaded when the user want to reload the list of routes available """
+		self.mechanicalMove = True
+		# reload hierarchies
+		self.fm.loadHierarchies()
+		# get the new one and put it on the widget
+		self.defineList(self.fm)
+		self.mechanicalMove = False

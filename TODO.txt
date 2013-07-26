@@ -13,8 +13,6 @@ Change in the route lists
 	improve control when changing route perimeters
 	improved validation control
 Improve selection check	
-Button for reloading list of routes
-	- add behaviour
 	
 	
 In tableGui.py
@@ -23,6 +21,7 @@ improve layout
 	- size
 	- display of figures
 Y-Y for LF
+Correct ask totals
 
 
 In database.py
