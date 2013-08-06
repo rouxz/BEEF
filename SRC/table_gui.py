@@ -52,7 +52,7 @@ class Tabs(QTabWidget):
 		self.setUI()
 
 	def setUI(self):
-		self.setMinimumSize(300,300)
+		self.setMinimumSize(800,300)
 
 
 	def changeRef(self):
@@ -225,7 +225,7 @@ class MyTableView(QTableView):
 		self.retrieveData()
 
 		 # set the minimum size
-		self.setMinimumSize(1200, 600)
+		self.setMinimumSize(1400, 600)
 
 		# look and feel
 		self.lookAndFeel()

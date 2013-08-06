@@ -13,6 +13,8 @@ Change in the route lists
 	improve control when changing route perimeters
 	improved validation control
 Improve selection check	
+
+In apply add confirmation pop up
 	
 	
 In tableGui.py

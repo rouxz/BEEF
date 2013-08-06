@@ -256,6 +256,8 @@ class Window_modif(QDialog):
 		# update data model in the system
 		self.cy = float(self.cy_LE.text())
 		
+		# update the YoY
+		
 		# tell the class something has been modified
 		self.modifFlag = True
 		
