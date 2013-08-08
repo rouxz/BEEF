@@ -15,12 +15,14 @@ Change in the route lists
 Improve selection check	
 
 In apply add confirmation pop up
-	
+
+In mainGui.py
+-------------
+Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 	
 In tableGui.py
 -------------
 improve layout
-	- size
 	- display of figures
 Y-Y for LF
 Correct ask totals
