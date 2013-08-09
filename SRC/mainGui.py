@@ -123,7 +123,7 @@ class CentralWidget(QWidget):
 		
 
 		# set the tabs
-		self.tabsWidget = Tabs(core, self.sidePanel, self)
+		self.tabsWidget = Tabs(core, self.sidePanel, self.status, self)
 		self.grid.addWidget(self.tabsWidget, 1 , 1)
 
 

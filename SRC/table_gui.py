@@ -26,11 +26,11 @@ class Tabs(QTabWidget):
 
 
 
-	def __init__(self, core, sidePanel, parent):
+	def __init__(self, core, sidePanel, status, parent):
 		QTabWidget.__init__(self, parent)
 
 		self.parentWidget = parent
-
+		
 		#for user interactions
 		self.sidePanel = sidePanel
 
@@ -40,12 +40,12 @@ class Tabs(QTabWidget):
 		i = 0
 
 		# add new tabs
-		for flow in equivFlow:
+		for flow in ARRAY_FLOW:
 			if flow != "All":
 				editable = True
 			else:
 				editable = False
-			self.tabs.append(MyTableView(editable, core, flow, self.sidePanel, self))
+			self.tabs.append(MyTableView(editable, core, flow, self.sidePanel, status, self))
 			self.addTab(self.tabs[i], flow)
 			i = i +1
 
@@ -134,9 +134,9 @@ class TableData(QAbstractTableModel):
 
 
 
-	def setBackground(self, col, role):
+	def setBackground(self, row, role):
 		""" Allow to define background of the cells """
-		header = self.vheader[col]
+		header = VERTICAL_HEADER[row]
 		regex_modifiable = re.compile("(RPK|Yield).(HY|LY).*")
 		regex_res = re.compile("(LF|RASK).AY.*")
 		# modifiable value
@@ -197,13 +197,16 @@ class TableData(QAbstractTableModel):
 class MyTableView(QTableView):
 	""" table specialisation of QTableView displaying all the data and calculated KPI fetched from db"""
 
-	def __init__(self, editable, core, flow, sidePanel, parent, debug = True):
+	def __init__(self, editable, core, flow, sidePanel, status, parent, debug = True):
 
 		QTableView.__init__(self)
 
 		# editability of the table
 		self.editable = editable
-
+		
+		# status bar
+		self.status = status
+		
 		#core engine
 		self.core = core
 
@@ -253,7 +256,7 @@ class MyTableView(QTableView):
 		#-----------------
 		#new way
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
-		#self.connect(self, SIGNAL("doubleclicked(QModelIndex)"), self.affiche_coordo)
+		self.connect(self, SIGNAL("clicked(QModelIndex)"), self.cell_one_click)
 
 
 	def lookAndFeel(self):
@@ -510,6 +513,12 @@ class MyTableView(QTableView):
 				Window_modif(self, index, self.debug)
 				#pass
 
+	
+	def cell_one_click(self, index):
+		# display message in status bar
+		self.status.showMessage("your message")
+
+		
 	# def center(self):
 
 		# qr = self.frameGeometry()
