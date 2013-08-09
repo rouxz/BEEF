@@ -23,7 +23,8 @@ Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 In tableGui.py
 -------------
 improve layout
-	- display of figures
+	- display of figures (almost done)
+	- display headers
 Y-Y for LF
 Correct ask totals
 

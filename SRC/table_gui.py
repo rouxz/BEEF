@@ -100,7 +100,24 @@ class TableData(QAbstractTableModel):
 			# colors in the table
 			return self.setBackground(index.row(), role)
 		elif index.isValid() and role == Qt.DisplayRole:
-			return QVariant(self.arraydata[index.row()][index.column()])
+			header = VERTICAL_HEADER[index.row()]
+			# if index then send the string representing point or percentage
+			regexp_ask_rpk_rev = re.compile("(RPK|ASK|Rev).*")
+			regexp_yield = re.compile("Yield.*")
+			regexp_LF = re.compile("LF.*")
+			if header[-3:] == "YoY" or header[-6:] == "CY-Ref":
+				return QVariant(self.arraydata[index.row()][index.column()])
+			# if ASK or RPK divide by 1000
+			elif regexp_ask_rpk_rev.match(header) != None:
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',1))
+			# if yield display in euro cents with 2 digits after point
+			elif regexp_yield.match(header) != None:
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])*100,'f',2))
+			# if LF then display in percentage
+			elif regexp_LF.match(header) != None:
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])*100,'f',1) + "%")
+			else:
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',3))
 		else:
 			return QVariant()
 
@@ -133,7 +150,8 @@ class TableData(QAbstractTableModel):
 
 	def getData(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
-		return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
+		#return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
+		return self.arraydata[r][c]
 
 	def getDataFloat(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
@@ -213,7 +231,7 @@ class MyTableView(QTableView):
 		# self.setDataConsistency()
 
 		#define dataModel for MVC
-		self.tableModel = TableData(self.tableData, VERTICAL_HEADER, TABLE_TITLE, parent)
+		self.tableModel = TableData(self.tableData, DISPLAYED_VERTICAL_HEADER, TABLE_TITLE, parent)
 
 		#define the model to be used by the table
 		self.setModel(self.tableModel)
@@ -257,6 +275,9 @@ class MyTableView(QTableView):
 			if regexp_non_necessary.match(row) != None:
 				self.hideRow(VERTICAL_HEADER.index(row))
 
+	def getData(self, index):
+		return self.tableModel.getData(index.row(), index.column())
+				
 	def retrieveData(self):
 		""" get all data from core engine """
 
@@ -268,7 +289,7 @@ class MyTableView(QTableView):
 			row = VERTICAL_HEADER.index(r)
 			res = regexp.match(r)
 			res2 = regexp2.match(r)
-			
+
 			for c in range(len(TABLE_TITLE)):
 				# print(str(r) + "-" + str(c) + " " )
 				if res != None:
@@ -297,7 +318,7 @@ class MyTableView(QTableView):
 				else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 
-				
+
 
 		# calcultate all totals
 		self.setDataConsistency()
@@ -305,7 +326,7 @@ class MyTableView(QTableView):
 
 		#update display
 		self.tableModel.updateDisplay()
-		
+
 		# update global GUI
 		self.parent.dataConsistency()
 
@@ -352,7 +373,7 @@ class MyTableView(QTableView):
 
 		# update global GUI
 		self.parent.dataConsistency()
-		
+
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
 
@@ -432,7 +453,7 @@ class MyTableView(QTableView):
 
 		# 6 - calculate YoY for ASK/RPK/Yield/Rev
 		# ---------------------------------------
-	
+
 		regexp6 = re.compile("(RPK|Yield|Rev|RASK|ASK).(AY|LY|HY).(YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for all YoY except LF
@@ -446,24 +467,24 @@ class MyTableView(QTableView):
 		# 7 - calculate CY-PY for LF
 		# --------------------------
 
-		
+
 	def totalForAllFlow(self, tabs):
 		""" calculate the sum of all tabs whose flow isn't 'All' for a specific table"""
 		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
-		
+
 		for r in VERTICAL_HEADER:
 			if regexp.match(r) != None:
-				
+
 				for i in xrange(12):
 					sum = 0
 					for tab in tabs:
 						if tab.flow != "All":
 							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, sum)
-		
+
 		self.setDataConsistency()
 		self.tableModel.updateDisplay()
-		
+
 	def updateDisplay(self):
 		""" update the display of this tabs """
 		self.tableModel.updateDisplay()

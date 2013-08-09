@@ -91,6 +91,15 @@ VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY YoY" , "ASK LY CY" ,"ASK
 		"Rev LY CY" , "Rev LY Ref" , "Rev LY YoY" , "Rev AY CY" , "Rev AY Ref" , "Rev AY YoY" , \
 		"RASK HY CY" , "RASK HY Ref" , "RASK HY YoY" , "RASK LY CY" , "RASK LY Ref" , "RASK LY YoY" , \
 		"RASK AY CY" , "RASK AY Ref" , "RASK AY YoY"  ]
+DISPLAYED_VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY index" , "ASK LY CY" ,"ASK LY Ref" ,"ASK LY index" ,"ASK CY" ,"ASK Ref" , \
+		"ASK Index" , "RPK HY CY"  , "RPK HY Ref"  , "RPK HY Index" , "RPK LY CY" , "RPK LY Ref" , "RPK LY Index"  , \
+		"RPK Total CY"  , "RPK Total Ref" , "RPK Total index"  , "LF HY CY" , "LF HY Ref"  , "LF HY CY-Ref" , \
+		"LF LY CY" , "LF LY Ref" , "LF LY Index" , "LF CY" , "LF Ref" , "LF Index" , \
+		"Yield HY CY" , "Yield HY Ref" , "Yield HY index" , "Yield LY CY" , "Yield LY Ref" , "Yield LY index" , \
+		"Yield Total CY" , "Yield Total Ref" , "Yield Total index" , "Rev HY CY" , "Rev HY Ref" , "Rev HY index" , \
+		"Rev LY CY" , "Rev LY Ref" , "Rev LY index" , "Rev Total CY" , "Rev Total Ref" , "Rev Total index" , \
+		"RASK HY CY" , "RASK HY Ref" , "RASK HY index" , "RASK LY CY" , "RASK LY Ref" , "RASK LY index" , \
+		"RASK CY" , "RASK Ref" , "RASK index"  ]
 MAX_NUM_LINES = 53
 
 # for about.py

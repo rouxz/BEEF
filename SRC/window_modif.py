@@ -180,8 +180,10 @@ class Window_modif(QDialog):
 	
 	def getData(self):
 		""" retrieve cy and ref data """
-		self.cy = self.cyIndex.data(Qt.DisplayRole).toPyObject()
-		self.ref = self.refIndex.data(Qt.DisplayRole).toPyObject()
+		# self.cy = self.cyIndex.data(Qt.DisplayRole).toPyObject()
+		# self.ref = self.refIndex.data(Qt.DisplayRole).toPyObject()
+		self.cy = self.parentTable.getData(self.cyIndex)
+		self.ref = self.parentTable.getData(self.refIndex)
 		
 		#print("Popup " + str(self.cy)  + "-" + str(self.ref))
 
