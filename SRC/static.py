@@ -94,7 +94,7 @@ VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY YoY" , "ASK LY CY" ,"ASK
 DISPLAYED_VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY index" , "ASK LY CY" ,"ASK LY Ref" ,"ASK LY index" ,"ASK CY" ,"ASK Ref" , \
 		"ASK Index" , "RPK HY CY"  , "RPK HY Ref"  , "RPK HY Index" , "RPK LY CY" , "RPK LY Ref" , "RPK LY Index"  , \
 		"RPK Total CY"  , "RPK Total Ref" , "RPK Total index"  , "LF HY CY" , "LF HY Ref"  , "LF HY CY-Ref" , \
-		"LF LY CY" , "LF LY Ref" , "LF LY Index" , "LF CY" , "LF Ref" , "LF Index" , \
+		"LF LY CY" , "LF LY Ref" , "LF LY Index" , "LF CY" , "LF Ref" , "LF Delta" , \
 		"Yield HY CY" , "Yield HY Ref" , "Yield HY index" , "Yield LY CY" , "Yield LY Ref" , "Yield LY index" , \
 		"Yield Total CY" , "Yield Total Ref" , "Yield Total index" , "Rev HY CY" , "Rev HY Ref" , "Rev HY index" , \
 		"Rev LY CY" , "Rev LY Ref" , "Rev LY index" , "Rev Total CY" , "Rev Total Ref" , "Rev Total index" , \

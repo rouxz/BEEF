@@ -127,6 +127,16 @@ class TableData(QAbstractTableModel):
 			return self.setBackground(section, role)
 		elif orientation == Qt.Vertical and role == Qt.DisplayRole:
 			return QVariant(self.vheader[section])
+		elif orientation == Qt.Vertical and role == Qt.FontRole:
+			font = QFont("Verdana",8)
+			header = VERTICAL_HEADER[section]
+			regexp_ay = re.compile(".*AY.*")
+			regexp_index = re.compile(".*(YoY|CY-Ref).*")
+			if regexp_index.match(header) != None:
+				font.setItalic(True)
+			elif  regexp_ay.match(header) != None: 
+				font.setBold(True)
+			return QVariant(font)
 		elif orientation == Qt.Horizontal and role == Qt.DisplayRole:
 			return QVariant(self.hheader[section])
 		else:

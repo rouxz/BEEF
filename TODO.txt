@@ -14,20 +14,26 @@ Change in the route lists
 	improved validation control
 Improve selection check	
 
+Discard should redownload all data to be displayer in MyTableView
+
 In apply add confirmation pop up
+
+Prévoir un CTR+Z ?
 
 In mainGui.py
 -------------
-Ajouter la valeur brute de la cellule selectionn�e dans la StatusBar
+Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 	
 In tableGui.py
 -------------
 improve layout
 	- display of figures (almost done)
 	- display headers
-Y-Y for LF
+Calculate Y-Y for LF
 Correct ask totals
+Séparateur de milliers
 
+Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 
 In database.py
 --------------
