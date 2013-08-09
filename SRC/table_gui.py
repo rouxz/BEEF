@@ -30,7 +30,7 @@ class Tabs(QTabWidget):
 		QTabWidget.__init__(self, parent)
 
 		self.parentWidget = parent
-		
+
 		#for user interactions
 		self.sidePanel = sidePanel
 
@@ -101,15 +101,17 @@ class TableData(QAbstractTableModel):
 			return self.setBackground(index.row(), role)
 		elif index.isValid() and role == Qt.DisplayRole:
 			header = VERTICAL_HEADER[index.row()]
-			# if index then send the string representing point or percentage
 			regexp_ask_rpk_rev = re.compile("(RPK|ASK|Rev).*")
-			regexp_yield = re.compile("Yield.*")
+			regexp_yield = re.compile("(Yield|RASK).*")
 			regexp_LF = re.compile("LF.*")
-			if header[-3:] == "YoY" or header[-6:] == "CY-Ref":
-				return QVariant(self.arraydata[index.row()][index.column()])
+			# if index then send the string representing point or percentage
+			if header[-3:] == "YoY":
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1) + "%")
+			elif header[-6:] == "CY-Ref":
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1))
 			# if ASK or RPK divide by 1000
 			elif regexp_ask_rpk_rev.match(header) != None:
-				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',1))
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',0))
 			# if yield display in euro cents with 2 digits after point
 			elif regexp_yield.match(header) != None:
 				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])*100,'f',2))
@@ -121,12 +123,15 @@ class TableData(QAbstractTableModel):
 		else:
 			return QVariant()
 
+
 	def headerData(self, section, orientation, role):
 		""" return header for the table model"""
 		if orientation == Qt.Vertical and role == Qt.BackgroundRole:
 			return self.setBackground(section, role)
 		elif orientation == Qt.Vertical and role == Qt.DisplayRole:
 			return QVariant(self.vheader[section])
+		elif orientation == Qt.Vertical and role == Qt.TextAlignmentRole:
+			return Qt.AlignmentFlag(Qt.AlignRight|Qt.AlignVCenter)
 		elif orientation == Qt.Vertical and role == Qt.FontRole:
 			font = QFont("Verdana",8)
 			header = VERTICAL_HEADER[section]
@@ -134,7 +139,8 @@ class TableData(QAbstractTableModel):
 			regexp_index = re.compile(".*(YoY|CY-Ref).*")
 			if regexp_index.match(header) != None:
 				font.setItalic(True)
-			elif  regexp_ay.match(header) != None: 
+				#font.setLetterSpacing(font.PercentageSpacing, 90)
+			if  regexp_ay.match(header) != None:
 				font.setBold(True)
 			return QVariant(font)
 		elif orientation == Qt.Horizontal and role == Qt.DisplayRole:
@@ -213,10 +219,10 @@ class MyTableView(QTableView):
 
 		# editability of the table
 		self.editable = editable
-		
+
 		# status bar
 		self.status = status
-		
+
 		#core engine
 		self.core = core
 
@@ -290,7 +296,7 @@ class MyTableView(QTableView):
 
 	def getData(self, index):
 		return self.tableModel.getData(index.row(), index.column())
-				
+
 	def retrieveData(self):
 		""" get all data from core engine """
 
@@ -523,12 +529,12 @@ class MyTableView(QTableView):
 				Window_modif(self, index, self.debug)
 				#pass
 
-	
+
 	def cell_one_click(self, index):
 		# display message in status bar
 		self.status.showMessage("your message")
 
-		
+
 	# def center(self):
 
 		# qr = self.frameGeometry()

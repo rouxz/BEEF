@@ -54,4 +54,4 @@ Improve layout
 Functional improvements
 -----------------------
 Courbes
-Send copy to server
+Send copy to server et mettre une QProgressBar
