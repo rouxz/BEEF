@@ -133,9 +133,11 @@ class CentralWidget(QWidget):
 		self.grid.addWidget(self.title, 0 , 0, 1, -1)
 
 		# set the side panel
-		self.grid.addWidget(self.sidePanel, 1, 0)
+		self.grid.addWidget(self.sidePanel, 2, 1)
 
 		#setting the layout
+
+		self.grid.setVerticalSpacing(1)
 		self.setLayout(self.grid)
 
 

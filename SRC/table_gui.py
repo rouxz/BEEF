@@ -169,6 +169,11 @@ class TableData(QAbstractTableModel):
 		#return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
 		return self.arraydata[r][c]
 
+	def getDataIndex(self, index):
+		""" retrieve data within the data container simple way as a string"""
+		#return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
+		return self.arraydata[index.row()][index.column()]
+
 	def getDataFloat(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
 		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
@@ -262,7 +267,7 @@ class MyTableView(QTableView):
 		self.retrieveData()
 
 		 # set the minimum size
-		self.setMinimumSize(1400, 600)
+		self.setMinimumSize(1400, 800)
 
 		# look and feel
 		self.lookAndFeel()
@@ -498,7 +503,8 @@ class MyTableView(QTableView):
 					sum = 0
 					for tab in tabs:
 						if tab.flow != "All":
-							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
+#							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
+							sum += tab.tableModel.getData(VERTICAL_HEADER.index(r),i)
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, sum)
 
 		self.setDataConsistency()

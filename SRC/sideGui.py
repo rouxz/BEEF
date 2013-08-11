@@ -22,7 +22,7 @@ class SidePanel(QWidget):
 		self.status = status
 		self.parent = parent
 
-		self.layout = QVBoxLayout()
+		self.layout = QHBoxLayout()
 
 		# user interaction
 		self.user_interaction = UserInteraction(core, self.status, self)
@@ -38,12 +38,14 @@ class SidePanel(QWidget):
 
 
 
-class UserInteraction(QGroupBox):
+class UserInteraction(QWidget):
+#class UserInteraction(QGroupBox):
 		""" a class for the user to interact with the database / core engine
 			this class allow to apply all pending actions to the database behind all calculations
 		"""
 		def __init__(self, core, status, *args):
-			QGroupBox.__init__(self, *args)
+#			QGroupBox.__init__(self, *args)
+			QWidget.__init__(self, *args)			
 
 			# core engine to process all requests
 			self.core = core
@@ -52,8 +54,10 @@ class UserInteraction(QGroupBox):
 			#status bar
 			self.status = status
 
-			self.setTitle(QString("User actions"))
+#			self.setTitle(QString("User actions"))
 			self.layout = QVBoxLayout()
+			#set title
+			self.layout.addWidget(QLabel("<b>User actions</b>"))
 
 			#show number of pending actions
 			self.labelNbrPending = QLabel(QString("Pending actions : 0"), self)
@@ -117,35 +121,40 @@ class UserInteraction(QGroupBox):
 
 
 
-class ReferenceWidget(QGroupBox):
+#class ReferenceWidget(QGroupBox):
+class ReferenceWidget(QWidget):
 	""" allow selection of the type of ref for calculation and setting parameters for the ref"""
 	def __init__(self, core, parent, debug=True):
-		QGroupBox.__init__(self, parent)
+#		QGroupBox.__init__(self, parent)
+		QWidget.__init__(self,parent)
 
 		self.core = core
 		self.parent = parent
 		self.debug = debug
 
-		self.setTitle(QString("Reference"))
+#		self.setTitle(QString("Reference"))
 
-		self.layout = QVBoxLayout()
+		self.layout = QGridLayout()
+
+		#add a title
+		self.layout.addWidget(QLabel("<b>Reference</b>"),0,0)
 
 		#selecting if reference is retreated or not
-		self.layout.addWidget(QLabel(QString("Choose type of reference"), self))
+		self.layout.addWidget(QLabel(QString("Choose type of reference"), self),1,0)
 		self.trButton = QRadioButton("Retreated", self)
 		self.ntrButton = QRadioButton("Non retreated", self)
-		self.layout.addWidget(self.trButton)
-		self.layout.addWidget(self.ntrButton)
+		self.layout.addWidget(self.trButton,2,0)
+		self.layout.addWidget(self.ntrButton,3,0)
 
 		#set treatment according to core engine parameter
 		self.changeTreatment(self.core.treatment)
 
 		#which reference to choose
-		self.layout.addWidget(QLabel("Choose reference data", self))
+		self.layout.addWidget(QLabel("Choose reference data", self),0,1)
 		self.listRef = QListWidget(self)
 		# add the reference table in the widget
 		self.addReference(core)
-		self.layout.addWidget(self.listRef)
+		self.layout.addWidget(self.listRef,1,1,-1,1)
 
 		#select first element in the list by default
 		self.listRef.setCurrentItem(self.listRef.item(0))
@@ -215,11 +224,12 @@ class ReferenceWidget(QGroupBox):
 		if bool == True:
 			self._changeTreatmentEvent(False)		
 	
-class PerimeterSelection(QGroupBox):
+#class PerimeterSelection(QGroupBox):
+class PerimeterSelection(QWidget):
 	""" allow to select the route perimeter """
 	def __init__(self, core, fm, parent, debug = True):
-		QGroupBox.__init__(self, parent)
-
+#		QGroupBox.__init__(self, parent)
+		QWidget.__init__(self, parent)
 		self.parent = parent
 		self.debug = debug
 		self.fm = fm
@@ -227,17 +237,21 @@ class PerimeterSelection(QGroupBox):
 		self.validation = True
 		self.mechanicalMove = False
 
-		self.setTitle(QString("Route perimeter"))
-		self.layout = QVBoxLayout()
+#		self.setTitle(QString("Route perimeter"))
+		self.layout = QGridLayout()
+
+		#title
+		self.layout.addWidget(QLabel("<b>Route perimeter</b>"),0,0)
 
 		# add the found hierarchy in the list
 		self.listPerimeter = QListWidget(self)
 		self.defineList(fm)
 
-		self.layout.addWidget(self.listPerimeter)
+		self.layout.addWidget(self.listPerimeter,1,0,1,-1)
 
-		self.reload = QPushButton("Reload")
-		self.layout.addWidget(self.reload)
+		self.reload = QPushButton("Reload list")
+		self.reload.sizeHint()
+		self.layout.addWidget(self.reload,0,1)
 		
 		self.setLayout(self.layout)
 
