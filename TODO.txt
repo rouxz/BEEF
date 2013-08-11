@@ -28,7 +28,6 @@ In tableGui.py
 -------------
 improve layout
 	- display of figures (almost done)
-	- display headers
 Calculate Y-Y for LF
 Correct ask totals
 Séparateur de milliers
