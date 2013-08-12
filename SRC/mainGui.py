@@ -124,7 +124,7 @@ class CentralWidget(QWidget):
 
 		# set the tabs
 		self.tabsWidget = Tabs(core, self.sidePanel, self.status, self)
-		self.grid.addWidget(self.tabsWidget, 1 , 1)
+		self.grid.addWidget(self.tabsWidget, 1 , 0, 1, -1)
 
 
 		# set the title

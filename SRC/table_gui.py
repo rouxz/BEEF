@@ -108,7 +108,7 @@ class TableData(QAbstractTableModel):
 			if header[-3:] == "YoY":
 				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1) + "%")
 			elif header[-6:] == "CY-Ref":
-				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1))
+				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1) + "pt")
 			# if ASK or RPK divide by 1000
 			elif regexp_ask_rpk_rev.match(header) != None:
 				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',0))
@@ -177,7 +177,8 @@ class TableData(QAbstractTableModel):
 	def getDataFloat(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
 		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
-		return self.data(self.index(r, c), Qt.DisplayRole).toFloat()[0]
+		#return self.arraydata[index.row()][index.column()].toFloat()[0]
+		return float(self.arraydata[r][c])
 
 
 
@@ -317,6 +318,8 @@ class MyTableView(QTableView):
 			for c in range(len(TABLE_TITLE)):
 				# print(str(r) + "-" + str(c) + " " )
 				if res != None:
+					# looking for Rev and RPK data
+					# ----------------------------
 					end = r[-3:].strip()
 					yld = ARRAY_YIELD.index(r[4:6].strip())
 					type = ARRAY_DATA.index(r[:3].strip())
@@ -330,6 +333,8 @@ class MyTableView(QTableView):
 					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 				elif res2 != None:
+					# looking for ASK data
+					# --------------------
 					end = r[-3:].strip()
 					yld = ARRAY_YIELD.index(r[4:6].strip())
 					type = ARRAY_DATA.index(r[:3].strip())
@@ -434,19 +439,34 @@ class MyTableView(QTableView):
 		# 3 - calculate data AY for ASK
 		regexp3 = re.compile("ASK.AY.(?!YoY).*")
 		for r in VERTICAL_HEADER:
-			#looking for AY ASK
+			# looking for AY ASK
 			if regexp3.match(r) != None:
 				fin = r[-3:].strip()
-				for i in xrange(17):
+
+				for i in xrange(12):
 					if self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i) == 0:
 						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK LY " + fin),i))
-
+						# total += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i)
+						# print(self.flow + "iteration ASK total : " + r + "/ i="  + str(i) + "/ total=" + str(total) + "/ value=" + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i) ))
+				# try to add yearly total if sum is null
+				sum = 0
+				for m in xrange(12):
+					sum +=  self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m)
+				self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
+				# add quarterly sum if required
+				for q in ARRAY_QUARTERS:
+					sum = 0
+					for m in q:
+						sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m - 1)
+					if 	self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q)) == 0:
+						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
+				
 
 		# 3 - populate yield, lF and RASK
 		regexp4 = re.compile("(Yield|RASK).(AY|LY|HY).(?!YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for yield LF ans RASK
-			if regexp4.match(r):
+			if regexp4.match(r) != None:
 				# calcul des yields
 				if r[:5]=="Yield":
 					#verif de division par 0
@@ -466,7 +486,7 @@ class MyTableView(QTableView):
 		regexp5 = re.compile("LF.(AY|LY|HY).(?!CY-Ref).*")
 		for r in VERTICAL_HEADER:
 			# looking for yield LF ans RASK
-			if regexp5.match(r):
+			if regexp5.match(r) != None:
 				fin = r[2:]
 				for i in xrange(17):
 					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin),i) > 0:
@@ -481,16 +501,23 @@ class MyTableView(QTableView):
 		regexp6 = re.compile("(RPK|Yield|Rev|RASK|ASK).(AY|LY|HY).(YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for all YoY except LF
-			if regexp6.match(r):
+			if regexp6.match(r) != None:
 				prefix = r[:-3].strip()
 				for i in xrange(17):
 					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i)> 0:
-						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, str((self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100 )+ "%")
+						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, (self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100)
 
 
 		# 7 - calculate CY-PY for LF
 		# --------------------------
-
+		regexp7 = re.compile("LF.(HY|LY|AY).CY-Ref")
+		for r in VERTICAL_HEADER:
+			#looking for LF delta
+			if regexp7.match(r) != None:
+				prefix = r[:-6].strip()
+				for i in xrange(17):
+					if self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) > 0:
+						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, (self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) - self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) ) * 100)
 
 	def totalForAllFlow(self, tabs):
 		""" calculate the sum of all tabs whose flow isn't 'All' for a specific table"""

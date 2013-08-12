@@ -4,6 +4,7 @@ In window_modif.py
 ------------------
 Move to next case
 Modify yoy when dealing absolute !
+Improve display of figure
 
 In sideGui.py
 -------------
@@ -26,12 +27,8 @@ Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 	
 In tableGui.py
 -------------
-improve layout
-	- display of figures (almost done)
-Calculate Y-Y for LF
-Correct ask totals
-Séparateur de milliers
 
+Séparateur de milliers
 Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 
 In database.py
