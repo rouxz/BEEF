@@ -77,6 +77,7 @@ GRID_LAYOUT_SPACE = 10
 
 TABLE_TITLE = ["1","2","3","4","5","6","7","8","9","10","11","12","Total","Q1","Q2","Q3","Q4"]
 HEIGHT_ROW = 18
+DEFAULT_COLUMN_WIDTH = 80
 
 
 COLOR_EDITABLE = {"r": 223, "v":241, "b": 216}

@@ -3,8 +3,7 @@ TODO
 In window_modif.py
 ------------------
 Move to next case
-Modify yoy when dealing absolute !
-Improve display of figure
+
 
 In sideGui.py
 -------------
@@ -28,8 +27,8 @@ Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
 In tableGui.py
 -------------
 
-Séparateur de milliers
 Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
+ajuster la largeur des colonnes
 
 In database.py
 --------------

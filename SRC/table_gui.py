@@ -23,7 +23,7 @@ def color(color_dict):
 
 class Tabs(QTabWidget):
 	""" class for defining the tabs including all the tables """
-
+	
 
 
 	def __init__(self, core, sidePanel, status, parent):
@@ -39,6 +39,8 @@ class Tabs(QTabWidget):
 
 		i = 0
 
+		# QLocale.setDefault(QLocale.English, QLocale.UnitedStates )
+		
 		# add new tabs
 		for flow in ARRAY_FLOW:
 			if flow != "All":
@@ -111,7 +113,10 @@ class TableData(QAbstractTableModel):
 				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()]),'f',1) + "pt")
 			# if ASK or RPK divide by 1000
 			elif regexp_ask_rpk_rev.match(header) != None:
-				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',0))
+				#return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])/1000,'f',0))
+				local = QLocale(QLocale.French, QLocale.France)
+				# return QVariant(QString("%L1").arg(round(float(self.arraydata[index.row()][index.column()])/1000)))
+				return QVariant(QString(local.toString(float(self.arraydata[index.row()][index.column()])/1000,'f',0)))
 			# if yield display in euro cents with 2 digits after point
 			elif regexp_yield.match(header) != None:
 				return QVariant(QString.number(float(self.arraydata[index.row()][index.column()])*100,'f',2))
@@ -287,6 +292,9 @@ class MyTableView(QTableView):
 		for row in xrange(len(VERTICAL_HEADER)):
 			self.setRowHeight(row, HEIGHT_ROW)
 
+		for col in xrange(len(TABLE_TITLE)):
+			self.setColumnWidth(col, DEFAULT_COLUMN_WIDTH)
+			
 		# add color for changeable data
 		if self.editable == True:
 			for r in xrange(len(VERTICAL_HEADER)):
@@ -546,8 +554,8 @@ class MyTableView(QTableView):
 	def cell_clicked_event(self, index):
 
 		#for debuggin purpose only
-		if self.debug == True:
-			print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.data(Qt.DisplayRole).toString() + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
+		# if self.debug == True:
+			# print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + index.getIndex)
 		#print("Cell r:" + str(index.row()) + " ,c:" + str(index.column()) + " clicked - Value :" + str(index.data(Qt.DisplayRole).toFloat()) + " " +str(self.tableModel.arraydata[index.row()][index.column()]))
 
 		#determine if the clicked cell what kind of data is it and if it is editable or not

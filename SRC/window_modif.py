@@ -58,6 +58,7 @@ class Window_modif(QDialog):
 		
 		#set the first yoy
 		self.yoy = self.calcyoY(self.cy, self.ref)
+
 	
 	def initUI(self):
 		""" display the window properly """
@@ -91,18 +92,30 @@ class Window_modif(QDialog):
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
 		#cy
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("cy"), self))
-		self.cy_LE = QLineEdit(QString(str(self.cy)), self)
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("cy (000)"), self))
+		self.cy_LE = QLineEdit(self.convertFloatToString(self.cy), self)
 		self.dataGroupBoxLayout.addWidget(self.cy_LE)
 		#ref
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("Ref"), self))
-		self.ref_LE = QLineEdit(QString(str(self.ref)), self)
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("Ref (000)"), self))
+		self.ref_LE = QLineEdit(self.convertFloatToString(self.ref), self)
 		self.dataGroupBoxLayout.addWidget(self.ref_LE)
 		
 		# YoY
 		self.dataGroupBoxLayout.addWidget(QLabel(QString("YoY"), self))
-		self.yoy_LE = QLineEdit(QString(str(self.yoy) + "%"), self)
-		self.yoy_LE.setInputMask(QString("000.00%"))
+		self.yoy_LE = QDoubleSpinBox(self)
+		# parameters for Spinbox
+		self.yoy_LE.setSuffix(" %")
+		self.yoy_LE.setRange(-100,99999)
+		self.yoy_LE.setDecimals(2)
+		
+		#setting value of spinbox
+		self.yoy_LE.setValue(self.yoy)
+		
+		# self.yoy_LE.replace(QLatin1Char('.'), QLocale().decimalPoint()))
+		# self.yoy_LE.replace(QLocale().decimalPoint(), QUnicodeChar('.'))
+		
+		# self.yoy_LE = QLineEdit(QString(str(self.yoy)), self)
+		
 		self.dataGroupBoxLayout.addWidget(self.yoy_LE)
 		
 		self.dataGroupBox.setLayout(self.dataGroupBoxLayout)
@@ -139,8 +152,9 @@ class Window_modif(QDialog):
 		self.layout.addWidget(self.moveGroupBox)
 		
 		# connect slots and signals
-		self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
-		self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
+		# self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
+		# self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
+		self.connect(self.yoy_LE, SIGNAL("valueChanged(double)"),self.update_cy)
 		self.connect(self.buttonValidate, SIGNAL("released()"), self.validateAndClose)
 		
 		# for switching between absolute and relative
@@ -157,8 +171,14 @@ class Window_modif(QDialog):
 		#setting the main layout
 		self.setLayout(self.layout)
 		
-		self.setWindowTitle("Da Du Run")
+		self.setWindowTitle(self.header)
 		self.show()
+	
+	
+	def convertFloatToString(self, flt):
+		# return QString("%L1").arg(round(float(flt)/1000,1))
+		return QString("%L1").arg(round(flt/1000,1))
+	
 	
 	def defineIndexes(self, index):
 		""" define the index for the CY, ref and YoY cells in the tableView """ 
@@ -182,8 +202,8 @@ class Window_modif(QDialog):
 		""" retrieve cy and ref data """
 		# self.cy = self.cyIndex.data(Qt.DisplayRole).toPyObject()
 		# self.ref = self.refIndex.data(Qt.DisplayRole).toPyObject()
-		self.cy = self.parentTable.getData(self.cyIndex)
-		self.ref = self.parentTable.getData(self.refIndex)
+		self.cy = self.parentTable.tableModel.getDataFloat(self.cyIndex.row(),self.cyIndex.column())
+		self.ref = self.parentTable.tableModel.getDataFloat(self.refIndex.row(),self.refIndex.column())
 		
 		#print("Popup " + str(self.cy)  + "-" + str(self.ref))
 
@@ -239,15 +259,15 @@ class Window_modif(QDialog):
 				self.modifFlag = True
 			
 			#changing display
-			self.cy_LE.setText(str(self.cy))
+			self.cy_LE.setText(self.convertFloatToString(self.cy))
 		else:
 			self.cy = 0
 			
 	def update_cy(self):
 		""" change the display after having set a data in the YoY field """
-		#odd behaviour on converting Qstring to float !!
-		#print("data entered " + str(self.yoy_LE.text().toUtf8()[:-1]).strip())
-		self.recalculate_cy(float(str(self.yoy_LE.text().toUtf8()[:-1]).strip())/100)
+		self.recalculate_cy((self.yoy_LE.value())/100)
+		# print((self.yoy_LE.value())/100)
+		
 		
 	def callbackModifCY(self):
 		""" callback function launched once self.cy_LE has been modified """
@@ -256,12 +276,21 @@ class Window_modif(QDialog):
 			print("Callback on cy modification")
 		
 		# update data model in the system
-		self.cy = float(self.cy_LE.text())
+		tmp = self.cy_LE.text().toFloat()
+		if (tmp[1] == True) and (tmp[0]>=0):
+			self.cy = tmp[0] * 1000
+		else:
+			self.cy_LE.setText(self.convertFloatToString(self.cy))
 		
-		# update the YoY
+		
 		
 		# tell the class something has been modified
 		self.modifFlag = True
+		
+		# update the YoY
+		self.yoy_LE.setValue(self.calcyoY(self.cy, self.ref))
+		
+	
 		
 		
 	def validate(self):
