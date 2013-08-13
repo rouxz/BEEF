@@ -23,7 +23,7 @@ def color(color_dict):
 
 class Tabs(QTabWidget):
 	""" class for defining the tabs including all the tables """
-	
+
 
 
 	def __init__(self, core, sidePanel, status, parent):
@@ -40,7 +40,7 @@ class Tabs(QTabWidget):
 		i = 0
 
 		# QLocale.setDefault(QLocale.English, QLocale.UnitedStates )
-		
+
 		# add new tabs
 		for flow in ARRAY_FLOW:
 			if flow != "All":
@@ -169,10 +169,6 @@ class TableData(QAbstractTableModel):
 			return QVariant()
 
 
-	def getData(self, r, c):
-		""" retrieve data within the data container simple way as a string"""
-		#return self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole))
-		return self.arraydata[r][c]
 
 	def getDataIndex(self, index):
 		""" retrieve data within the data container simple way as a string"""
@@ -181,8 +177,6 @@ class TableData(QAbstractTableModel):
 
 	def getDataFloat(self, r, c):
 		""" retrieve data within the data container simple way as a string"""
-		#return float(self.qstr2str(self.data(self.index(r, c), Qt.DisplayRole)))
-		#return self.arraydata[index.row()][index.column()].toFloat()[0]
 		return float(self.arraydata[r][c])
 
 
@@ -294,7 +288,7 @@ class MyTableView(QTableView):
 
 		for col in xrange(len(TABLE_TITLE)):
 			self.setColumnWidth(col, DEFAULT_COLUMN_WIDTH)
-			
+
 		# add color for changeable data
 		if self.editable == True:
 			for r in xrange(len(VERTICAL_HEADER)):
@@ -316,7 +310,7 @@ class MyTableView(QTableView):
 
 		flw = ARRAY_FLOW.index(self.flow)
 		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
-		regexp2 = re.compile("ASK.(AY|HY|LY).(CY|Ref)")
+		regexp2 = re.compile("ASK.(HY|LY).(CY|Ref)")
 
 		for r in VERTICAL_HEADER:
 			row = VERTICAL_HEADER.index(r)
@@ -334,9 +328,15 @@ class MyTableView(QTableView):
 					if c < 12: #data is a month
 						# data is either Rev or RPK for CY or ref or ASK AY
 						if end == "CY":
-							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
+							if (self.core.DATA_FCST[type][flw][yld][c + 1])  != None and (self.core.DATA_FCST[type][flw][yld][c + 1])  != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][flw][yld][c + 1] )
+							else:
+								self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 						elif end == "Ref":
-							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
+							if (self.core.DATA_REF[type][flw][yld][c + 1])  != None and (self.core.DATA_REF[type][flw][yld][c + 1])  != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
+							else:
+								self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 
 					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
@@ -349,10 +349,16 @@ class MyTableView(QTableView):
 					if c < 12: #data is a month
 						# data is either Rev or RPK for CY or ref or ASK AY
 						if end == "CY":
-							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][ARRAY_FLOW.index("All")][yld][c + 1] )
+							if self.core.DATA_FCST[type][ARRAY_FLOW.index("All")][yld][c + 1] != None and self.core.DATA_FCST[type][ARRAY_FLOW.index("All")][yld][c + 1] != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_FCST[type][ARRAY_FLOW.index("All")][yld][c + 1] )
+							else:
+								self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 						elif end == "Ref":
-							self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] )
-				else:
+							if self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] != None and self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] )
+							else:
+								self.tableModel.setDataNoDisplayUpdate(row, c, 0)
+					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 
 
@@ -371,8 +377,8 @@ class MyTableView(QTableView):
 		""" get all data from core engine """
 
 		flw = ARRAY_FLOW.index(self.flow)
-		regexp = re.compile("(Rev|RPK|ASK).(HY|LY).Ref.*")
-		regexp2 = re.compile("(ASK).(HY|LY|AY).Ref.*")
+		regexp = re.compile("(Rev|RPK).(HY|LY).Ref.*")
+		regexp2 = re.compile("(ASK).(HY|LY).Ref.*")
 
 		for r in VERTICAL_HEADER:
 			row = VERTICAL_HEADER.index(r)
@@ -386,7 +392,10 @@ class MyTableView(QTableView):
 					type = ARRAY_DATA.index(r[:3].strip())
 					if c < 12: #data is a month
 						# data is either Rev or RPK for CY or ref
-						self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1])
+						if (self.core.DATA_REF[type][flw][yld][c + 1])  != None and (self.core.DATA_REF[type][flw][yld][c + 1])  != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][flw][yld][c + 1] )
+						else:
+							self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 				elif res2 != None:
@@ -395,7 +404,10 @@ class MyTableView(QTableView):
 					type = ARRAY_DATA.index(r[:3].strip())
 					if c < 12: #data is a month
 						# data is either Rev or RPK for CY or ref
-						self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1])
+						if self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] != None and self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] != "":
+								self.tableModel.setDataNoDisplayUpdate(row, c, self.core.DATA_REF[type][ARRAY_FLOW.index("All")][yld][c + 1] )
+						else:
+							self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 					else:
 						self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 				else:
@@ -424,6 +436,8 @@ class MyTableView(QTableView):
 				# annual sum
 				sum = 0
 				for i in xrange(0,12):
+					if r[:3] == "ASK":
+						print("m: " + str(i+1) + " " + r + " " + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)))
 					sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 				self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
 				# quarterly sum
@@ -433,8 +447,8 @@ class MyTableView(QTableView):
 						sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m - 1)
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
 
-		# 3 - calculate data for AY RPK and REV
-		regexp2 = re.compile("(Rev|RPK).AY.(?!YoY).*")
+		# 3 - calculate data for AY RPK and REV and ASK
+		regexp2 = re.compile("(Rev|RPK|ASK).AY.(?!YoY).*")
 		for r in VERTICAL_HEADER:
 			#looking for AY RPK and REV info
 			if regexp2.match(r) != None:
@@ -442,33 +456,33 @@ class MyTableView(QTableView):
 				for i in xrange(0,17):
 					deb = r[:3]
 					fin = r[-3:].strip()
-					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, float(self.tableModel.getData(VERTICAL_HEADER.index(deb + " HY " + fin),i)) + float(self.tableModel.getData(VERTICAL_HEADER.index(deb + " LY " + fin),i)))
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " LY " + fin),i))
 
 		# 3 - calculate data AY for ASK
-		regexp3 = re.compile("ASK.AY.(?!YoY).*")
-		for r in VERTICAL_HEADER:
+		# regexp3 = re.compile("ASK.AY.(?!YoY).*")
+		# for r in VERTICAL_HEADER:
 			# looking for AY ASK
-			if regexp3.match(r) != None:
-				fin = r[-3:].strip()
+			# if regexp3.match(r) != None:
+				# fin = r[-3:].strip()
 
-				for i in xrange(12):
-					if self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i) == 0:
-						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK LY " + fin),i))
+				# for i in xrange(12):
+					# if self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i) == 0:
+						# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK LY " + fin),i))
 						# total += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i)
 						# print(self.flow + "iteration ASK total : " + r + "/ i="  + str(i) + "/ total=" + str(total) + "/ value=" + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i) ))
 				# try to add yearly total if sum is null
-				sum = 0
-				for m in xrange(12):
-					sum +=  self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m)
-				self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
+				# sum = 0
+				# for m in xrange(12):
+					# sum +=  self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m)
+				# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
 				# add quarterly sum if required
-				for q in ARRAY_QUARTERS:
-					sum = 0
-					for m in q:
-						sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m - 1)
-					if 	self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q)) == 0:
-						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
-				
+				# for q in ARRAY_QUARTERS:
+					# sum = 0
+					# for m in q:
+						# sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m - 1)
+					# if 	self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q)) == 0:
+						# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
+
 
 		# 3 - populate yield, lF and RASK
 		regexp4 = re.compile("(Yield|RASK).(AY|LY|HY).(?!YoY).*")
@@ -527,6 +541,7 @@ class MyTableView(QTableView):
 					if self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) > 0:
 						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, (self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) - self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) ) * 100)
 
+	
 	def totalForAllFlow(self, tabs):
 		""" calculate the sum of all tabs whose flow isn't 'All' for a specific table"""
 		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
@@ -539,8 +554,8 @@ class MyTableView(QTableView):
 					for tab in tabs:
 						if tab.flow != "All":
 #							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
-							sum += tab.tableModel.getData(VERTICAL_HEADER.index(r),i)
-					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, sum)
+							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i , sum)
 
 		self.setDataConsistency()
 		self.tableModel.updateDisplay()

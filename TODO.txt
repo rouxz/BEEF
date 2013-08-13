@@ -27,6 +27,7 @@ In tableGui.py
 -------------
 
 Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
+Corriger totaux ASK
 
 
 In database.py
