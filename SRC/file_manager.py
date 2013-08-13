@@ -65,4 +65,29 @@ class MyFileManager():
 			print("Cannot open file : " + file)
 			return []
 
-
+def readInfo(file, filePath, spliter):
+	""" read information line per line on the following format option_name spliter value  until finding a line with ### """
+	try:
+		#setting repertory serapator
+		if sys.platform == "linux2":
+			directorySep = "/"
+		else:
+			directorySep = "\\"
+		print("Opening : " + filePath + directorySep + file)
+		fs = open(filePath + directorySep + file, 'r')
+		info = []
+		while 1:
+			txt = fs.readline()
+			if txt == "###":
+				break
+			else:
+				tmp = txt.split(spliter)
+				if  tmp != None:
+					info.append([tmp[0].strip(), tmp[1].strip()])
+					print(tmp[0].strip() + " " + tmp[1].strip())
+		fs.close
+		print("Closing : " + filePath + directorySep + file)
+		return info
+	except:
+		print("Cannot open file : " + file)
+		return []

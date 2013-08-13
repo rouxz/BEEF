@@ -6,6 +6,7 @@ from mainGui import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from os_specifity import *
+from param import *
 
 # main module for launching BEEF
 
@@ -17,11 +18,13 @@ def main():
 	#debugging
 	debug = True
 	
-	#find platform
-	system = find_system()
 
+
+	#dynamic parameters
+	dynamic_param = DynamicParameters(debug)
+	
 	# database
-	db = Database(system, debug)
+	db = Database(dynamic_param.system, debug)
 	
 	if db != None:
 		# core engine to handle db
@@ -36,7 +39,7 @@ def main():
 		# for launching the ui
 		app = QApplication(sys.argv)
 		# topwindow of the gui
-		w = TopWindow(core, system, debug)
+		w = TopWindow(core, dynamic_param.system, debug)
 		w.showMaximized()
 		sys.exit(app.exec_())
 

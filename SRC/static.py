@@ -53,6 +53,15 @@ PLATFORM_WINDOWS = 1
 PLATFORM_LINUX = 2
 PLATFORM_MAC = 3
 
+
+# for param.py
+# ------------
+
+PARAM_PATH = "PARAM"
+PARAM_FILE = "param.ini"
+SPLITER = "="
+
+
 # for file_manager.py
 # ---------------
 
