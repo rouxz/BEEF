@@ -5,7 +5,7 @@
 
 PROG_SHORT_NAME = "BEEF"
 PROG_LONG_NAME = "BEEF - Budget Estimation for Each Flow"
-VERSION = 0.6
+VERSION = 0.7
 
 
 
