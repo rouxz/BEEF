@@ -153,7 +153,7 @@ class Database():
 		return len(self.__execute_query("SELECT RFS FROM RFS_USED;"))
 
 	###################################
-	# setting data
+	# 		setting data
 	###################################
 
 	def set_rfs_used(self,rfs):
@@ -177,4 +177,17 @@ class Database():
 
 			
 		
-
+	#################################
+	# 		Handling database
+	#################################
+	
+	def clearDatabase(self):
+		"""clear all data within database """
+		if (self.platform == STATIC.PLATFORM_WINDOWS):
+			query_start = "DELETE * FROM "
+		else:
+			query_start = "DELETE FROM "
+		for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED"]
+			self.__commit_query(query_start + table + ";")
+		print("Database " + self.dbname + " cleared")
+		

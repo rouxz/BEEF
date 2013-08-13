@@ -37,6 +37,13 @@ class RemoteServer():
 			print("Connection to db " + self.remote_db + " failed")
 
 
+
+	def importRemoteData(self, database):
+		""" import all data from remote data to local db """
+        #clear data within locale db
+		#import all remote dataw
+		pass
+
 if __name__ == "__main__":
 	p = DynamicParameters(True)
 	RemoteServer(None, p, True)
