@@ -8,6 +8,7 @@ import event
 class Window_modif(QDialog):
 	""" windows to modif values with a tableView """
 	
+	
 	def __init__(self, parent, index, debug = True):
 		QWidget.__init__(self, parent)
 		
@@ -37,6 +38,13 @@ class Window_modif(QDialog):
 		self.exec_()
 	
 	
+	
+	
+	
+	# #####################
+	#		 DATA
+	# #####################
+	
 	def initData(self, index):
 		# index QModelIndex representing the cell launching this pop up
 		self.index = index
@@ -59,6 +67,47 @@ class Window_modif(QDialog):
 		#set the first yoy
 		self.yoy = self.calcyoY(self.cy, self.ref)
 
+	def defineIndexes(self, index):
+		""" define the index for the CY, ref and YoY cells in the tableView """ 
+		
+		
+		if self.header[-3:].strip() == "CY":
+			self.cyIndex = index
+			self.refIndex = index.sibling(index.row()+1, index.column())
+			self.YoYIndex = index.sibling(index.row()+2, index.column())
+		elif self.header[-3:].strip() == "Ref":
+			self.cyIndex = index.sibling(index.row()-1, index.column())
+			self.refIndex = index
+			self.YoYIndex = index.sibling(index.row()+1, index.column())
+		else:
+			self.cyIndex = index.sibling(index.row()-2, index.column())
+			self.refIndex = index.sibling(index.row()-1, index.column())
+			self.YoYIndex = index
+	
+	
+	def getData(self):
+		""" retrieve cy and ref data """
+
+		self.cy = self.parentTable.tableModel.getDataFloat(self.cyIndex.row(),self.cyIndex.column())
+		self.ref = self.parentTable.tableModel.getDataFloat(self.refIndex.row(),self.refIndex.column())
+
+
+	
+	def calcyoY(self, cy, ref):
+		""" define yoy data """
+		if ref != 0:
+			return (self.cy / self.ref - 1) * 100
+		else:
+			return 0	
+		
+		
+		
+		
+		
+	# #####################
+	#		 DISPLAY
+	# #####################	
+		
 	
 	def initUI(self):
 		""" display the window properly """
@@ -91,17 +140,34 @@ class Window_modif(QDialog):
 		self.dataGroupBox.setTitle(QString("Data"))
 		
 		self.dataGroupBoxLayout = QVBoxLayout()
-		#cy
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("cy (000)"), self))
+		
+		# label for CY data
+		if self.header[:5] == "Yield":
+			#cy
+			self.dataGroupBoxLayout.addWidget(QLabel(QString(LABEL_CY_Yield), self))
+		else:
+			self.dataGroupBoxLayout.addWidget(QLabel(QString(LABEL_CY_RPK), self))
+
+		
+		#Line edit for displaying CY
 		self.cy_LE = QLineEdit(self.convertFloatToString(self.cy), self)
 		self.dataGroupBoxLayout.addWidget(self.cy_LE)
-		#ref
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("Ref (000)"), self))
+		
+		
+		# label for reference data
+		if self.header[:5] == "Yield":
+			#cy
+			self.dataGroupBoxLayout.addWidget(QLabel(QString(LABEL_REF_Yield), self))
+		else:
+			self.dataGroupBoxLayout.addWidget(QLabel(QString(LABEL_REF_RPK), self))
+
+		
+		#Line edit for displaying Reference data
 		self.ref_LE = QLineEdit(self.convertFloatToString(self.ref), self)
 		self.dataGroupBoxLayout.addWidget(self.ref_LE)
 		
-		# YoY
-		self.dataGroupBoxLayout.addWidget(QLabel(QString("YoY"), self))
+		# Index
+		self.dataGroupBoxLayout.addWidget(QLabel(QString("Index"), self))
 		self.yoy_LE = QDoubleSpinBox(self)
 		# parameters for Spinbox
 		self.yoy_LE.setSuffix(" %")
@@ -110,12 +176,6 @@ class Window_modif(QDialog):
 		
 		#setting value of spinbox
 		self.yoy_LE.setValue(self.yoy)
-		
-		# self.yoy_LE.replace(QLatin1Char('.'), QLocale().decimalPoint()))
-		# self.yoy_LE.replace(QLocale().decimalPoint(), QUnicodeChar('.'))
-		
-		# self.yoy_LE = QLineEdit(QString(str(self.yoy)), self)
-		
 		self.dataGroupBoxLayout.addWidget(self.yoy_LE)
 		
 		self.dataGroupBox.setLayout(self.dataGroupBoxLayout)
@@ -136,7 +196,7 @@ class Window_modif(QDialog):
 		self.moveGroupBox.setLayout(self.moveGroupBoxLayout)
 		
 		#top label for displaying information
-		self.topLabel = QLabel(QString(self.header[:-3] + " - Month : " + str(self.index.column()+1)))
+		self.topLabel = QLabel(self.topLabelValue())
 		
 		#adding the top label
 		self.layout.addWidget(self.topLabel)
@@ -164,9 +224,9 @@ class Window_modif(QDialog):
 			#Updating CY for absolute
 			self.connect(self.cy_LE, SIGNAL("editingFinished()"), self.callbackModifCY)
 			
-		
-		# void	editingFinished ()
-
+		# for going to the left or the right
+		self.connect(self.buttonNext, SIGNAL("released()"), self.moveToRight)
+		self.connect(self.buttonPrev, SIGNAL("released()"), self.moveToLeft)
 		
 		#setting the main layout
 		self.setLayout(self.layout)
@@ -175,46 +235,45 @@ class Window_modif(QDialog):
 		self.show()
 	
 	
+	def topLabelValue(self):
+		""" define the label on top of the window indicating what data are we dealing with"""
+		return QString(self.header[:-3] + " - Month : " + str(self.index.column()+1))
+	
+	
 	def convertFloatToString(self, flt):
-		# return QString("%L1").arg(round(float(flt)/1000,1))
-		return QString("%L1").arg(round(flt/1000,1))
-	
-	
-	def defineIndexes(self, index):
-		""" define the index for the CY, ref and YoY cells in the tableView """ 
-		
-		
-		if self.header[-3:].strip() == "CY":
-			self.cyIndex = index
-			self.refIndex = index.sibling(index.row()+1, index.column())
-			self.YoYIndex = index.sibling(index.row()+2, index.column())
-		elif self.header[-3:].strip() == "Ref":
-			self.cyIndex = index.sibling(index.row()-1, index.column())
-			self.refIndex = index
-			self.YoYIndex = index.sibling(index.row()+1, index.column())
+		""" function used to properly display figures in the line edits """
+
+		if self.header[:5] == "Yield":
+			return QString("%L1").arg(round(flt*100,3))
 		else:
-			self.cyIndex = index.sibling(index.row()-2, index.column())
-			self.refIndex = index.sibling(index.row()-1, index.column())
-			self.YoYIndex = index
+			return QString("%L1").arg(round(flt/1000,1))
 	
-	
-	def getData(self):
-		""" retrieve cy and ref data """
-		# self.cy = self.cyIndex.data(Qt.DisplayRole).toPyObject()
-		# self.ref = self.refIndex.data(Qt.DisplayRole).toPyObject()
-		self.cy = self.parentTable.tableModel.getDataFloat(self.cyIndex.row(),self.cyIndex.column())
-		self.ref = self.parentTable.tableModel.getDataFloat(self.refIndex.row(),self.refIndex.column())
+	def updateDisplay(self):
+		""" update the display with the current data enclosed in the object """
 		
-		#print("Popup " + str(self.cy)  + "-" + str(self.ref))
+		#update the header
+		self.topLabel.setText(self.topLabelValue())
+		
+		#update CY
+		self.cy_LE.setText(self.convertFloatToString(self.cy))
+		
+		#update REF
+		self.ref_LE.setText(self.convertFloatToString(self.ref))
+		
+		#update the index
+		self.yoy_LE.setValue(self.calcyoY(self.cy, self.ref))
+	
+	
+	
+	
+	
+
+	# #####################
+	#		 BEHAVIOUR
+	# #####################	
+	
 
 	
-	def calcyoY(self, cy, ref):
-		""" define yoy data """
-		if ref != 0:
-			return (self.cy / self.ref - 1) * 100
-		else:
-			return 0
-			
 	def switchAbsoluteRelative(self, bool):
 		""" define if the display should be set for relative evolution or absolute data """
 		
@@ -271,14 +330,18 @@ class Window_modif(QDialog):
 		
 	def callbackModifCY(self):
 		""" callback function launched once self.cy_LE has been modified """
-		# for debuggin purpose
+		
+		# for debugging purpose
 		if self.debug == True:
 			print("Callback on cy modification")
 		
 		# update data model in the system
 		tmp = self.cy_LE.text().toFloat()
 		if (tmp[1] == True) and (tmp[0]>=0):
-			self.cy = tmp[0] * 1000
+			if self.header[:5] == "Yield":
+				self.cy =  tmp[0] / 100
+			else:
+				self.cy = tmp[0] * 1000
 		else:
 			self.cy_LE.setText(self.convertFloatToString(self.cy))
 		
@@ -364,5 +427,46 @@ class Window_modif(QDialog):
 		self.validate()
 		#close the window
 		self.done(0)
-					
 		
+	def changePosition(self, left_or_right):
+		""" function used when button to the right or the left are being pressed / True means to the right , False to the left"""
+		if (self.debug):
+			print(str(left_or_right))
+			
+		# find next index.
+		col = self.index.column()
+		if (left_or_right) and (col < 11):
+			col += 1
+		elif not (left_or_right):
+			col -= 1
+		
+		# do nothing if col < 0
+		if col >= 0:
+			new_index = self.index.sibling(self.index.row(), col)
+			
+			# fetch new data
+			self.initData(new_index)
+			if (self.debug):
+				print("New month :" + str(col+1))
+			
+			# update display
+			self.updateDisplay()
+					
+	def moveToRight(self):
+		self.changePosition(True)
+		
+	def moveToLeft(self):
+		self.changePosition(False)
+		
+		
+	def keyPressEvent(self, e):
+		"""handling key strokes """
+		# closing window on escape
+		if e.key() == Qt.Key_Escape:
+			self.close()
+		# moving to next data
+		elif e.key() == Qt.Key_Right:
+			self.moveToRight()
+		#moving to previous data
+		elif e.key() == Qt.Key_Left:
+			self.moveToLeft()

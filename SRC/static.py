@@ -120,6 +120,16 @@ DISPLAYED_VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "index" , "ASK LY CY" 
 
 MAX_NUM_LINES = 53
 
+
+# for modif_window.py
+# -------------------
+
+LABEL_CY_RPK = "RPK CY (000)"
+LABEL_CY_Yield = "Yield CY (Ects)"
+LABEL_REF_RPK = "RPK Ref (000)"
+LABEL_REF_Yield = "Yield Ref (Ects)"
+
+
 # for about.py
 # ------------
 
