@@ -38,7 +38,7 @@ class TopWindow(QMainWindow):
 	def initTopWindow(self, fm, core):
 
 
-				########################
+		########################
 		# Status and menu bars
 		########################
 
@@ -98,6 +98,8 @@ class TopWindow(QMainWindow):
 	def launchRemoteServer(self):
 		print("remote server")
 		RemoteServerWindow(self.core.db, self.params, self)
+		
+		
 # ###########################################
 #
 #	Central widget
@@ -131,7 +133,7 @@ class CentralWidget(QWidget):
 		self.sidePanel = SidePanel(fm, core, self, self.status, debug)
 		
 		#######################"
-		# Place all the itemes
+		# Place all the items
 		########################
 
 		
