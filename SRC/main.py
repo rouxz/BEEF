@@ -9,6 +9,8 @@ from PyQt4.QtCore import *
 from os_specifity import *
 from param import *
 
+#ma ligne de commentaires
+
 # main module for launching BEEF
 
 def main():
