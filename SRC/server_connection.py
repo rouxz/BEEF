@@ -1,6 +1,8 @@
 ﻿import static as STATIC
 import os
 import file_manager
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 
 try:
 	from pyodbc import *
@@ -44,6 +46,41 @@ class RemoteServer():
 		#import all remote dataw
 		pass
 
+		
+		
+		
+class RemoteServerWindow(QDialog):
+	""" class for handling actions with remote server """
+	def __init__(self, parent, index, debug = True):
+		QDialog.__init__(self, parent)
+		
+		self.debug = debug
+		
+		#parent - MyTableView
+		self.parentTable = parent
+		
+		# number of routes on which the evolution will be applied
+		self.numberOfRoutes = self.parentTable.core.numberOfRoutes
+		
+		#initiate data
+		self.initData(index)
+		
+		#side panel to send the events
+		self.sidePanel = self.parentTable.sidePanel
+
+		
+		
+		#set the UI
+		self.initUI()
+		
+		#set to relative by default
+		self.toRelative(True)
+		
+		#launch the UI
+		self.exec_()
+	
+	
+		
 if __name__ == "__main__":
 	p = DynamicParameters(True)
 	RemoteServer(None, p, True)

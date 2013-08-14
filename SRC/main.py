@@ -1,4 +1,5 @@
 import sys
+import getopt
 from database import *
 from static import *
 from coreengine import *
@@ -15,38 +16,28 @@ def main():
 	print(TITLE_LINE)
 	print("")
 
-	#debugging
-	debug = True
-	
-
-
 	#dynamic parameters
-	dynamic_param = DynamicParameters(debug)
-	
+	dynamic_param = DynamicParameters()
+
 	# database
-	db = Database(dynamic_param.system, debug)
-	
+	db = Database(dynamic_param.system, dynamic_param.debug)
+
 	if db != None:
 		# core engine to handle db
-		core = Core(db, debug)
-
-		#for testing purpose only
-		#~ core.set_rfs_used("FAA")
-		#~ core.get_data_CY()
-		#~ core.get_data_ref()
-
+		core = Core(db, dynamic_param.debug)
 
 		# for launching the ui
 		app = QApplication(sys.argv)
 		# topwindow of the gui
-		w = TopWindow(core, dynamic_param.system, debug)
+		w = TopWindow(core, dynamic_param.system, dynamic_param.debug)
 		w.showMaximized()
 		sys.exit(app.exec_())
 
 		db.__del__()
-		print(TITLE_LINE)
-		print("Quiting " + PROG_LONG_NAME)
-		print(TITLE_LINE)
+
+	print(TITLE_LINE)
+	print("Quiting " + PROG_LONG_NAME)
+	print(TITLE_LINE)
 
 
 if __name__ == "__main__":

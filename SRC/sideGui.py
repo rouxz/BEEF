@@ -21,11 +21,10 @@ class SidePanel(QWidget):
 		#status bar
 		self.status = status
 		self.parent = parent
-
 		self.layout = QHBoxLayout()
 
 		# user interaction
-		self.user_interaction = UserInteraction(core, self.status, self)
+		self.user_interaction = UserInteraction(core, self.status, self, debug)
 		self.layout.addWidget(self.user_interaction)
 		# reference
 		self.layout.addWidget(ReferenceWidget(core, self, debug))
@@ -43,14 +42,18 @@ class UserInteraction(QWidget):
 		""" a class for the user to interact with the database / core engine
 			this class allow to apply all pending actions to the database behind all calculations
 		"""
-		def __init__(self, core, status, *args):
+		def __init__(self, core, status, parent, debug=True, *args):
 #			QGroupBox.__init__(self, *args)
 			QWidget.__init__(self, *args)			
 
+			self.debug = debug
+			self.parent = parent
+			
 			# core engine to process all requests
 			self.core = core
 			self.nbrPending = 0
 
+			
 			#status bar
 			self.status = status
 
@@ -103,7 +106,8 @@ class UserInteraction(QWidget):
 					self.status.showMessage("Actions saved")
 					#zero the display
 					self.zeroPending()
-					print("Actions saved")
+					if (self.debug):
+						print("Actions saved")
 				else:
 					self.status.showMessage("Error processing data")
 					print("Error processing data")
@@ -117,7 +121,12 @@ class UserInteraction(QWidget):
 				self.status.showMessage("Actions discarded")
 				#re get all data from db
 				self.core.get_data_CY()
-				print("Actions discarded")
+				# update the display
+				self.parent.parent.tabsWidget.updateData()
+				self.parent.parent.tabsWidget.updateTabs()
+				
+				if (self.debug):
+					print("Actions discarded")
 
 
 

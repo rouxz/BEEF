@@ -13,8 +13,6 @@ Change in the route lists
 	improved validation control
 Improve selection check	
 
-Discard should redownload all data to be displayer in MyTableView
-
 In apply add confirmation pop up
 
 Prévoir un CTR+Z ?
@@ -27,7 +25,7 @@ In tableGui.py
 -------------
 
 Ajouter la valeur brute de la cellule selectionnée dans la StatusBar
-Corriger totaux ASK
+Ajouter 
 
 
 In database.py

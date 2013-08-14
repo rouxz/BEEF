@@ -10,7 +10,7 @@ class Window_modif(QDialog):
 	
 	
 	def __init__(self, parent, index, debug = True):
-		QWidget.__init__(self, parent)
+		QDialog.__init__(self, parent)
 		
 		self.debug = debug
 		

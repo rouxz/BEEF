@@ -422,8 +422,6 @@ class MyTableView(QTableView):
 				# annual sum
 				sum = 0
 				for i in xrange(0,12):
-					if r[:3] == "ASK":
-						# print("m: " + str(i+1) + " " + r + " " + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)))
 					sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 				self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
 				# quarterly sum
@@ -443,31 +441,6 @@ class MyTableView(QTableView):
 					deb = r[:3]
 					fin = r[-3:].strip()
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " LY " + fin),i))
-
-		# 3 - calculate data AY for ASK
-		# regexp3 = re.compile("ASK.AY.(?!YoY).*")
-		# for r in VERTICAL_HEADER:
-			# looking for AY ASK
-			# if regexp3.match(r) != None:
-				# fin = r[-3:].strip()
-
-				# for i in xrange(12):
-					# if self.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i) == 0:
-						# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK LY " + fin),i))
-						# total += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i)
-						# print(self.flow + "iteration ASK total : " + r + "/ i="  + str(i) + "/ total=" + str(total) + "/ value=" + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), i) ))
-				# try to add yearly total if sum is null
-				# sum = 0
-				# for m in xrange(12):
-					# sum +=  self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m)
-				# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 12, sum)
-				# add quarterly sum if required
-				# for q in ARRAY_QUARTERS:
-					# sum = 0
-					# for m in q:
-						# sum += self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), m - 1)
-					# if 	self.tableModel.getDataFloat(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q)) == 0:
-						# self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), 13 + ARRAY_QUARTERS.index(q), sum)
 
 
 		# 3 - populate yield, lF and RASK
@@ -539,7 +512,6 @@ class MyTableView(QTableView):
 					sum = 0
 					for tab in tabs:
 						if tab.flow != "All":
-#							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i , sum)
 
