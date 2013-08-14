@@ -100,7 +100,13 @@ class UserInteraction(QWidget):
 		def saveActions(self):
 			self.status.showMessage("Processing actions")
 			#print("Processing actions")
-			if self.nbrPending > 0:
+			validate = QMessageBox.warning(self, "Validation required", "Are you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
+			if validate == QMessageBox.Ok:
+				# enable validation
+				validation = True
+			else:
+				validation = False
+			if (self.nbrPending > 0) and (validation):
 				res = self.core.process_events()
 				if res == 0:
 					self.status.showMessage("Actions saved")
@@ -254,6 +260,10 @@ class PerimeterSelection(QWidget):
 
 		# add the found hierarchy in the list
 		self.listPerimeter = QListWidget(self)
+		
+		self.listPerimeter.setSelectionMode(QAbstractItemView.SingleSelection)
+		# self.listPerimeter.setSelectionMode(QAbstractItemView.NoSelection)
+		
 		self.defineList(fm)
 
 		self.layout.addWidget(self.listPerimeter,1,0,1,-1)
@@ -332,9 +342,15 @@ class PerimeterSelection(QWidget):
 				self.mechanicalMove = True
 				if self.debug == True:
 					print("Switching back to : " + itemInit.text())
-				self.listPerimeter.setCurrentItem(itemInit)
+				self.listPerimeter.blockSignals(True)
 				itemInit.setSelected(True)
-
+				self.listPerimeter.setCurrentItem(itemInit)
+				# self.listPerimeter.setCurrentRow(itemInit.row())
+				# self.listPerimeter.clearSelection()
+				#self.listPerimeter.setItemSelected(itemInit, True)
+				
+				self.listPerimeter.blockSignals(False)
+				# print(self.listPerimeter.currentItem().text())
 
 		else:
 			self.mechanicalMove = False

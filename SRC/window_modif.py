@@ -429,7 +429,9 @@ class Window_modif(QDialog):
 		self.done(0)
 		
 	def changePosition(self, left_or_right):
-		""" function used when button to the right or the left are being pressed / True means to the right , False to the left"""
+		""" Validate - function used when button to the right or the left are being pressed / True means to the right , False to the left"""
+		self.validate()
+		
 		if (self.debug):
 			print(str(left_or_right))
 			

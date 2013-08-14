@@ -13,8 +13,6 @@ Change in the route lists
 	improved validation control
 Improve selection check	
 
-In apply add confirmation pop up
-
 Prévoir un CTR+Z ?
 
 In mainGui.py
@@ -40,8 +38,12 @@ Add text about
 	copyright
 Improve layout
 
+In server_connection.py
+-----------------------
+continuer
+mettre une QProgressBar
 
 Functional improvements
 -----------------------
 Courbes
-Send copy to server et mettre une QProgressBar
+
