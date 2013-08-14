@@ -6,6 +6,7 @@ from PyQt4.QtCore import *
 from sideGui import *
 from file_manager import *
 from table_gui import *
+from server_connection import *
 import about
 
 
@@ -15,18 +16,19 @@ import about
 # création de la vue et du conteneur
 class TopWindow(QMainWindow):
 	""" create a window being the main window of the gui """
-	def __init__(self, core, platform = PLATFORM_WINDOWS, debug = True):
+	def __init__(self, core, params):
 		# initiate the main widget
 		QMainWindow.__init__(self)
 		
-		self.platform = platform
-		self.debug = debug
+		self.params = params
+		self.platform = params.system
+		self.debug = params.debug
 		
 		#core
 		self.core = core
 
 		# file manager
-		self.fm = MyFileManager(platform)
+		self.fm = MyFileManager(self.platform)
 
 		# init the window
 		self.initTopWindow(self.fm, self.core)
@@ -66,6 +68,12 @@ class TopWindow(QMainWindow):
 		exitAction.setShortcut('Ctrl+Q')
 		exitAction.setStatusTip('Exit application')
 		exitAction.triggered.connect(qApp.quit)
+		
+		# remote server button
+		remoteServer = QAction('&Remote server', self)
+		remoteServer.setShortcut('Ctrl+R')
+		remoteServer.setStatusTip('Deal with remote server')
+		remoteServer.triggered.connect(self.launchRemoteServer)
 
 		#about button
 		aboutAction = QAction("&About " + PROG_SHORT_NAME, self)
@@ -76,7 +84,9 @@ class TopWindow(QMainWindow):
 		self.menubar = self.menuBar()
 		# fileMenu
 		self.fileMenu = self.menubar.addMenu('&File')
+		self.fileMenu.addAction(remoteServer)
 		self.fileMenu.addAction(exitAction)
+		
 		#help menu
 		self.helpMenu = self.menubar.addMenu("&?")
 		self.helpMenu.addAction(aboutAction)
@@ -84,6 +94,10 @@ class TopWindow(QMainWindow):
 		
 	def launchAbout(self):
 		about.About(self)
+		
+	def launchRemoteServer(self):
+		print("remote server")
+		RemoteServerWindow(self.core.db, self.params, self)
 # ###########################################
 #
 #	Central widget

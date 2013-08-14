@@ -14,9 +14,9 @@ from param import *
 
 class RemoteServer():
 
-	def __init__(self, database, params, debug=True):
+	def __init__(self, database, params):
 		""" connect local database to remote one """
-		self.debug = debug
+		self.debug = params.debug
 		self.platform = params.system
 
 		try:
@@ -51,35 +51,23 @@ class RemoteServer():
 		
 class RemoteServerWindow(QDialog):
 	""" class for handling actions with remote server """
-	def __init__(self, parent, index, debug = True):
+	def __init__(self, database, params, parent):
 		QDialog.__init__(self, parent)
 		
-		self.debug = debug
-		
-		#parent - MyTableView
-		self.parentTable = parent
-		
-		# number of routes on which the evolution will be applied
-		self.numberOfRoutes = self.parentTable.core.numberOfRoutes
-		
-		#initiate data
-		self.initData(index)
-		
-		#side panel to send the events
-		self.sidePanel = self.parentTable.sidePanel
-
-		
+		self.debug = params.debug
+		self.remote_server = RemoteServer(database, params)
 		
 		#set the UI
 		self.initUI()
 		
 		#set to relative by default
-		self.toRelative(True)
+		# self.toRelative(True)
 		
 		#launch the UI
 		self.exec_()
 	
-	
+	def initUI(self):
+		print("defining UI")
 		
 if __name__ == "__main__":
 	p = DynamicParameters(True)

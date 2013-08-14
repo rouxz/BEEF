@@ -29,7 +29,7 @@ def main():
 		# for launching the ui
 		app = QApplication(sys.argv)
 		# topwindow of the gui
-		w = TopWindow(core, dynamic_param.system, dynamic_param.debug)
+		w = TopWindow(core, dynamic_param)
 		w.showMaximized()
 		sys.exit(app.exec_())
 

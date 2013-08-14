@@ -546,7 +546,7 @@ class MyTableView(QTableView):
 
 	def cell_one_click(self, index):
 		# display message in status bar
-		self.status.showMessage("your message")
+		self.status.showMessage("Data: " + VERTICAL_HEADER[index.row()] + " - Month: " + TABLE_TITLE[index.column()] + " Value: " + str(self.tableModel.getDataIndex(index)))
 
 
 	# def center(self):
