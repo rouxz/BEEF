@@ -433,7 +433,7 @@ class Window_modif(QDialog):
 		self.validate()
 		
 		if (self.debug):
-			print(str(left_or_right))
+			print("Moving to " + str(left_or_right))
 			
 		# find next index.
 		col = self.index.column()
@@ -449,7 +449,7 @@ class Window_modif(QDialog):
 			# fetch new data
 			self.initData(new_index)
 			if (self.debug):
-				print("New month :" + str(col+1))
+				print("Updating data for month :" + str(col+1))
 			
 			# update display
 			self.updateDisplay()

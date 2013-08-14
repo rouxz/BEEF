@@ -266,6 +266,8 @@ class PerimeterSelection(QWidget):
 		
 		self.defineList(fm)
 
+		
+		
 		self.layout.addWidget(self.listPerimeter,1,0,1,-1)
 
 		self.reload = QPushButton("Reload list")
@@ -279,8 +281,10 @@ class PerimeterSelection(QWidget):
 
 		# signal & slots
 		self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changePerimeter)
+		# self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged)
 		self.connect(self.reload, SIGNAL("clicked()"), self.actionReload)
 
+		
 	def defineList(self, fm):
 		""" get the lists of files within the directory specified """
 		# remove all if necessary
@@ -290,6 +294,7 @@ class PerimeterSelection(QWidget):
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
 
 	def changePerimeter(self, item, itemInit):
+	# def currentItemChanged(self, item, itemInit):
 		""" change perimeter in the data sent to the GUI / clear all pending actions as well"""
 
 		if self.mechanicalMove == False:
@@ -342,15 +347,18 @@ class PerimeterSelection(QWidget):
 				self.mechanicalMove = True
 				if self.debug == True:
 					print("Switching back to : " + itemInit.text())
-				self.listPerimeter.blockSignals(True)
-				itemInit.setSelected(True)
-				self.listPerimeter.setCurrentItem(itemInit)
-				# self.listPerimeter.setCurrentRow(itemInit.row())
+				# self.listPerimeter.blockSignals(True)
 				# self.listPerimeter.clearSelection()
+				# itemInit.setSelected(True)
+				# self.listPerimeter.setCurrentItem(itemInit)
+				self.listPerimeter.setItemSelected(itemInit, True)
+				# self.listPerimeter.setCurrentRow(self.listPerimeter.row(itemInit))
+				# self.listPerimeter.selectionModel().select(self.listPerimeter.currentIndex(), QItemSelectionModel.Select);
+				self.listPerimeter.update()
 				#self.listPerimeter.setItemSelected(itemInit, True)
 				
-				self.listPerimeter.blockSignals(False)
-				# print(self.listPerimeter.currentItem().text())
+				# self.listPerimeter.blockSignals(False)
+				print(self.listPerimeter.currentItem().text() +  " "  + str(self.listPerimeter.currentIndex().row()))
 
 		else:
 			self.mechanicalMove = False
