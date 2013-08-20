@@ -97,7 +97,7 @@ class TopWindow(QMainWindow):
 		
 	def launchRemoteServer(self):
 		print("remote server")
-		RemoteServerWindow(self.core.db, self.params, self)
+		RemoteServerWindow(self.core.db, self.params, self.fm, self)
 		
 		
 # ###########################################
