@@ -38,10 +38,7 @@ class Curves(QDialog):
 		#global layout for the widget
 		self.layout = QGridLayout()
 
-		# figure of the curses
-		self.plot = plt.figure()
-		# Qwidget to have the plot
-		self.canvas = FigureCanvas(self.plot)
+		
 
 		self.drawPlot()
 
@@ -59,21 +56,42 @@ class Curves(QDialog):
 		self.show()
 
 	def drawPlot(self):
+	
+		# figure of the curses
+		self.plot = plt.figure()
+		
+		#set global background
+		self.plot.patch.set_facecolor("white")
+		self.plot.patch.set_alpha(1)
+		# Qwidget to have the plot
+		self.canvas = FigureCanvas(self.plot)
+		
+		
 		# random data
-		data = [random.random() for i in range(15)]
-		data2 = [random.random() for i in range(15)]
+		data = [random.random() for i in range(12)]
+		data2 = [random.random() for i in range(12)]
 
         # axis
-		self.axData = self.plot.add_subplot(211)
-		self.axYoY = self.plot.add_subplot(212)
+		# self.axData = self.plot.add_subplot(211)
+		# self.axYoY = self.plot.add_subplot(212)
 
 		# discards the old graph
-		self.axData.hold(False)
-		self.axYoY.hold(False)
+		# self.axData.hold(False)
+		# self.axYoY.hold(False)
 
 		# plot data
-		#self.axData.plot(STATIC.TABLE_TITLE[:12],data, '*-',STATIC.TABLE_TITLE[:12],data2, '*-')
-		self.axData.
+		# self.axData.plot(STATIC.TABLE_TITLE[:12], data, '*-', label="1",STATIC.TABLE_TITLE[:12],data2, '*--', label="2")
+		self.plot.plot(STATIC.TABLE_TITLE[:12], data, '*-', label="1")
+		self.plot.plot(STATIC.TABLE_TITLE[:12], data2, '*--', label="2")
+		# self.axData.plot(S)
+		# self.axData.
+		# self.axYoY.hist([random.random() for i in xrange(12)])
+
+		#add legend
+		# self.axData.legend(loc='upper right')
+		
+		#transparency of the background
+		# self.axData.patch.set_alpha(0)
 
 # for testing
 if __name__ == '__main__':

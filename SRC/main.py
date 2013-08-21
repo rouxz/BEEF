@@ -20,7 +20,7 @@ def main():
 	dynamic_param = DynamicParameters()
 
 	# database
-	db = Database(dynamic_param.system, dynamic_param.debug)
+	db = LocalDatabase(dynamic_param)
 
 	if db != None:
 		# core engine to handle db

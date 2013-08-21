@@ -9,47 +9,10 @@ try:
 except ImportError:
 	from sqlite3 import *
 
-# retirer
 from param import *
-
-class RemoteServer():
-
-	def __init__(self, database, params):
-		""" connect local database to remote one """
-		self.debug = params.debug
-		self.platform = params.system
-
-		try:
-
-			#get address of database
-			self.remote_db = params.remote_db_address
-
-			if self.platform == STATIC.PLATFORM_WINDOWS:
-				#connection MS ACCESS
-				print("Connecting to : " + self.remote_db)
-				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  self.remote_db.replace("\\", "\\\\") + ";Uid=Admin;Pwd=;")
-			else:
-				# Connection to sqlite3
-				print("Platform different than windows / no remote connection")
-				return -1
-
-			print("Connection to remote db " + self.remote_db + " successfull")
-
-		except:
-			print("Connection to db " + self.remote_db + " failed")
+from database import *
 
 
-
-	def importRemoteData(self):
-		""" import all data from remote data to local db """
-        #clear data within locale db
-		#import all remote dataw
-		pass
-
-	def sendLocalData(self):
-		""" send data from local data to remote database """
-		pass
-		
 		
 		
 class RemoteServerWindow(QDialog):
@@ -58,8 +21,10 @@ class RemoteServerWindow(QDialog):
 		QDialog.__init__(self, parent)
 		
 		self.debug = params.debug
-		self.remote_server = RemoteServer(database, params)
+		self.user_profile = params.profile
+		self.remote_db = RemoteDatabase(params)
 		self.file_manager = fm
+		self.local_db = database
 		
 		#set the UI
 		self.initUI()
@@ -167,11 +132,20 @@ class RemoteServerWindow(QDialog):
 			#start progress bag
 			self.pull_pbar.show()
 			self.pull_pbar.setValue(0)
+			
+			table_to_copy = ("DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF")
+			step = 12
+			
 			if (self.debug):
 				print("Pulling data")
+				
+			# clear local database
+			self.local_db.clearDatabase()
 			
 			# import data
-			self.remote_server.importRemoteData()
+			for table in table_to_copy:
+				self.local_db.copyTable(table, self.remote_db)
+				self.pull_pbar.setValue(self.pull_pbar.value() + step)
 			
 			if (self.debug):
 				print("Data pulled")
@@ -181,21 +155,31 @@ class RemoteServerWindow(QDialog):
 	def pushAction(self):
 		if (self.debug):
 			print("Push actions")
-		validate = QMessageBox.warning(self, "Validation required", "This actions will erase every data already push towards remote the server\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
+		validate = QMessageBox.warning(self, "Validation required", "This actions will erase every data already pushed towards remote the server\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
 		if validate == QMessageBox.Ok:
-			# init progress bar
-			self.push_pbar.show()
-			self.push_pbar.setValue(0)
-			if (self.debug):
-				print("Pushing data")
+			
 				
 			# send data
-			self.remote_server.sendLocalData()
+			try:
+				table_destination = STATIC.DICT_PROFILE[self.user_profile]
+				# init progress bar
+				self.push_pbar.show()
+				self.push_pbar.setValue(0)
+				if (self.debug):
+					print("Pushing data")
+					
+					
+					
+				if (self.debug):
+					print("Data pushed")
+				#finish progress bag
+				self.push_pbar.setValue(100)
+			except:
+				print("Error in the user profile - please check " + STATIC.PARAM_FILE)
+				QMessageBox.critical(self,"Error", "Error in the user profile - please check " + STATIC.PARAM_FILE,  QMessageBox.Ok)
 			
-			if (self.debug):
-				print("Data pushed")
-			#finish progress bag
-			self.push_pbar.setValue(100)
+			
+			
 	
 if __name__ == "__main__":
 	p = DynamicParameters()
