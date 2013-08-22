@@ -160,23 +160,25 @@ class RemoteServerWindow(QDialog):
 			
 				
 			# send data
-			try:
-				table_destination = STATIC.DICT_PROFILE[self.user_profile]
-				# init progress bar
-				self.push_pbar.show()
-				self.push_pbar.setValue(0)
-				if (self.debug):
-					print("Pushing data")
-					
-					
-					
-				if (self.debug):
-					print("Data pushed")
-				#finish progress bag
-				self.push_pbar.setValue(100)
-			except:
-				print("Error in the user profile - please check " + STATIC.PARAM_FILE)
-				QMessageBox.critical(self,"Error", "Error in the user profile - please check " + STATIC.PARAM_FILE,  QMessageBox.Ok)
+			# try:
+			table_destination = STATIC.DICT_PROFILE[self.user_profile]
+			if (self.debug):
+				print("Pushing data to " + table_destination)
+			# init progress bar
+			self.push_pbar.show()
+			self.push_pbar.setValue(0)
+			if (self.debug):
+				print("Pushing data")
+				
+				self.local_db.sendDataToExternal(["FAA"], table_destination, self.remote_db) 
+				
+			if (self.debug):
+				print("Data pushed")
+			#finish progress bag
+			self.push_pbar.setValue(100)
+			# except:
+				# print("Error in the user profile - please check " + STATIC.PARAM_FILE)
+				# QMessageBox.critical(self,"Error", "Error in the user profile - please check " + STATIC.PARAM_FILE,  QMessageBox.Ok)
 			
 			
 			

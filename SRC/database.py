@@ -208,10 +208,31 @@ class Database():
 			print("Copying done")
 		
 		
-	def sendDataToExternal(self, external_db, external_table):
+	def sendDataToExternal(self,  lst_of_lines, external_table, external_db):
 		""" take data from this database's DATA_RAW according to a selected perimeter and then update the value in the external table of the external database  """
-		data = self.get_data_CY()
-		# external_db.cnx.cursor().executemany(
+		# set proper RFS_USED table
+		self.clear_rfs_used()
+		external_db.clear_rfs_used()
+		for line in lst_of_lines:
+			self.set_rfs_used(line)
+			external_db.set_rfs_used(line)
+			
+		# get data
+		data = self.__execute_query("SELECT DATA_RAW.RFS, DATA_RAW.SUBLINE, DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK \
+				FROM DATA_RAW INNER JOIN RFS_USED ON DATA_RAW.RFS = RFS_USED.RFS \
+				GROUP BY DATA_RAW.RFS, DATA_RAW.SUBLINE, DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK;")
+
+		# for d in data:
+			# print(d)
+			
+		
+		# remove data for selected scope
+		external_db.__commit_query("DELETE * FROM " + external_table + " WHERE RFS IN (SELECT RFS FROM RFS_USED)")
+		
+		
+		# put data into the remote database
+		res = external_db.cnx.cursor().executemany("INSERT INTO " + external_table + " (RFS, SUBLINE,  MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK ) VALUES (?, ?, ?, ?,?,?,?,?,?)" , data)
+		print(res)
 		return 0
 		
 class LocalDatabase(Database):
