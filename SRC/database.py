@@ -231,8 +231,13 @@ class Database():
 		
 		
 		# put data into the remote database
-		res = external_db.cnx.cursor().executemany("INSERT INTO " + external_table + " (RFS, SUBLINE,  MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK ) VALUES (?, ?, ?, ?,?,?,?,?,?)" , data)
-		print(res)
+		try:
+			if (self.debug):
+				print("Writing data into TABLE " +  external_table + " FROM " + external_db.dbname)
+			external_db.cnx.cursor().executemany("INSERT INTO " + external_table + " (RFS, SUBLINE,  MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK ) VALUES (?, ?, ?, ?,?,?,?,?,?)" , data)
+			external_db.cnx.commit()
+		except:
+			external_db.cnx.rollback()
 		return 0
 		
 class LocalDatabase(Database):

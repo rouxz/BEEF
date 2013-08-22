@@ -87,6 +87,7 @@ class RemoteServerWindow(QDialog):
 		self.listPerimeter = QListWidget(self.push_widget)
 		self.defineListPerimeter()
 		self.listPerimeter.setSelectionMode(QAbstractItemView.SingleSelection)
+		self.listPerimeter.setCurrentRow(0)
 		self.push_widget_layout.addWidget(self.listPerimeter, 3, 0)
 		
 		#list data already sent
@@ -158,27 +159,35 @@ class RemoteServerWindow(QDialog):
 		validate = QMessageBox.warning(self, "Validation required", "This actions will erase every data already pushed towards remote the server\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
 		if validate == QMessageBox.Ok:
 			
+			# look for list of lines 
+			file2read = str(self.listPerimeter.currentItem().text().toUtf8())
+			lstLines = self.file_manager.getSublines(file2read)
+			if (self.debug):
+				print("Following routes will be impacted:")
+				for line in lstLines:
+					print("- " + line) 
+				
 				
 			# send data
-			# try:
-			table_destination = STATIC.DICT_PROFILE[self.user_profile]
-			if (self.debug):
-				print("Pushing data to " + table_destination)
-			# init progress bar
-			self.push_pbar.show()
-			self.push_pbar.setValue(0)
-			if (self.debug):
-				print("Pushing data")
-				
-				self.local_db.sendDataToExternal(["FAA"], table_destination, self.remote_db) 
-				
-			if (self.debug):
-				print("Data pushed")
-			#finish progress bag
-			self.push_pbar.setValue(100)
-			# except:
-				# print("Error in the user profile - please check " + STATIC.PARAM_FILE)
-				# QMessageBox.critical(self,"Error", "Error in the user profile - please check " + STATIC.PARAM_FILE,  QMessageBox.Ok)
+			try:
+				table_destination = STATIC.DICT_PROFILE[self.user_profile]
+				if (self.debug):
+					print("Pushing data to " + table_destination)
+				# init progress bar
+				self.push_pbar.show()
+				self.push_pbar.setValue(0)
+				if (self.debug):
+					print("Pushing data")
+					
+					self.local_db.sendDataToExternal(lstLines, table_destination, self.remote_db) 
+					
+				if (self.debug):
+					print("Data pushed")
+				#finish progress bag
+				self.push_pbar.setValue(100)
+			except:
+				print("Error in the user profile - please check " + STATIC.PARAM_FILE)
+				QMessageBox.critical(self,"Error", "Error in the user profile - please check " + STATIC.PARAM_FILE,  QMessageBox.Ok)
 			
 			
 			
