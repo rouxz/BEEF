@@ -40,8 +40,9 @@ Improve layout
 
 In server_connection.py
 -----------------------
-continuer
-mettre une QProgressBar
+Define actions
+Reload UI after getting data
+Implement table to show what data is already sent to server
 
 Functional improvements
 -----------------------

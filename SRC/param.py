@@ -28,6 +28,8 @@ class DynamicParameters:
 						print("Debugging mode enabled")
 					else:
 						self.debug = False
+				elif p[0] == "user_profile":
+					self.profile = p[1]
 			print("")
 			
 		except:

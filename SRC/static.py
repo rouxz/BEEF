@@ -61,6 +61,10 @@ PARAM_PATH = "PARAM"
 PARAM_FILE = "param.ini"
 SPLITER = "="
 
+# for server_connection.py
+# ------------------------
+DICT_PROFILE = {"IA": "DATA_RAW_IA", "IM": "DATA_RAW_IM", "ID": "DATA_RAW_ID"}
+
 
 # for file_manager.py
 # ---------------
