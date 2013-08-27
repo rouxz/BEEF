@@ -4,39 +4,19 @@ except ImportError:
 	from sqlite3 import *
 import static as STATIC
 import os
+from param import *
 
 class Database():
-	def __init__(self, platform=STATIC.PLATFORM_WINDOWS, debug=True):
+	""" class to handle a database this class MUST implement __init__ """ 
+	def __init__(self, params):
 		# Connect to an access database using pyodbc
+		
 
-		self.debug = debug
-		self.platform = platform
-
-		if self.platform == STATIC.PLATFORM_WINDOWS:
-			self.dbname = STATIC.DBNAME
-		else:
-			self.dbname = STATIC.DBNAME_UNIX
-		if (self.debug):
-					print("Connecting to " + os.getcwd() + "\\" + STATIC.DATA_DIR + "\\" + self.dbname )
-
-		try:
-
-			if self.platform == STATIC.PLATFORM_WINDOWS:
-				#connection MS ACCESS
-				#self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + STATIC.DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
-				
-				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  STATIC.DATA_DIR + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
-			else:
-				# Connection to sqlite3
-				print("Platform different than windows / switching to SQLite")
-				self.cnx = connect(STATIC.DBPATH_UNIX + "/" + self.dbname)
-
-			print("Connection to db " + self.dbname + " successfull")
-			# clear RFS used for consistency purpose
-			self.clear_rfs_used()
-		except:
-			print("Connection to db " + self.dbname + " failed")
-
+		self.debug = params.debug
+		self.platform = params.system
+		
+		
+		# continuation to be implemented
 
 	def __del__(self):
 		#disconnect properly from database
@@ -187,7 +167,132 @@ class Database():
 			query_start = "DELETE * FROM "
 		else:
 			query_start = "DELETE FROM "
-		for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED"]:
+		for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
 			self.__commit_query(query_start + table + ";")
 		print("Database " + self.dbname + " cleared")
 		
+	
+	def copyTable(self, table_name, external_db):
+		""" copy one table from an external database to the current one the name of 
+			the table name should be the same in the two databases 
+			local table should hold no data
+			table structures should be identical """
+		
+		
+		
+		# fetch architecture of external table
+		column_names = self.cnx.cursor().columns(table = table_name)
+		# set list of fields 
+		fields = ""
+		vals = ""
+		for c in column_names:
+			fields += c.column_name + ", "
+			vals += "?, "
+		fields = fields[:-2]
+		vals = vals[:-2]
+		
+		if (self.debug):
+			print("Copying " + table_name + " into " + self.dbname)
+		
+		# get external data
+		data = external_db.__execute_query("SELECT " + fields + " FROM " + table_name + ";")
+	
+		# put fetched data into local db
+		if (self.debug):
+			print("Inserting data into " + self.dbname)
+		if len(data) > 0:
+			print("length of results " + str(len(data)))
+			self.cnx.cursor().executemany("INSERT INTO " + table_name + " (" + fields + ") VALUES (" + vals + " );", data)
+		
+		if (self.debug):
+			print("Copying done")
+		
+		
+	def sendDataToExternal(self,  lst_of_lines, external_table, external_db):
+		""" take data from this database's DATA_RAW according to a selected perimeter and then update the value in the external table of the external database  """
+		# set proper RFS_USED table
+		self.clear_rfs_used()
+		external_db.clear_rfs_used()
+		for line in lst_of_lines:
+			self.set_rfs_used(line)
+			external_db.set_rfs_used(line)
+			
+		# get data
+		data = self.__execute_query("SELECT DATA_RAW.RFS, DATA_RAW.SUBLINE, DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK \
+				FROM DATA_RAW INNER JOIN RFS_USED ON DATA_RAW.RFS = RFS_USED.RFS \
+				GROUP BY DATA_RAW.RFS, DATA_RAW.SUBLINE, DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK;")
+
+		# for d in data:
+			# print(d)
+			
+		
+		# remove data for selected scope
+		external_db.__commit_query("DELETE * FROM " + external_table + " WHERE RFS IN (SELECT RFS FROM RFS_USED)")
+		
+		
+		# put data into the remote database
+		try:
+			if (self.debug):
+				print("Writing data into TABLE " +  external_table + " FROM " + external_db.dbname)
+			external_db.cnx.cursor().executemany("INSERT INTO " + external_table + " (RFS, SUBLINE,  MONTH, CONTRIB, FLOW, REV, REV_EX_ROX, RPK, ASK ) VALUES (?, ?, ?, ?,?,?,?,?,?)" , data)
+			external_db.cnx.commit()
+		except:
+			external_db.cnx.rollback()
+		return 0
+		
+class LocalDatabase(Database):
+	""" class to handle local database """
+	def __init__(self, params):
+		Database.__init__(self, params)
+		
+		if self.platform == STATIC.PLATFORM_WINDOWS:
+			self.dbname = STATIC.DBNAME
+		else:
+			self.dbname = STATIC.DBNAME_UNIX
+		if (self.debug):
+					print("Connecting to " + os.getcwd() + "\\" + STATIC.DATA_DIR + "\\" + self.dbname )
+
+		try:
+
+			if self.platform == STATIC.PLATFORM_WINDOWS:
+				#connection MS ACCESS
+				#self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + STATIC.DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
+				
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  STATIC.DATA_DIR + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
+			else:
+				# Connection to sqlite3
+				print("Platform different than windows / switching to SQLite")
+				self.cnx = connect(STATIC.DBPATH_UNIX + "/" + self.dbname)
+
+			print("Connection to db " + self.dbname + " successfull")
+			# clear RFS used for consistency purpose
+			self.clear_rfs_used()
+		except:
+			print("Connection to db " + self.dbname + " failed")
+			
+
+class RemoteDatabase(Database):
+	""" class to handle remote database"""
+	def __init__(self, params):
+	
+		Database.__init__(self, params)
+		
+		try:
+
+			#get address of database
+			self.remote_db = params.remote_db_address
+			self.dbname = "Remote db"
+
+			if self.platform == STATIC.PLATFORM_WINDOWS:
+				#connection MS ACCESS
+				print("Connecting to : " + self.remote_db)
+				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  self.remote_db.replace("\\", "\\\\") + ";Uid=Admin;Pwd=;")
+			else:
+				# Connection to sqlite3
+				print("Platform different than windows / no remote connection")
+				return -1
+
+			print("Connection to remote db " + self.remote_db + " successfull")
+
+		except:
+			print("Connection to db " + self.remote_db + " failed")
