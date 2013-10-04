@@ -112,12 +112,39 @@ class UserInteraction(QWidget):
 					self.status.showMessage("Actions saved")
 					#zero the display
 					self.zeroPending()
+					#erase red color of data changed
+					self.parent.parent.tabsWidget.resetModif()
+					# update the display
+					self.parent.parent.tabsWidget.updateTabs()
+					
 					if (self.debug):
 						print("Actions saved")
 				else:
 					self.status.showMessage("Error processing data")
 					print("Error processing data")
-
+		
+		
+		def saveActionsNoValidation(self):
+			self.status.showMessage("Processing actions")
+			
+			if self.nbrPending > 0 :
+				res = self.core.process_events()
+				if res == 0:
+					self.status.showMessage("Actions saved")
+					#zero the display
+					self.zeroPending()
+					#erase red color of data changed
+					self.parent.parent.tabsWidget.resetModif()
+					# update the display
+					self.parent.parent.tabsWidget.updateTabs()
+					
+					if (self.debug):
+						print("Actions saved")
+				else:
+					self.status.showMessage("Error processing data")
+					print("Error processing data")
+		
+		
 		def discardActions(self):
 			if self.nbrPending > 0:
 				#clear core engine
@@ -301,14 +328,22 @@ class PerimeterSelection(QWidget):
 			# pending actions still not processed
 			if len(self.core.events_list) > 0:
 				#ask for validation
-				validate = QMessageBox.warning(self, "Validation required", "Pending actions have been processed\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
-				if validate == QMessageBox.Ok:
+				
+				validate = QMessageBox.warning(self, "Validation required", "Pending actions have been processed\nApply or Discard actions before changing perimeter :", QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+				
+				if validate == QMessageBox.Discard:
 					# enable validation
 					self.validation = True
 					# clear actions list
 					self.parent.user_interaction.discardActions()
+				elif validate == QMessageBox.Save:
+					# enable validation
+					self.validation = True
+					# save actions list in db
+					self.parent.user_interaction.saveActionsNoValidation()
 				else:
 					self.validation = False
+					print("self.validation = " + str(self.validation) + " and self.mechanicalMove = " + str(self.mechanicalMove))
 
 
 			if self.validation == True:
@@ -345,20 +380,28 @@ class PerimeterSelection(QWidget):
 				# reselect previous item
 				self.validation = True
 				self.mechanicalMove = True
+				print("Remise sur previous item et self.validation = " + str(self.validation) + " and self.mechanicalMove = " + str(self.mechanicalMove))
+				
 				if self.debug == True:
 					print("Switching back to : " + itemInit.text())
-				# self.listPerimeter.blockSignals(True)
-				# self.listPerimeter.clearSelection()
-				# itemInit.setSelected(True)
-				# self.listPerimeter.setCurrentItem(itemInit)
+
+
+				itemInit.setSelected(True)
+				self.listPerimeter.setCurrentItem(itemInit)
 				self.listPerimeter.setItemSelected(itemInit, True)
-				# self.listPerimeter.setCurrentRow(self.listPerimeter.row(itemInit))
-				# self.listPerimeter.selectionModel().select(self.listPerimeter.currentIndex(), QItemSelectionModel.Select);
+				self.listPerimeter.selectionModel().select(self.listPerimeter.currentIndex(), QItemSelectionModel.Select)
+				self.listPerimeter.clearSelection()
 				self.listPerimeter.update()
-				#self.listPerimeter.setItemSelected(itemInit, True)
+
+				
+				# print("itemInit : " + str(itemInit.text()) + " est selectionne : " + str(itemInit.isSelected()) + " et la couleur est " + str(itemInit.backgroundColor()))
+				# print("itemCible : " + str(item.text()) + " est selectionne : " + str(item.isSelected())+ " et la couleur est " + str(item.backgroundColor()))
+				# self.listPerimeter.setCurrentItem(itemInit)
+				# self.listPerimeter.update()
 				
 				# self.listPerimeter.blockSignals(False)
 				print(self.listPerimeter.currentItem().text() +  " "  + str(self.listPerimeter.currentIndex().row()))
+
 
 		else:
 			self.mechanicalMove = False

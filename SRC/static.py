@@ -93,8 +93,14 @@ HEIGHT_ROW = 18
 DEFAULT_COLUMN_WIDTH = 80
 
 
-COLOR_EDITABLE = {"r": 223, "v":241, "b": 216}
-COLOR_RES = {"r": 210, "v":252, "b": 255}
+COLOR_EDITABLE = {"r": 150, "v":204, "b": 150}
+COLOR_NONEDITABLE = {"r": 204, "v": 255, "b": 204}
+COLOR_NONEDITABLE_YOY = {"r": 237, "v": 255, "b": 237}
+COLOR_REV = {"r": 255, "v":217, "b": 217}
+COLOR_REV_YOY = {"r": 255, "v":240, "b": 240}
+COLOR_TOUS_FLUX = {"r": 220, "v":220, "b": 220}
+COLOR_TOUS_FLUX_YOY = {"r": 255, "v":255, "b": 255}
+
 
 VERTICAL_HEADER = ["ASK HY CY" , "ASK HY Ref" , "ASK HY YoY" , "ASK LY CY" ,"ASK LY Ref" ,"ASK LY YoY" ,"ASK AY CY" ,"ASK AY Ref" , \
 		"ASK AY YoY" , "RPK HY CY"  , "RPK HY Ref"  , "RPK HY YoY" , "RPK LY CY" , "RPK LY Ref" , "RPK LY YoY"  , \

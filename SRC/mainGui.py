@@ -32,6 +32,9 @@ class TopWindow(QMainWindow):
 
 		# init the window
 		self.initTopWindow(self.fm, self.core)
+		
+		#connect slots and signals
+		# self.connect(self, SIGNAL('triggered()'), self.quitApplication)
 
 		
 	""" initiate the top window """
@@ -67,7 +70,8 @@ class TopWindow(QMainWindow):
 		exitAction = QAction('&Exit', self)
 		exitAction.setShortcut('Ctrl+Q')
 		exitAction.setStatusTip('Exit application')
-		exitAction.triggered.connect(qApp.quit)
+		exitAction.triggered.connect(self.quitApplication)
+		# exitAction.triggered.connect(qApp.quit)
 		
 		# remote server button
 		remoteServer = QAction('&Remote server', self)
@@ -98,7 +102,22 @@ class TopWindow(QMainWindow):
 	def launchRemoteServer(self):
 		print("remote server")
 		RemoteServerWindow(self.core.db, self.params, self.fm, self)
-		
+	
+	def	quitApplication(self):
+		# print("Quitting")
+		if len(self.core.events_list) > 0:
+			print(str(len(self.core.events_list)))
+			validate = QMessageBox.warning(self, "Validation required", "Pending actions have been processed\nApply or Discard actions before changing perimeter :", QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+			if validate == QMessageBox.Discard:
+				# clear actions list
+				self.centralWidget.sidePanel.user_interaction.discardActions()
+				qApp.quit()
+			elif validate == QMessageBox.Save:
+				# save actions list in db
+				self.centralWidget.sidePanel.user_interaction.saveActionsNoValidation()
+				qApp.quit()
+			else:
+				print("Back to the App !")
 		
 # ###########################################
 #

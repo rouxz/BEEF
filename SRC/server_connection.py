@@ -135,6 +135,7 @@ class RemoteServerWindow(QDialog):
 			self.pull_pbar.setValue(0)
 			
 			table_to_copy = ("DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF")
+			# table_to_copy = ("TABLE_REF", "DATA_RAW")
 			step = 12
 			
 			if (self.debug):
