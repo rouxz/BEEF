@@ -49,10 +49,14 @@ class RemoteServerWindow(QDialog):
 		# title
 		self.pull_title = QLabel("<b>Pull</b>")
 		self.pull_widget_layout.addWidget(self.pull_title, 0, 0, 1, -1)
-		self.pull_widget_layout.addWidget(QLabel("Fetch all data from remote server"), 1, 0, 1, -1)
+		self.pull_widget_layout.addWidget(QLabel("Fetch data from remote server"), 1, 0, 1, -1)
 		
 		self.pull_button = QPushButton("Retrieve data")
-		self.pull_widget_layout.addWidget(self.pull_button, 3, 0, 1, -1)
+		self.pull_widget_layout.addWidget(self.pull_button, 3, 0)
+	
+		
+		self.pull_ref_only_button = QPushButton("Retrieve ref data only")
+		self.pull_widget_layout.addWidget(self.pull_ref_only_button, 3, 1)
 		
 		#progress bar
 		self.pull_pbar = QProgressBar(self.pull_widget)
@@ -112,6 +116,7 @@ class RemoteServerWindow(QDialog):
 		
 		# behaviour of items
 		self.connect(self.pull_button, SIGNAL("released()"), self.pullAction)
+		self.connect(self.pull_ref_only_button, SIGNAL("released()"), self.pullRefOnlyAction)
 		self.connect(self.push_button, SIGNAL("released()"), self.pushAction)
 		
 	
@@ -124,8 +129,7 @@ class RemoteServerWindow(QDialog):
 			self.listPerimeter.addItem(QListWidgetItem(i, self.listPerimeter))
 	
 	
-	
-	def pullAction(self):
+	def pullActionParam(self, tables, step):
 		if (self.debug):
 			print("Pull actions")
 		validate = QMessageBox.warning(self, "Validation required", "This actions will erase all changed already made on the local database\nAre you sure to proceed ?", QMessageBox.Cancel | QMessageBox.Ok)
@@ -134,9 +138,9 @@ class RemoteServerWindow(QDialog):
 			self.pull_pbar.show()
 			self.pull_pbar.setValue(0)
 			
-			table_to_copy = ("DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF")
+			# table_to_copy = ("DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF")
+			table_to_copy = tables
 			# table_to_copy = ("TABLE_REF", "DATA_RAW")
-			step = 12
 			
 			if (self.debug):
 				print("Pulling data")
@@ -153,6 +157,13 @@ class RemoteServerWindow(QDialog):
 				print("Data pulled")
 			#finish progress bag
 			self.pull_pbar.setValue(100)
+	
+	def pullRefOnlyAction(self):
+		self.pullActionParam(("DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF"),12)
+	
+	
+	def pullAction(self):
+		self.pullActionParam(("DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "TABLE_REF"),12)
 	
 	def pushAction(self):
 		if (self.debug):

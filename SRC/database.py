@@ -204,12 +204,12 @@ class Database():
 		if len(data) > 0:
 			print("length of results " + str(len(data)))
 			#print(data)
-			# try:
-			self.cnx.cursor().executemany("INSERT INTO " + table_name + " (" + fields + ") VALUES (" + vals + " );", data)
-			self.cnx.commit()
-			# except:
-				# print("Error copying data")
-				# self.cnx.rollback()
+			try:
+				self.cnx.cursor().executemany("INSERT INTO " + table_name + " (" + fields + ") VALUES (" + vals + " );", data)
+				self.cnx.commit()
+			except:
+				print("Error copying data")
+				self.cnx.rollback()
 		if (self.debug):
 			print("Copying done")
 
