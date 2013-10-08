@@ -154,6 +154,10 @@ class UserInteraction(QWidget):
 				self.status.showMessage("Actions discarded")
 				#re get all data from db
 				self.core.get_data_CY()
+				
+				#erase red color of data changed
+				self.parent.parent.tabsWidget.resetModif()
+				
 				# update the display
 				self.parent.parent.tabsWidget.updateData()
 				self.parent.parent.tabsWidget.updateTabs()
@@ -310,8 +314,17 @@ class PerimeterSelection(QWidget):
 		self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.changePerimeter)
 		# self.connect(self.listPerimeter, SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged)
 		self.connect(self.reload, SIGNAL("clicked()"), self.actionReload)
+		self.connect(self.listPerimeter, SIGNAL("itemClicked(QListWidgetItem*)"), self.highlightCell)
 
-		
+	def highlightCell(self, itemSelected):
+		# ItemSelected = self.listPerimeter.currentItem()
+		# ItemSelected.setBackgroundColor(QColor('red'))
+		for i in xrange(0,self.listPerimeter.count()):
+			item = self.listPerimeter.item(i)
+			item.setBackgroundColor(QColor('white'))
+		itemSelected.setBackgroundColor(QColor('red'))
+	
+	
 	def defineList(self, fm):
 		""" get the lists of files within the directory specified """
 		# remove all if necessary
@@ -351,6 +364,9 @@ class PerimeterSelection(QWidget):
 				if self.debug == True:
 					print("Perimeter changed")
 
+				# Highlight new choice of Perimeter
+				self.highlightCell(item)	
+				
 				#clear rfs list in the db
 				self.core.clear_rfs_used()
 
@@ -387,6 +403,7 @@ class PerimeterSelection(QWidget):
 
 
 				itemInit.setSelected(True)
+				itemInit.setBackgroundColor(QColor(255, 135, 135))
 				self.listPerimeter.setCurrentItem(itemInit)
 				self.listPerimeter.setItemSelected(itemInit, True)
 				self.listPerimeter.selectionModel().select(self.listPerimeter.currentIndex(), QItemSelectionModel.Select)
