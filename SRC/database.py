@@ -172,6 +172,16 @@ class Database():
 			self.__commit_query(query_start + table + ";")
 		print("Database " + self.dbname + " cleared")
 
+	def clearTableList(self, tablelist):
+		""" clear the given tables in the db """
+		if (self.platform == STATIC.PLATFORM_WINDOWS):
+			query_start = "DELETE * FROM "
+		else:
+			query_start = "DELETE FROM "
+		# for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
+		for table in tablelist:
+			self.__commit_query(query_start + table + ";")
+		print("Database " + self.dbname + " cleared")
 
 	def copyTable(self, table_name, external_db):
 		""" copy one table from an external database to the current one the name of

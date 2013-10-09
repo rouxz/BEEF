@@ -106,7 +106,7 @@ class Window_modif(QDialog):
 		if ref != 0:
 			return (self.cy / self.ref - 1) * 100
 		else:
-			return 0	
+			return 100
 		
 		
 		

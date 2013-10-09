@@ -19,11 +19,11 @@ class TopWindow(QMainWindow):
 	def __init__(self, core, params):
 		# initiate the main widget
 		QMainWindow.__init__(self)
-		
+
 		self.params = params
 		self.platform = params.system
 		self.debug = params.debug
-		
+
 		#core
 		self.core = core
 
@@ -32,11 +32,13 @@ class TopWindow(QMainWindow):
 
 		# init the window
 		self.initTopWindow(self.fm, self.core)
-		
-		#connect slots and signals
-		# self.connect(self, SIGNAL('triggered()'), self.quitApplication)
 
-		
+		#connect slots and signals
+		self.connect(self, SIGNAL('triggered()'), self.quitApplication)
+		self.connect(self, SIGNAL('destroyed()'), self.quitApplication)
+		self.connect(self, SIGNAL('quit()'), self.quitApplication)
+
+
 	""" initiate the top window """
 	def initTopWindow(self, fm, core):
 
@@ -57,13 +59,13 @@ class TopWindow(QMainWindow):
 
 		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.platform, self.debug)
 		self.setCentralWidget(self.centralWidget)
-		
-		
+
+
 		#pack the window
 		self.setWindowTitle(TITLE_TOPWINDOW)
 
 		self.show()
-		
+
 	def defineMenu(self):
 		""" define menu of the application"""
 		# exit button
@@ -72,7 +74,7 @@ class TopWindow(QMainWindow):
 		exitAction.setStatusTip('Exit application')
 		exitAction.triggered.connect(self.quitApplication)
 		# exitAction.triggered.connect(qApp.quit)
-		
+
 		# remote server button
 		remoteServer = QAction('&Remote server', self)
 		remoteServer.setShortcut('Ctrl+R')
@@ -83,26 +85,26 @@ class TopWindow(QMainWindow):
 		aboutAction = QAction("&About " + PROG_SHORT_NAME, self)
 		aboutAction.setStatusTip('About')
 		self.connect(aboutAction, SIGNAL("triggered()"), self.launchAbout)
-		
+
 		# main menu bar
 		self.menubar = self.menuBar()
 		# fileMenu
 		self.fileMenu = self.menubar.addMenu('&File')
 		self.fileMenu.addAction(remoteServer)
 		self.fileMenu.addAction(exitAction)
-		
+
 		#help menu
 		self.helpMenu = self.menubar.addMenu("&?")
 		self.helpMenu.addAction(aboutAction)
-		
-		
+
+
 	def launchAbout(self):
 		about.About(self)
-		
+
 	def launchRemoteServer(self):
 		print("remote server")
 		RemoteServerWindow(self.core.db, self.params, self.fm, self)
-	
+
 	def	quitApplication(self):
 		# print("Quitting")
 		if len(self.core.events_list) > 0:
@@ -111,14 +113,27 @@ class TopWindow(QMainWindow):
 			if validate == QMessageBox.Discard:
 				# clear actions list
 				self.centralWidget.sidePanel.user_interaction.discardActions()
+				#close local db
+				self.core.db.__del__()
 				qApp.quit()
+				
+				
 			elif validate == QMessageBox.Save:
 				# save actions list in db
 				self.centralWidget.sidePanel.user_interaction.saveActionsNoValidation()
+				#close local db
+				self.core.db.__del__()
 				qApp.quit()
 			else:
 				print("Back to the App !")
-		
+		else:
+			#close local db
+			self.core.db.__del__()
+			qApp.quit()
+			
+	def closeEvent(self, e):
+		self.quitApplication()
+
 # ###########################################
 #
 #	Central widget
@@ -131,10 +146,10 @@ class CentralWidget(QWidget):
 	""" this main widget will have all the required tabs and table within """
 	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS, debug = True):
 		QWidget.__init__(self, parent)
-		
+
 		# operating system
 		self.platform = platform
-		
+
 		# status bar
 		self.status = status
 
@@ -150,12 +165,12 @@ class CentralWidget(QWidget):
 
 		#SIDE PANEL
 		self.sidePanel = SidePanel(fm, core, self, self.status, debug)
-		
+
 		#######################"
 		# Place all the items
 		########################
 
-		
+
 
 		# set the tabs
 		self.tabsWidget = Tabs(core, self.sidePanel, self.status, self)

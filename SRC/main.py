@@ -23,7 +23,7 @@ def main():
 	# database
 	db = LocalDatabase(dynamic_param)
 
-	
+
 	if db != None:
 		# core engine to handle db
 		core = Core(db, dynamic_param.debug)
@@ -44,4 +44,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	
+

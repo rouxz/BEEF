@@ -55,7 +55,9 @@ class MyFileManager():
 				txt = fs.readline()
 				if txt == "###":
 					break
+					# pass
 				else:
+					# print("Lecture " + txt[0:3])
 					sublines.append(txt[0:3])
 			fs.close
 			print("Closing : " + self.hierachyDir + directorySep + file)
