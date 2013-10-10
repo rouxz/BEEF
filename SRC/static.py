@@ -157,8 +157,15 @@ LICENSE_WORDING = "This program is under license :"
 LICENSE = "(c) - 2013"
 
 TECHNOLOGY_HEADER = "Program using :"
-TECHNOLOGIES_LIST = ["Python v2.6.7", "pyodbc library", "PyQt4", "Mathplotlib"]
+TECHNOLOGIES_LIST = ["Python v2.6.7", "pyodbc library", "PyQt4", ]
 
+# for export_json.py
+# ------------------
 
+PATH_EXPORT = "WEB_RENDER"
+SUBPATH_EXPORT = "json"
+FLOW_CHARTS= ["#flow_chart", "#Q1_chart", "#Q2_chart", "#Q3_chart", "#Q4_chart"]
+QUARTERS = ["Q1", "Q2", "Q3", "Q4", "Annual"]
+QUARTER_CHART = "#split_quarter_chart"
 
 

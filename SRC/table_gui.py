@@ -6,6 +6,7 @@ from PyQt4.QtCore import *
 from mainGui import *
 from file_manager import *
 from window_modif import *
+from export_json import *
 import re
 
 
@@ -26,9 +27,10 @@ class Tabs(QTabWidget):
 
 
 
-	def __init__(self, core, sidePanel, status, parent):
+	def __init__(self, core, sidePanel, status, parent, params):
 		QTabWidget.__init__(self, parent)
 
+		self.params = params
 		self.parentWidget = parent
 
 		#for user interactions
@@ -52,6 +54,12 @@ class Tabs(QTabWidget):
 			i = i +1
 
 		self.setUI()
+		
+		# for exporting purpose
+		self.exporter = Exporter(self.params,self)
+		
+		# test only
+		# self.export.export_quarters()
 
 	def setUI(self):
 		# self.setMinimumSize(1200,700)
@@ -76,6 +84,9 @@ class Tabs(QTabWidget):
 		for tab in self.tabs:
 			tab.copyDataAllFlows(DataRASKLF)
 
+		# and export json
+		self.exporter.export_quarters()
+		self.exporter.export_general()
 
 	def changeRef(self):
 		""" change all reference data in the tableviews and recalculate totals, when change of reference"""

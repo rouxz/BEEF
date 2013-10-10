@@ -1,0 +1,190 @@
+﻿body { 
+	margin: 20px 0 0 0; 
+	background-color : #f8f8f8;
+	font-family : Arial, Sans serif;
+	
+	/* positionnement */
+	position:relative;
+}
+
+/* **************************** */
+/* 		Structure high level	*/
+/* **************************** */
+
+
+
+
+
+#title{
+	text-align : center;
+	font-size : X-large;
+	font-weight : bold;
+	
+	background-color : #dee3fd;
+	
+	position : absolute;
+	left: 210px;
+	top: 20px;
+	width: 1420px;
+	height: 50px;
+}
+
+#legend{
+	width : 170px;
+	position : absolute;
+	top : 370px;
+	left: 20px;
+	margin : 0px 0px 0px 0px;
+	padding: 5px;
+	
+	display : block;
+	
+	background-color: #dee3fd;
+}
+
+
+
+
+
+/* classes partagées */
+.small_title{
+	font-size : small;
+	font-weight : bold;
+}
+.small_subtitle{
+	font-size : x-small;
+	font-style : italic;
+}
+.big_subtitle{
+	font-size : medium;
+	font-style : italic;
+	font-weight : normal;
+}
+
+
+.colored_borders{
+	border-style: solid;
+	border-width: 1px;
+	margin : 15px 0 15px 0;
+	border-color: #E6E6F0;
+}
+
+.shadow {
+  -moz-box-shadow:    3px 3px 5px 0px #ccc;
+  -webkit-box-shadow: 3px 3px 5px 0px #ccc;
+  box-shadow:         3px 3px 5px 0px #ccc;
+}
+
+.boxes {
+	background-color : white;
+}
+
+.big_chart{
+	width: 600px; 
+	height: 500px;
+	margin: 0;
+}
+
+.small_chart{
+	width: 600px; 
+	height: 300px;
+	margin: 0;
+}
+
+
+
+
+
+/* mise en forme des graphes */
+/* --------------------------  */
+
+
+#split_quarter{
+		width: 700px; 
+		height: 600px;
+		margin: 0;
+		
+		top: 80px;
+		left : 210px;
+		position : absolute;
+		
+}
+
+
+#split_flow{
+		width: 700px; 
+		height: 600px;
+		margin: 0;
+		
+		top: 80px;
+		left : 930px;
+		position : absolute;
+		
+}
+
+
+#Q1 {
+
+	position : absolute;
+	left: 210px;
+	top: 750px;
+	
+	width: 700px;
+	height: 300px;
+}
+
+#Q1_chart {
+
+	
+
+}
+
+#Q2 {
+
+	position : absolute;
+	left: 930px;
+	top: 750px;
+	
+	width: 700px;
+	height: 300px;
+}
+
+#Q3 {
+
+	position : absolute;
+	left: 210px;
+	top: 1080px;
+	
+	width: 700px;
+	height: 300px;
+}
+
+#Q4 {
+
+	position : absolute;
+	left: 930px;
+	top: 1080px;
+	
+	width: 700px;
+	height: 300px;
+}
+
+
+
+
+
+/* info				*/
+/* --------------------------  */
+
+#info{
+	width : 170px;
+	position : absolute;
+	top : 20px;
+	left: 20px;
+	margin : 0px 0px 0px 0px;
+	padding: 5px;
+	
+	display : block;
+	
+	background-color: white;
+}

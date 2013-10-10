@@ -57,7 +57,7 @@ class TopWindow(QMainWindow):
 		# central widget
 		########################
 
-		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.platform, self.debug)
+		self.centralWidget = CentralWidget(fm, core, self, self.statusBar(), self.params)
 		self.setCentralWidget(self.centralWidget)
 
 
@@ -144,17 +144,19 @@ class TopWindow(QMainWindow):
 class CentralWidget(QWidget):
 	""" a widget being the main widget within the topwindow"""
 	""" this main widget will have all the required tabs and table within """
-	def __init__(self, fm, core, parent, status, platform = PLATFORM_WINDOWS, debug = True):
+	def __init__(self, fm, core, parent, status, params):
 		QWidget.__init__(self, parent)
 
+		
+		self.params = params
 		# operating system
-		self.platform = platform
+		# self.platform = platform
 
 		# status bar
 		self.status = status
 
 		#init the central widget
-		self.initCentralWidget(fm, core, debug)
+		self.initCentralWidget(fm, core, self.params.debug)
 
 	def initCentralWidget(self, fm, core, debug):
 		#the top grid layout and tweak it
@@ -173,7 +175,7 @@ class CentralWidget(QWidget):
 
 
 		# set the tabs
-		self.tabsWidget = Tabs(core, self.sidePanel, self.status, self)
+		self.tabsWidget = Tabs(core, self.sidePanel, self.status, self, self.params)
 		self.grid.addWidget(self.tabsWidget, 1 , 0, 1, -1)
 
 
