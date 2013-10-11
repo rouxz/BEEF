@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>BEEF - Visualisation</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<!-- mise en forme -->
+	<link rel="stylesheet" href="css.css" type="text/css" media="screen">
+  </head>
+  <body>
+	<div id="messager"></div>
+	<div id="legend" class="shadow"><span class="small_title">My route</span></div>
+	<div id="title" class="shadow"><h1>BEEF - Visualisation</h1></div>
+	<div id="split_quarter" class="shadow boxes">
+		<h2>Quarterly split</h2><div id="split_quarter_chart_legend" class="legend"></div>
+		<canvas id="split_quarter_chart" class="big_chart" width=600 height=600></canvas>
+	</div>
+	<div id="split_flow" class="shadow boxes">
+		<h2>Flow split</h2><div id="flow_chart_legend" class="legend"></div>
+		<canvas id="flow_chart" class="big_chart" width=600 height=600></canvas>
+	</div>
+	<div id="Q1" class = "quarter boxes shadow">
+		<h2>Q1</h2><div id="Q1_chart_legend" class="legend"></div>
+		<canvas id="Q1_chart" class="small_chart" width=600 height=300></canvas>
+	</div>
+	<div id="Q2" class = "quarter boxes shadow">
+		<h2>Q2</h2><div id="Q2_chart_legend" class="legend"></div>
+		<canvas id="Q2_chart" class="small_chart" width=600 height=300></canvas>
+	</div>
+	<div id="Q3" class = "quarter boxes shadow ">
+		<h2>Q3</h2><div id="Q3_chart_legend" class="legend"></div>
+		<canvas id="Q3_chart" class="small_chart" width=600 height=300></canvas>
+	</div>
+	<div id="Q4" class = "quarter boxes shadow ">
+		<h2>Q4</h2><div id="Q4_chart_legend" class="legend"></div>
+		<canvas id="Q4_chart" class="small_chart" width=600 height=300></canvas>
+	</div>
+	
+
+	<!-- embedded javascripts -->
+	<script src="script/jquery-2.0.1.min.js"></script>
+	<script src="script/Chart.js"></script>
+	<script src="script/legend.js"></script>
+	
+	<script src="script/behaviour.js"></script>
+  </body>
+</html>

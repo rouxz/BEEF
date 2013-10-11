@@ -6,6 +6,7 @@ from PyQt4.QtCore import *
 from mainGui import *
 from file_manager import *
 from window_modif import *
+from export_json import *
 import re
 
 
@@ -26,9 +27,10 @@ class Tabs(QTabWidget):
 
 
 
-	def __init__(self, core, sidePanel, status, parent):
+	def __init__(self, core, sidePanel, status, parent, params):
 		QTabWidget.__init__(self, parent)
 
+		self.params = params
 		self.parentWidget = parent
 
 		#for user interactions
@@ -52,32 +54,89 @@ class Tabs(QTabWidget):
 			i = i +1
 
 		self.setUI()
+		
+		# for exporting purpose
+		self.exporter = Exporter(self.params,self)
+		
+		# test only
+		# self.export.export_quarters()
 
 	def setUI(self):
-		self.setMinimumSize(800,300)
+		# self.setMinimumSize(1200,700)
+		pass
 
+	def consistencyAllFlows(self):
+		# sums Rev & RPK in tab "All Flows" and calculate totals & YoY
+		self.updateTabAllFlows()
+		# print("Calcule les totaux de Rev et RPK suite changement de reference")
+
+		DataRASKLF = []
+		for r in range(len(VERTICAL_HEADER)):
+			DataRASKLF.append([])
+			for c in range(len(TABLE_TITLE)):
+				DataRASKLF[r].append(0)
+		# calculate and retrieve RASK & LF in tab "All Flow"
+		for tab in self.tabs:
+			if tab.flow == "All":
+				DataRASKLF = tab.retrieveDataAllFlows()
+
+		# and copy in all tabs
+		for tab in self.tabs:
+			tab.copyDataAllFlows(DataRASKLF)
+
+		# and export json
+		self.exporter.export_quarters()
+		self.exporter.export_general()
+		self.exporter.export_information()
 
 	def changeRef(self):
-		""" change all reference data in the tableviews """
+		""" change all reference data in the tableviews and recalculate totals, when change of reference"""
+		# retrieve data RPK & Rev of Reference for each flows and calculate totals & YoY
 		for tab in self.tabs:
 			tab.retrieveDataRefOnly()
 
+		self.consistencyAllFlows()
+
 	def updateData(self):
-		""" update data in all the table views """
+		""" update data in all the table views when change of perimeter and discard actions pending """
+		# retrieve Ref data RPK & Rev of CY for each flows and calculate totals & YoY
 		for tab in self.tabs:
 			tab.retrieveData()
+
+		self.consistencyAllFlows()
 
 	def updateTabs(self):
 		""" update the data displayed in all the present tabs"""
 		for tab in self.tabs:
 			tab.updateDisplay()
 
-	def dataConsistency(self):
+	def resetModif(self):
+		""" update the display when actions saved"""
+		for tab in self.tabs:
+			tab.resetModifTab()
+
+	# remplace dataConsistency()
+	def updateTabAllFlows(self):
 		""" will make the total of all flows in the tabs total if it is not editable """
 		if len(self.tabs) > 1:
 			for tab in self.tabs:
 				if tab.flow == "All":
 					tab.totalForAllFlow(self.tabs)
+
+	def dataConsistency(self):
+		""" will make the total of all flows in the tabs total if it is not editable """
+		if len(self.tabs) > 1:
+			for tab in self.tabs:
+				if tab.flow == "All":
+					print("Dans dataconsistency Flow = " + str(tab.flow))
+					tab.totalForAllFlow(self.tabs)
+
+	def updateDataFromAllFlows(self):
+		""" updates RASK with data from tab All flows """
+		if len(self.tabs) > 1:
+			for tab in self.tabs:
+				print("vient chercher la RASK de la tab AllFlow pour le rappatrier dans la tab " + str(tab.flow))
+				tab.setDataConsistencyRASK(self.tabs)
 
 class TableData(QAbstractTableModel):
 	""" all the data bying displayed in the tabs """
@@ -89,6 +148,7 @@ class TableData(QAbstractTableModel):
 		self.arraydata = datain
 		self.vheader = vheader
 		self.hheader = hheader
+		self.resetModifCells()
 
 	def rowCount(self, parent):
 		return len(self.arraydata)
@@ -101,6 +161,11 @@ class TableData(QAbstractTableModel):
 		if index.isValid() and role == Qt.BackgroundRole:
 			# colors in the table
 			return self.setBackground(index.row(), role)
+		elif index.isValid() and role == Qt.TextColorRole:
+			if self.TableModif[index.row()][index.column()] == 1:
+				return QColor(Qt.red)
+			else:
+				return QColor(Qt.black)
 		elif index.isValid() and role == Qt.DisplayRole:
 			header = VERTICAL_HEADER[index.row()]
 			regexp_ask_rpk_rev = re.compile("(RPK|ASK|Rev).*")
@@ -146,6 +211,8 @@ class TableData(QAbstractTableModel):
 				font.setItalic(True)
 				#font.setLetterSpacing(font.PercentageSpacing, 90)
 			if  regexp_ay.match(header) != None:
+				# frame.setFrameStyle(QFrame.HLine| QFrame.Raised)
+				# frame.setLineWidth(115)
 				font.setBold(True)
 			return QVariant(font)
 		elif orientation == Qt.Horizontal and role == Qt.DisplayRole:
@@ -158,17 +225,40 @@ class TableData(QAbstractTableModel):
 	def setBackground(self, row, role):
 		""" Allow to define background of the cells """
 		header = VERTICAL_HEADER[row]
-		regex_modifiable = re.compile("(RPK|Yield).(HY|LY).*")
-		regex_res = re.compile("(LF|RASK).AY.*")
+		regex_modifiable = re.compile("(RPK|Yield).(HY|LY).CY.*")
+		regex_nonmodifiable = re.compile("(RPK|Yield).*.(?!CY).*")
+		regex_res = re.compile("(ASK|LF|RASK).AY.*")
+		regex_res_yoy = re.compile("(ASK|LF|RASK).AY.(CY-Ref|YoY).*")
+		regex_autre = re.compile("(Rev).*")
+		regex_autre_yoy = re.compile("(Rev).*.(CY-Ref|YoY)")
 		# modifiable value
 		if regex_modifiable.match(header) != None:
 			return QBrush(color(COLOR_EDITABLE))
+		elif regex_nonmodifiable.match(header) != None:
+			if header[-3:] == "YoY":
+				return QBrush(color(COLOR_NONEDITABLE_YOY))
+			else:
+				return QBrush(color(COLOR_NONEDITABLE))
 		elif regex_res.match(header) != None:
-			return QBrush(color(COLOR_RES))
+			if regex_res_yoy.match(header)!= None:
+				return QBrush(color(COLOR_TOUS_FLUX_YOY))
+			else:
+				return QBrush(color(COLOR_TOUS_FLUX))
+		elif regex_autre.match(header) != None:
+			if regex_autre_yoy.match(header)!= None:
+				return QBrush(color(COLOR_REV_YOY))
+			else:
+				return QBrush(color(COLOR_REV))
 		else:
 			return QVariant()
 
-
+	def resetModifCells(self):
+		""" reset TableModif when actions saved in database """
+		self.TableModif = []
+		for r in range(len(VERTICAL_HEADER)):
+			self.TableModif.append([])
+			for c in range(len(TABLE_TITLE)):
+				self.TableModif[r].append(0)
 
 	def getDataIndex(self, index):
 		""" retrieve data within the data container simple way as a string"""
@@ -183,8 +273,15 @@ class TableData(QAbstractTableModel):
 
 	def setData(self, index, value, role):
 		""" change data in the array containing all the required information """
+		header = VERTICAL_HEADER[index.row()]
+		regex_modifiable = re.compile("(RPK|Yield).(HY|LY).CY.*")
+
 		if index.isValid() and role == Qt.DisplayRole:
 			self.arraydata[index.row()][index.column()] = value
+
+			if index.isValid() and regex_modifiable.match(header) != None:
+				self.TableModif[index.row()][index.column()] = 1
+				print("cellule (" + str(index.row())+ "/" + str(index.column()) + ") est rouge et la valeur est =" + str(self.arraydata[index.row()][index.column()]))
 			#show to the world the update
 			self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
 			return True
@@ -267,7 +364,11 @@ class MyTableView(QTableView):
 		self.retrieveData()
 
 		 # set the minimum size
-		self.setMinimumSize(1400, 800)
+		self.setMinimumSize(1400, 700)
+
+		# set scrollbar
+		self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
 
 		# look and feel
 		self.lookAndFeel()
@@ -279,13 +380,32 @@ class MyTableView(QTableView):
 		self.connect(self, SIGNAL("doubleClicked(QModelIndex)"), self.cell_clicked_event)
 		self.connect(self, SIGNAL("clicked(QModelIndex)"), self.cell_one_click)
 
+	def resetModifTab(self):
+		self.tableModel.resetModifCells()
 
 	def lookAndFeel(self):
+
+
+
+		# self.setShowGrid(False)
+        #special layout for total column
+		# idx = self.model().createIndex(0,0)
+		# for row in xrange(len(VERTICAL_HEADER)):
+			# self.indexWidget(self.model().createIndex(row,13)).setStyleSheet("{border : 3px;}")
+			# self.indexWidget(self.model().createIndex(row,13)).setSpacing(10)
+		# self.horizontalHeader().setStyleSheet("QHeaderView::section{margin-right: 10; margin-left: 10; border: 1px solid; background: red}");
+		# self.setStyleSheet("QHeaderView::section::horizontal {margin-right: 10px; background: red; border: 1px solid}");
+		# self.setStyleSheet( "QTableView  QVariant::section {background: red; border-left-width: 30px;   border-style: solid; spacing : 10px }")
+		# self.setStyleSheet("QTableview {margin-right: 10; margin-left: 10; border: 1px solid; background: red}");
+		# self.indexWidget(QAbstractItemModel.createIndex(10,10)).setContentsMargins(0, 10, 0, 10)
+		# self.horizontalHeader().setSpacing(10)
+		# self.horizontalHeader().setOffset(4)
 
 		# set row height
 		for row in xrange(len(VERTICAL_HEADER)):
 			self.setRowHeight(row, HEIGHT_ROW)
 
+		#set width for column
 		for col in xrange(len(TABLE_TITLE)):
 			self.setColumnWidth(col, DEFAULT_COLUMN_WIDTH)
 
@@ -302,13 +422,15 @@ class MyTableView(QTableView):
 			if regexp_non_necessary.match(row) != None:
 				self.hideRow(VERTICAL_HEADER.index(row))
 
+
 	def getData(self, index):
+		# Not used --> getDataFloat() used instead
 		return self.tableModel.getData(index.row(), index.column())
 
 	def retrieveData(self):
 		""" get all data from core engine """
 
-		
+		# print('Récupère les données CY de l onglet ' + str(self.flow))
 		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
 		regexp2 = re.compile("ASK.(HY|LY).(CY|Ref)")
 
@@ -318,27 +440,27 @@ class MyTableView(QTableView):
 			res2 = regexp2.match(r)
 
 			for c in xrange(len(TABLE_TITLE)):
-			
+
 				if c < 12: #data is a month
 					# looking for Rev and RPK and ASK data
 					# ------------------------------------
-					
+
 					if res != None or res2 != None:
 						end = r[-3:].strip()
 						yld = ARRAY_YIELD.index(r[4:6].strip())
 						type = ARRAY_DATA.index(r[:3].strip())
-						
+
 						if res != None:
 							flw = ARRAY_FLOW.index(self.flow)
 						elif res2!= None:
 							flw = ARRAY_FLOW.index("All")
-						
+
 						# data is either Rev or RPK for CY or ref or ASK AY
 						if end == "CY":
 							data = self.core.DATA_FCST[type][flw][yld][c + 1]
 						else:
 							data = self.core.DATA_REF[type][flw][yld][c + 1]
-							
+
 						if data != None and data != "":
 							self.tableModel.setDataNoDisplayUpdate(row, c, data)
 						else:
@@ -349,20 +471,19 @@ class MyTableView(QTableView):
 					self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 
 
-		# calcultate all totals
+		# calculate all totals on current tab
+		# print('Calcule les totaux au sein de la tab ' + str(self.flow))
 		self.setDataConsistency()
-
 
 		#update display
 		self.tableModel.updateDisplay()
+        # print('update le display de la tab ')
 
-		# update global GUI
-		self.parent.dataConsistency()
 
 	def retrieveDataRefOnly(self):
 		""" get all data from core engine """
 
-
+		# print('Récupère les données de Référence de l onglet ' + str(self.flow))
 		regexp = re.compile("(Rev|RPK).(HY|LY).Ref.*")
 		regexp2 = re.compile("(ASK).(HY|LY).Ref.*")
 
@@ -375,39 +496,36 @@ class MyTableView(QTableView):
 					if c < 12: #data is a month
 						# looking for Rev and RPK and ASK data
 						# ------------------------------------
-				
+
 						end = r[-3:].strip()
 						yld = ARRAY_YIELD.index(r[4:6].strip())
 						type = ARRAY_DATA.index(r[:3].strip())
-						
+
 						if res != None:
 							flw = ARRAY_FLOW.index(self.flow)
 						elif res2!= None:
 							flw = ARRAY_FLOW.index("All")
-						
+
 						# data is either Rev or RPK for CY or ref or ASK AY
 						if end == "Ref":
 							data = self.core.DATA_REF[type][flw][yld][c + 1]
 						else:
 							data = 0
-							
+
 						if data != None and data != "":
 							self.tableModel.setDataNoDisplayUpdate(row, c, data)
 						else:
 							self.tableModel.setDataNoDisplayUpdate(row, c, 0)
 					else:
 							self.tableModel.setDataNoDisplayUpdate(row, c, 0)
-					
 
-		# calcultate all totals
+
+		# # calculate all totals on current tab
+		# print('Calcule les totaux au sein de la tab ' + str(self.flow))
 		self.setDataConsistency()
-
 
 		#update display
 		self.tableModel.updateDisplay()
-
-		# update global GUI
-		self.parent.dataConsistency()
 
 	def setDataConsistency(self):
 		""" allow to calculate links within the array representing the table"""
@@ -443,8 +561,8 @@ class MyTableView(QTableView):
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " HY " + fin),i) + self.tableModel.getDataFloat(VERTICAL_HEADER.index(deb + " LY " + fin),i))
 
 
-		# 3 - populate yield, lF and RASK
-		regexp4 = re.compile("(Yield|RASK).(AY|LY|HY).(?!YoY).*")
+		# 4 - populate yield
+		regexp4 = re.compile("(Yield).(AY|LY|HY).(?!YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for yield LF ans RASK
 			if regexp4.match(r) != None:
@@ -455,31 +573,11 @@ class MyTableView(QTableView):
 					for i in xrange(0,17):
 						if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin),i) > 0:
 							self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin ),i))
-				# calculation RASK
-				if r[:4] == "RASK":
-					fin = r[4:]
-					for i in xrange(0,17):
-						if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin),i) > 0:
-							self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin ),i))
-
-		# 4 - calcul LF
-		# -------------
-		regexp5 = re.compile("LF.(AY|LY|HY).(?!CY-Ref).*")
-		for r in VERTICAL_HEADER:
-			# looking for yield LF ans RASK
-			if regexp5.match(r) != None:
-				fin = r[2:]
-				for i in xrange(17):
-					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin),i) > 0:
-						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r),i, self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin ),i))
-
-
 
 
 		# 6 - calculate YoY for ASK/RPK/Yield/Rev
 		# ---------------------------------------
-
-		regexp6 = re.compile("(RPK|Yield|Rev|RASK|ASK).(AY|LY|HY).(YoY).*")
+		regexp6 = re.compile("(RPK|Yield|Rev|ASK|RASK).(AY|LY|HY).(YoY).*")
 		for r in VERTICAL_HEADER:
 			# looking for all YoY except LF
 			if regexp6.match(r) != None:
@@ -487,20 +585,78 @@ class MyTableView(QTableView):
 				for i in xrange(17):
 					if  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i)> 0:
 						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, (self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) - 1) * 100)
+						# if re.compile("(RASK).(AY).(YoY).*").match(r) != None:
+							# print("Flux = " + str(self.flow) + "Mois = "+ str(i) + "    variable ="+ str(r) + "CY = " + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i)) + "//   Ref    =" + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i)))
+					else:
+						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, 100)
+
+	def retrieveDataAllFlows(self):
+		DataRASKLF = []
+		for r in range(len(VERTICAL_HEADER)):
+			DataRASKLF.append([])
+			for c in range(len(TABLE_TITLE)):
+				DataRASKLF[r].append(0)
+		# print(DataRASKLF)
+
+		# calculate RASK
+		regexp8 = re.compile("(RASK).(AY|LY|HY).(?!YoY).*")
+		for r in VERTICAL_HEADER:
+			# looking for RASK
+			if regexp8.match(r) != None:
+				fin = r[4:]
+				for i in xrange(17):
+					if self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin),i) > 0:
+						DataRASKLF[VERTICAL_HEADER.index(r)][i] = self.tableModel.getDataFloat(VERTICAL_HEADER.index("Rev" + fin),i) /  self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin ),i)
 
 
-		# 7 - calculate CY-PY for LF
-		# --------------------------
+		# calculate RASK YoY
+		regexp9 = re.compile("(RASK).(AY|LY|HY).YoY.*")
+		for r in VERTICAL_HEADER:
+			# looking for RASK YoY
+			if regexp9.match(r) != None:
+				for i in xrange(17):
+					denum = DataRASKLF[VERTICAL_HEADER.index(r[0:7] + " Ref")][i]
+					if denum > 0:
+						# print("Mois " + str(i) + " " + str(denum) + " " + str(self.tableModel.getDataFloat(VERTICAL_HEADER.index(r[0:7] + " CY"),i)))
+						DataRASKLF[VERTICAL_HEADER.index(r)][i] = ((DataRASKLF[VERTICAL_HEADER.index(r[0:7] + " CY")][i] / denum) - 1) * 100
+					else:
+						DataRASKLF[VERTICAL_HEADER.index(r)][i] = 100
+
+		# calculate LF
+		regexp5 = re.compile("LF.(AY|LY|HY).(?!CY-Ref).*")
+		for r in VERTICAL_HEADER:
+			# looking for yield LF
+			if regexp5.match(r) != None:
+				fin = r[2:]
+				for i in xrange(17):
+					denum = self.tableModel.getDataFloat(VERTICAL_HEADER.index("ASK" + fin),i)
+					if  denum > 0:
+						DataRASKLF[VERTICAL_HEADER.index(r)][i] = self.tableModel.getDataFloat(VERTICAL_HEADER.index("RPK" + fin),i) /  denum
+					else:
+						DataRASKLF[VERTICAL_HEADER.index(r)][i] = 0
+
+		# calculate CY-PY for LF
 		regexp7 = re.compile("LF.(HY|LY|AY).CY-Ref")
 		for r in VERTICAL_HEADER:
-			#looking for LF delta
+			# looking for LF delta
 			if regexp7.match(r) != None:
 				prefix = r[:-6].strip()
 				for i in xrange(17):
-					if self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) > 0:
-						self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i, (self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" CY"),i) - self.tableModel.getDataFloat(VERTICAL_HEADER.index(prefix+" Ref"),i) ) * 100)
+					DataRASKLF[VERTICAL_HEADER.index(r)][i] =( DataRASKLF[VERTICAL_HEADER.index(prefix+" CY")][i] - DataRASKLF[VERTICAL_HEADER.index(prefix + " Ref")][i] ) * 100
 
-	
+
+		return DataRASKLF
+
+	def copyDataAllFlows(self, DataRASKLF):
+		regexp8 = re.compile("(RASK|LF).(AY|LY|HY).*")
+		for r in VERTICAL_HEADER:
+			# looking for RASK
+			if regexp8.match(r) != None:
+				fin = r[4:]
+				for i in xrange(0,17):
+					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i , DataRASKLF[VERTICAL_HEADER.index(r)][i])
+
+
 	def totalForAllFlow(self, tabs):
 		""" calculate the sum of all tabs whose flow isn't 'All' for a specific table"""
 		regexp = re.compile("(Rev|RPK).(HY|LY).(?!YoY).*")
@@ -515,10 +671,13 @@ class MyTableView(QTableView):
 							sum += tab.tableModel.getDataFloat(VERTICAL_HEADER.index(r),i)
 					self.tableModel.setDataNoDisplayUpdate(VERTICAL_HEADER.index(r), i , sum)
 
+		# calculate totals and YoY in tab "All Flows"
 		self.setDataConsistency()
 		self.tableModel.updateDisplay()
+		# print("update la tab all flows avec les totaux")
 
 	def updateDisplay(self):
+		# used in window_modif
 		""" update the display of this tabs """
 		self.tableModel.updateDisplay()
 		# for debug purpose
@@ -540,6 +699,7 @@ class MyTableView(QTableView):
 			header = VERTICAL_HEADER[index.row()]
 			regexp = re.compile("(RPK|Yield).(HY|LY).*")
 			if regexp.match(header) and index.column() < 12:
+				self.sidePanel.user_interaction.saveActionsNoValidation()
 				Window_modif(self, index, self.debug)
 				#pass
 

@@ -219,3 +219,6 @@ pip-log.txt
 *.laccdb
 INSTALL/
 INSTALL\
+SRC/dist
+SRC/build
+*.json

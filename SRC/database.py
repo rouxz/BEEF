@@ -7,15 +7,15 @@ import os
 from param import *
 
 class Database():
-	""" class to handle a database this class MUST implement __init__ """ 
+	""" class to handle a database this class MUST implement __init__ """
 	def __init__(self, params):
 		# Connect to an access database using pyodbc
-		
+
 
 		self.debug = params.debug
 		self.platform = params.system
-		
-		
+
+
 		# continuation to be implemented
 
 	def __del__(self):
@@ -88,7 +88,7 @@ class Database():
 
 
 	###################################
-	# getting data
+	# getting data /!\ ASK extracted from LY + HY, must be present & identical for all flows, and null for any CONTRIB AY.
 	###################################
 
 	def get_data_CY(self):
@@ -128,7 +128,7 @@ class Database():
 				table[STATIC.equivData["RPK"]][STATIC.equivFlow[value[2]]][STATIC.equivYield[value[1]]][value[0]] = value[5]
 				# ask
 				table[STATIC.equivData["ASK"]][STATIC.equivFlow[value[2]]][STATIC.equivYield[value[1]]][value[0]] = value[6]
-			
+
 	def countNumberOfRoutes(self):
 		return len(self.__execute_query("SELECT RFS FROM RFS_USED;"))
 
@@ -155,34 +155,45 @@ class Database():
 		print("Commiting change in db")
 		return self.__commit_query("UPDATE DATA_RAW SET REV_EX_ROX = " + str(valueRev) + " , RPK= " + str(valueRPK) + " WHERE DATA_RAW.RFS IN (SELECT RFS FROM RFS_USED) AND MONTH = " +str(month) + " AND CONTRIB='" + yld + "' AND FLOW='" + flow + "';")
 
-			
-		
+
+
 	#################################
 	# 		Handling database
 	#################################
-	
+
 	def clearDatabase(self):
 		"""clear all data within database """
 		if (self.platform == STATIC.PLATFORM_WINDOWS):
 			query_start = "DELETE * FROM "
 		else:
 			query_start = "DELETE FROM "
-		for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
+		# for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
+		for table in ["DATA_RAW", "DATA_REF_0", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
 			self.__commit_query(query_start + table + ";")
 		print("Database " + self.dbname + " cleared")
-		
-	
+
+	def clearTableList(self, tablelist):
+		""" clear the given tables in the db """
+		if (self.platform == STATIC.PLATFORM_WINDOWS):
+			query_start = "DELETE * FROM "
+		else:
+			query_start = "DELETE FROM "
+		# for table in ["DATA_RAW", "DATA_REF_0",  "TABLE_NAME", "DATA_REF_1", "DATA_REF_2", "DATA_REF_3", "RFS_RETRAITEMENT", "RFS_USED", "TABLE_REF"]:
+		for table in tablelist:
+			self.__commit_query(query_start + table + ";")
+		print("Database " + self.dbname + " cleared")
+
 	def copyTable(self, table_name, external_db):
-		""" copy one table from an external database to the current one the name of 
-			the table name should be the same in the two databases 
+		""" copy one table from an external database to the current one the name of
+			the table name should be the same in the two databases
 			local table should hold no data
 			table structures should be identical """
-		
-		
-		
+
+
+
 		# fetch architecture of external table
 		column_names = self.cnx.cursor().columns(table = table_name)
-		# set list of fields 
+		# set list of fields
 		fields = ""
 		vals = ""
 		for c in column_names:
@@ -190,24 +201,29 @@ class Database():
 			vals += "?, "
 		fields = fields[:-2]
 		vals = vals[:-2]
-		
+
 		if (self.debug):
 			print("Copying " + table_name + " into " + self.dbname)
-		
+
 		# get external data
 		data = external_db.__execute_query("SELECT " + fields + " FROM " + table_name + ";")
-	
+
 		# put fetched data into local db
 		if (self.debug):
 			print("Inserting data into " + self.dbname)
 		if len(data) > 0:
 			print("length of results " + str(len(data)))
-			self.cnx.cursor().executemany("INSERT INTO " + table_name + " (" + fields + ") VALUES (" + vals + " );", data)
-		
+			#print(data)
+			try:
+				self.cnx.cursor().executemany("INSERT INTO " + table_name + " (" + fields + ") VALUES (" + vals + " );", data)
+				self.cnx.commit()
+			except:
+				print("Error copying data")
+				self.cnx.rollback()
 		if (self.debug):
 			print("Copying done")
-		
-		
+
+
 	def sendDataToExternal(self,  lst_of_lines, external_table, external_db):
 		""" take data from this database's DATA_RAW according to a selected perimeter and then update the value in the external table of the external database  """
 		# set proper RFS_USED table
@@ -216,7 +232,7 @@ class Database():
 		for line in lst_of_lines:
 			self.set_rfs_used(line)
 			external_db.set_rfs_used(line)
-			
+
 		# get data
 		data = self.__execute_query("SELECT DATA_RAW.RFS, DATA_RAW.SUBLINE, DATA_RAW.MONTH, DATA_RAW.CONTRIB, DATA_RAW.FLOW, DATA_RAW.REV, DATA_RAW.REV_EX_ROX, DATA_RAW.RPK, DATA_RAW.ASK \
 				FROM DATA_RAW INNER JOIN RFS_USED ON DATA_RAW.RFS = RFS_USED.RFS \
@@ -224,12 +240,12 @@ class Database():
 
 		# for d in data:
 			# print(d)
-			
-		
+
+
 		# remove data for selected scope
 		external_db.__commit_query("DELETE * FROM " + external_table + " WHERE RFS IN (SELECT RFS FROM RFS_USED)")
-		
-		
+
+
 		# put data into the remote database
 		try:
 			if (self.debug):
@@ -239,12 +255,12 @@ class Database():
 		except:
 			external_db.cnx.rollback()
 		return 0
-		
+
 class LocalDatabase(Database):
 	""" class to handle local database """
 	def __init__(self, params):
 		Database.__init__(self, params)
-		
+
 		if self.platform == STATIC.PLATFORM_WINDOWS:
 			self.dbname = STATIC.DBNAME
 		else:
@@ -257,7 +273,7 @@ class LocalDatabase(Database):
 			if self.platform == STATIC.PLATFORM_WINDOWS:
 				#connection MS ACCESS
 				#self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + STATIC.DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
-				
+
 				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  STATIC.DATA_DIR + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
 			else:
 				# Connection to sqlite3
@@ -269,14 +285,14 @@ class LocalDatabase(Database):
 			self.clear_rfs_used()
 		except:
 			print("Connection to db " + self.dbname + " failed")
-			
+
 
 class RemoteDatabase(Database):
 	""" class to handle remote database"""
 	def __init__(self, params):
-	
+
 		Database.__init__(self, params)
-		
+
 		try:
 
 			#get address of database

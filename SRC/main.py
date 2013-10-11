@@ -9,6 +9,7 @@ from PyQt4.QtCore import *
 from os_specifity import *
 from param import *
 
+
 # main module for launching BEEF
 
 def main():
@@ -21,6 +22,7 @@ def main():
 
 	# database
 	db = LocalDatabase(dynamic_param)
+
 
 	if db != None:
 		# core engine to handle db
@@ -42,3 +44,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
+
