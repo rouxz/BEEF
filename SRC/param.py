@@ -31,10 +31,12 @@ class DynamicParameters:
 				elif p[0] == "user_profile":
 					self.profile = p[1]
 			print("")
-			
+
 		except:
 			print("Failed to load all the parameters")
 			print("")
-			
+
+
 if __name__ == "__main__":
-	DynamicParameters(True)
+	params = DynamicParameters()
+	print(params.profile)

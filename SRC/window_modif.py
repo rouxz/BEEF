@@ -25,19 +25,21 @@ class Window_modif(QDialog):
 		
 		#side panel to send the events
 		self.sidePanel = self.parentTable.sidePanel
-
-		
 		
 		#set the UI
 		self.initUI()
+		
+		# list of events
+		self.eventList = []
+		for r in xrange(12):
+			self.eventList.append([])
 		
 		#set to relative by default
 		self.toRelative(True)
 		
 		#launch the UI
 		self.exec_()
-	
-	
+			
 	
 	
 	
@@ -46,6 +48,7 @@ class Window_modif(QDialog):
 	# #####################
 	
 	def initData(self, index):
+		# print("entre dans fonction initData")
 		# index QModelIndex representing the cell launching this pop up
 		self.index = index
 		
@@ -60,14 +63,17 @@ class Window_modif(QDialog):
 		
 		#flag for modification tracking
 		self.modifFlag = False
+		print("self.modifFlag = False dans initData")
 		
 		#data used
 		self.getData()
 		
 		#set the first yoy
 		self.yoy = self.calcyoY(self.cy, self.ref)
+		# print("Initialization of self.yoy = " + str(self.yoy))
 
 	def defineIndexes(self, index):
+		# print("entre dans fonction defineIndexes")
 		""" define the index for the CY, ref and YoY cells in the tableView """ 
 		
 		
@@ -86,6 +92,7 @@ class Window_modif(QDialog):
 	
 	
 	def getData(self):
+		# print("entre dans fonction getData")
 		""" retrieve cy and ref data """
 
 		self.cy = self.parentTable.tableModel.getDataFloat(self.cyIndex.row(),self.cyIndex.column())
@@ -94,11 +101,12 @@ class Window_modif(QDialog):
 
 	
 	def calcyoY(self, cy, ref):
+		# print("entre dans fonction calcyoY")
 		""" define yoy data """
 		if ref != 0:
 			return (self.cy / self.ref - 1) * 100
 		else:
-			return 0	
+			return 100
 		
 		
 		
@@ -110,6 +118,7 @@ class Window_modif(QDialog):
 		
 	
 	def initUI(self):
+		# print("entre dans fonction initUI")
 		""" display the window properly """
 		
 		#global layout for the widget
@@ -212,17 +221,20 @@ class Window_modif(QDialog):
 		self.layout.addWidget(self.moveGroupBox)
 		
 		# connect slots and signals
+		#--------------------------------
 		# self.connect(self.yoy_LE, SIGNAL("editingFinished()"),self.update_cy)
 		# self.connect(self.yoy_LE, SIGNAL("returnPressed()"),self.update_cy)
 		self.connect(self.yoy_LE, SIGNAL("valueChanged(double)"),self.update_cy)
 		self.connect(self.buttonValidate, SIGNAL("released()"), self.validateAndClose)
+		self.connect(self, SIGNAL('triggered()'), self.closeEvent)
 		
 		# for switching between absolute and relative
 		if self.numberOfRoutes <= 1:
 			self.connect(self.radioButtonAbsolute, SIGNAL("toggled(bool)"),self.toAbsolute)
 			self.connect(self.radioButtonRelative, SIGNAL("toggled(bool)"),self.toRelative)
 			#Updating CY for absolute
-			self.connect(self.cy_LE, SIGNAL("editingFinished()"), self.callbackModifCY)
+			# self.connect(self.cy_LE, SIGNAL("editingFinished()"), self.callbackModifCY)
+			self.connect(self.cy_LE, SIGNAL("textEdited(const QString&)"), self.callbackModifCY)
 			
 		# for going to the left or the right
 		self.connect(self.buttonNext, SIGNAL("released()"), self.moveToRight)
@@ -233,9 +245,13 @@ class Window_modif(QDialog):
 		
 		self.setWindowTitle(self.header)
 		self.show()
-	
+ 
+	def closeEvent(self, event):
+		# print "Closing modifWindow and saving changes"
+		self.validateAndClose()
 	
 	def topLabelValue(self):
+		# print("entre dans fonction topLabelValue")
 		""" define the label on top of the window indicating what data are we dealing with"""
 		return QString(self.header[:-3] + " - Month : " + str(self.index.column()+1))
 	
@@ -249,6 +265,7 @@ class Window_modif(QDialog):
 			return QString("%L1").arg(round(flt/1000,1))
 	
 	def updateDisplay(self):
+		# print("entre dans fonction updateDisplay")
 		""" update the display with the current data enclosed in the object """
 		
 		#update the header
@@ -275,6 +292,7 @@ class Window_modif(QDialog):
 
 	
 	def switchAbsoluteRelative(self, bool):
+		# print("entre dans fonction switchAbsoluteRelative")
 		""" define if the display should be set for relative evolution or absolute data """
 		
 		if bool == True:
@@ -308,14 +326,18 @@ class Window_modif(QDialog):
 		
 		
 	def recalculate_cy(self, yoy):
-		""" recalculate data for cy based on the reference and change the display """
+		print("entre dans fonction recalculate_cy")
+		""" recalculate data for cy based on the reference and change the display in the pop up window """
 		if self.ref !=0:
 			#changing data
 			self.cy = self.ref * (1 + yoy)
-			#print(self.cy)
+			temp = abs(round(self.yoy/100,4) - yoy)
+			# print("temp = " + str(temp))
+			
 			#Update the modif flag if the yoy is different than the previous one
-			if self.yoy != yoy:
+			if (temp >= 0.001):
 				self.modifFlag = True
+				print("self.modifFlag = True dans recalculate yoy car different du precedent")
 			
 			#changing display
 			self.cy_LE.setText(self.convertFloatToString(self.cy))
@@ -324,40 +346,15 @@ class Window_modif(QDialog):
 			
 	def update_cy(self):
 		""" change the display after having set a data in the YoY field """
-		self.recalculate_cy((self.yoy_LE.value())/100)
-		# print((self.yoy_LE.value())/100)
 		
-		
-	def callbackModifCY(self):
-		""" callback function launched once self.cy_LE has been modified """
-		
-		# for debugging purpose
-		if self.debug == True:
-			print("Callback on cy modification")
-		
-		# update data model in the system
-		tmp = self.cy_LE.text().toFloat()
-		if (tmp[1] == True) and (tmp[0]>=0):
-			if self.header[:5] == "Yield":
-				self.cy =  tmp[0] / 100
-			else:
-				self.cy = tmp[0] * 1000
-		else:
-			self.cy_LE.setText(self.convertFloatToString(self.cy))
-		
-		
-		
-		# tell the class something has been modified
-		self.modifFlag = True
-		
-		# update the YoY
-		self.yoy_LE.setValue(self.calcyoY(self.cy, self.ref))
+		if self.cy_LE.isReadOnly() == True:
+			self.recalculate_cy((self.yoy_LE.value())/100)
 		
 	
-		
-		
-	def validate(self):
+	def update_gui(self):
+		# print("entre dans fonction update_gui")
 		""" send the data to the tableview and the required action to the gui """
+		print("self.actionSent = " + str(self.actionSent) + "   self.modifFlag = " + str(self.modifFlag))
 		
 		if self.actionSent == 0 and self.modifFlag == True:
 			
@@ -375,6 +372,7 @@ class Window_modif(QDialog):
 			# RPK change revenue with constant yield
 			if self.header[:3] == "RPK":
 				valRPK = self.cy
+				print("------------ valRPK = " + str(valRPK))
 				valRev = self.parentTable.tableModel.getDataFloat(VERTICAL_HEADER.index("Yield " + yld + " CY"), self.index.column()) * self.cy
 				self.parentTable.tableModel.setData(self.index.sibling(VERTICAL_HEADER.index("Rev " + yld + " CY"), self.index.column()), valRev, Qt.DisplayRole)
 			# Yield change revenue with constant RPK
@@ -392,48 +390,117 @@ class Window_modif(QDialog):
 			
 			#update totals
 			self.parentTable.setDataConsistency()
-			
-			#update the gui
+			self.parentTable.parent.consistencyAllFlows()
 			self.parentTable.updateDisplay()
+						
+			self.createEvent(valRev, val_rev_init, valRPK, val_RPK_init, yld)
 			
-			#create a modif event
-			
-			#for yoy modification.
+	
+	def createEvent(self, valRev, val_rev_init, valRPK, val_RPK_init, yld):
+	#create a modif event
 		
-			if (self.numberOfRoutes <= 1 and self.radioButtonRelative.isChecked()) or self.numberOfRoutes > 1:
+		print("create event for month " + str(self.index.column()+1))
+		#for yoy modification	
+
+		e_old = self.eventList[self.index.column()]
+		FlagAbsolute = 0
+		if e_old != [] and e_old.type == ABSOLUTE:
+			FlagAbsolute = 1
+		
+		if self.numberOfRoutes > 1 or (self.numberOfRoutes <= 1 and self.radioButtonRelative.isChecked() and FlagAbsolute == 0):
 			
-					e = event.EventModifValue(valRev / val_rev_init, valRPK / val_RPK_init, self.index.column()+1, yld, self.parentTable.flow )
+			IdxRPK = valRPK / val_RPK_init
+			IdxRev = valRev / val_rev_init
+			
+			if  e_old != [] and e_old.type == MODIFICATION:
+					IdxRPK = e_old.indexRPK * IdxRPK
+					IdxRev = e_old.indexRev * IdxRev
+		
+			e = event.EventModifValue(IdxRev, IdxRPK, self.index.column()+1, yld, self.parentTable.flow )
+			self.eventList[self.index.column()] = e				
+			print("Liste d evenements : ") 
+			print(self.eventList)
+			print("Coeffs de MAJ // CoeffREV = " + str(IdxRev) + " // CoeffRPK = " + str(IdxRPK))
+		
+		else:
+			
+			#absolute modification
+			e = event.EventAddAbsoluteData(valRev, valRPK, self.index.column()+1, yld, self.parentTable.flow, self.debug)
+			self.eventList[self.index.column()] = e
+			print("Liste d evenements : ") 
+			print(self.eventList)
+			print("Nouvelles absolute values de MAJ // Rev = " + str(valRev) + " // RPK = " + str(valRPK))	
+			
+		# if self.debug == True:
+				# print("Value sent to the action handler is : " + str(self.cy))
+		
+		self.modifFlag = False
+		print("fin de creation d evenement et indicateur self.modifFlag = " + str(self.modifFlag))	
 
 			
+	
+	def callbackModifCY(self):
+		print("entre dans fonction callbackModifCY")
+		""" callback function launched once self.cy_LE has been modified """
+		
+		# for debugging purpose
+		# if self.debug == True:
+			# print("Callback on cy modification")
+		
+		# update data model in the system
+		tmp = self.cy_LE.text().toFloat()
+		# print("Callback on cy modification : self.cy = " + str(self.convertFloatToString(tmp[0] * 1000)))
+		if (tmp[1] == True) and (tmp[0]>=0):
+			if self.header[:5] == "Yield":
+				self.cy =  tmp[0] / 100
 			else:
-				#absolute modification
-				e = event.EventAddAbsoluteData(valRev, valRPK, self.index.column()+1, yld, self.parentTable.flow, self.debug)
-				
-				if self.debug == True:
-					print("Value sent to the action handler is : " + str(self.cy))
-			
-			
-			
-			
-			
-			
-			# add event if not null
-			if e != None:
+				self.cy = tmp[0] * 1000
+		else:
+			self.cy_LE.setText(self.convertFloatToString(self.cy))
+		
+		print("Callback on cy modification : self.cy = " + str(self.cy))
+		
+		
+		# tell the class something has been modified
+		self.modifFlag = True
+		print("ModifFlag mis a True dans callbackmodify")
+		
+		# update the YoY
+		self.yoy_LE.setValue(self.calcyoY(self.cy, self.ref))
+		
+	
+		
+		
+	def validate(self):
+		# print("entre dans validate")
+		# send all events to the list of actions pending
+		for e in self.eventList:
+			if e != []:
 				self.sidePanel.user_interaction.addPendingActions(e)
 				self.actionSent = 1
-			
 		
 	def validateAndClose(self):
+		# update the gui
+		self.update_gui()
+		
+		# add event if not null
 		self.validate()
+		
 		#close the window
 		self.done(0)
 		
 	def changePosition(self, left_or_right):
+		# print("entre dans fonction changePosition")
 		""" Validate - function used when button to the right or the left are being pressed / True means to the right , False to the left"""
-		self.validate()
+		# update gui before moving to next month
+		self.update_gui()
 		
-		if (self.debug):
-			print("Moving to " + str(left_or_right))
+		# initialization of flag
+		self.modifFlag = False
+		# print("self.modifFlag = False dans ChangePosition")
+		
+		# if (self.debug):
+			# print("Moving to " + str(left_or_right))
 			
 		# find next index.
 		col = self.index.column()
@@ -465,10 +532,20 @@ class Window_modif(QDialog):
 		"""handling key strokes """
 		# closing window on escape
 		if e.key() == Qt.Key_Escape:
-			self.close()
+			self.validateAndClose()
+		
+		# validate result on enter	
+		if e.key() == Qt.Key_Enter:
+			print("key enter pressed")
+			#update the gui
+			self.update_gui()
+		
 		# moving to next data
 		elif e.key() == Qt.Key_Right:
+			print("right botton pressed")
 			self.moveToRight()
+		
 		#moving to previous data
 		elif e.key() == Qt.Key_Left:
+			print("left botton pressed")
 			self.moveToLeft()
