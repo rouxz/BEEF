@@ -25,21 +25,22 @@
 	position : absolute;
 	left: 210px;
 	top: 20px;
-	width: 1420px;
+	width: 1410px;
 	height: 50px;
+	padding: 5px 5px 5px 5px;
 }
 
 #legend{
 	width : 170px;
 	position : absolute;
-	top : 370px;
+	top : 20px;
 	left: 20px;
 	margin : 0px 0px 0px 0px;
 	padding: 5px;
 	
 	display : block;
 	
-	background-color: #dee3fd;
+	background-color: white;
 }
 
 
@@ -92,8 +93,20 @@
 	margin: 0;
 }
 
+.legend{
+	position: absolute;
+	right: 0px;
+}
 
+h1{
+	font-size: x-large;
+	font-weight: bold;
+}
 
+h2{
+	font-size: large;
+	font-weight: bold;
+}
 
 
 /* mise en forme des graphes */
@@ -102,10 +115,10 @@
 
 #split_quarter{
 		width: 700px; 
-		height: 600px;
+		height: 660px;
 		margin: 0;
 		
-		top: 80px;
+		top: 100px;
 		left : 210px;
 		position : absolute;
 		
@@ -114,10 +127,10 @@
 
 #split_flow{
 		width: 700px; 
-		height: 600px;
+		height: 660px;
 		margin: 0;
 		
-		top: 80px;
+		top: 100px;
 		left : 930px;
 		position : absolute;
 		
@@ -128,64 +141,44 @@
 
 	position : absolute;
 	left: 210px;
-	top: 750px;
+	top: 780px;
 	
 	width: 700px;
-	height: 300px;
+	height: 360px;
 }
 
-#Q1_chart {
-
-	
-
-}
 
 #Q2 {
 
 	position : absolute;
 	left: 930px;
-	top: 750px;
+	top: 780px;
 	
 	width: 700px;
-	height: 300px;
+	height: 360px;
 }
 
 #Q3 {
 
 	position : absolute;
 	left: 210px;
-	top: 1080px;
+	top: 1150px;
 	
 	width: 700px;
-	height: 300px;
+	height: 360px;
 }
 
 #Q4 {
 
 	position : absolute;
 	left: 930px;
-	top: 1080px;
+	top: 1150px;
 	
 	width: 700px;
-	height: 300px;
+	height: 360px;
 }
 
 
 
 
 
-/* info				*/
-/* --------------------------  */
-
-#info{
-	width : 170px;
-	position : absolute;
-	top : 20px;
-	left: 20px;
-	margin : 0px 0px 0px 0px;
-	padding: 5px;
-	
-	display : block;
-	
-	background-color: white;
-}

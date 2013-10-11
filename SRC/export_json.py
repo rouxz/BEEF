@@ -202,7 +202,7 @@ class Exporter():
 		#data for output
 		perimeter = self.tabs.sidePanel.perimeter.listPerimeter.currentItem().text()
 		reference = self.tabs.sidePanel.ref.listRef.currentItem().text()
-		if (self.tabs.sidePanel.ref.trButton.setChecked(True)):
+		if (self.tabs.sidePanel.ref.trButton.isChecked()):
 			treatment = "Retreated"
 		else:
 			treatment = "Non-Retreated"
