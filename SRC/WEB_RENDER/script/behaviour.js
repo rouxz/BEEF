@@ -67,7 +67,7 @@
 		//This will get the first returned node in the jQuery collection.
 		var chart = new Chart(ctx);
 		var data = {
-			labels : ["Q1","Local","Intra-Europe","Long-haul"],
+			labels : ["All flows","Local","SH-MH", "MH-MH","Long-haul"],
 			datasets : [
 				{
 					fillColor : "rgba(201,201,201,0.7)",

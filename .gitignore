@@ -221,3 +221,4 @@ INSTALL/
 INSTALL\
 SRC/dist
 SRC/build
+*.json

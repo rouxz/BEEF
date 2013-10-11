@@ -62,25 +62,25 @@ class Exporter():
 
 			output = '{ "chart" : "' + STATIC.FLOW_CHARTS[c] +'", "data" : { "RPK" : ['
 			# rpk
-			for i in xrange(0,4):
+			for i in xrange(5):
 				output += str(RPK[i]) 
-				if i < 3:
+				if i < 4:
 					output += ','
 			
 			output += '], "yield":[' 
 			
 			#yield
-			for i in xrange(0,4):
+			for i in xrange(5):
 				output += str(yld[i]) 
-				if i < 3:
+				if i < 4:
 					output += ','
 			
 			output += '], "ASK": [' 
 			
 			# ASK
-			for i in xrange(0,4):
+			for i in xrange(5):
 				output += str(ASK[i]) 
-				if i < 3:
+				if i < 4:
 					output += ','
 			
 			output += ']} }'
