@@ -191,7 +191,39 @@ class Exporter():
 		if (self.params.debug):
 			print("Export done")
 
+	def export_information(self):
+		""" export information about what is being handled """
+		if (self.params.debug):
+			print("Exporting file : " + "json_information.json")
 
+		# output file
+		outfile = codecs.open(self.wd + self.directorySep + STATIC.PATH_EXPORT + self.directorySep + STATIC.SUBPATH_EXPORT + self.directorySep + "json_information.json", "w", "utf-8")
+
+		#data for output
+		perimeter = self.tabs.sidePanel.perimeter.listPerimeter.currentItem().text()
+		reference = self.tabs.sidePanel.ref.listRef.currentItem().text()
+		if (self.tabs.sidePanel.ref.trButton.setChecked(True)):
+			treatment = "Retreated"
+		else:
+			treatment = "Non-Retreated"
+
+		# start of file
+		outfile.write("{\n")
+
+		output = '"scope":"' + perimeter + '",\n'
+		output += '"reference_data":"' + reference + '",\n'
+		output += '"reference_type":"' + treatment + '"\n'
+		
+		output += '}\n'
+		
+				
+		#writing the line in the file
+		outfile.write(output)
+
+
+		outfile.close()
+		if (self.params.debug):
+			print("Export done")
 
 if __name__ == "__main__":
 	e = Exporter(DynamicParameters(),None)

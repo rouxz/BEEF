@@ -27,9 +27,11 @@ class SidePanel(QWidget):
 		self.user_interaction = UserInteraction(core, self.status, self, debug)
 		self.layout.addWidget(self.user_interaction)
 		# reference
-		self.layout.addWidget(ReferenceWidget(core, self, debug))
+		self.ref = ReferenceWidget(core, self, debug)
+		self.layout.addWidget(self.ref)
 		# route perimeter
-		self.layout.addWidget(PerimeterSelection(core, fm, self))
+		self.perimeter = PerimeterSelection(core, fm, self)
+		self.layout.addWidget(self.perimeter)
 
 		self.setLayout(self.layout)
 		self.sizeHint()

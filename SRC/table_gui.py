@@ -87,6 +87,7 @@ class Tabs(QTabWidget):
 		# and export json
 		self.exporter.export_quarters()
 		self.exporter.export_general()
+		self.exporter.export_information()
 
 	def changeRef(self):
 		""" change all reference data in the tableviews and recalculate totals, when change of reference"""
