@@ -20,12 +20,39 @@ class Database():
 
 	def __del__(self):
 		#disconnect properly from database
+		self.disconnect()
+			
+	def connect(self, dbname):
+		""" connect to a database """
+		
+		self.dbname = dbname
+		if (self.debug):
+					print("Connecting to " + os.getcwd() + "\\" + STATIC.DATA_DIR + "\\" + self.dbname )
+
+		# try:
+		if self.platform == STATIC.PLATFORM_WINDOWS:
+			#connection MS ACCESS
+			self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  STATIC.DATA_DIR + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
+		else:
+			# Connection to sqlite3
+			print("Platform different than windows / switching to SQLite")
+			self.cnx = connect(STATIC.DBPATH_UNIX + "/" + self.dbname)
+
+		print("Connection to db " + self.dbname + " successfull")
+		# clear RFS used for consistency purpose
+		self.clear_rfs_used()
+		# except:
+			# print("Connection to db " + self.dbname + " failed")
+	
+	def disconnect(self):
+		""" disconnect from a database """
 		try:
 			self.cnx.close()
 			print("Connection to database " + self.dbname + " closed")
 		except:
 			pass
-
+	
+	
 	def __execute_query(self, query):
 		"""retrieve values within db return a list containing all the informations """
 		try:
@@ -59,7 +86,7 @@ class Database():
 				print("Error executing : " + SQLquery + " on db : " + self.dbname)
 			return 1
 
-
+	
 
 
 	###################################
@@ -262,29 +289,13 @@ class LocalDatabase(Database):
 		Database.__init__(self, params)
 
 		if self.platform == STATIC.PLATFORM_WINDOWS:
-			self.dbname = STATIC.DBNAME
+			dbname = STATIC.DBNAME
 		else:
-			self.dbname = STATIC.DBNAME_UNIX
-		if (self.debug):
-					print("Connecting to " + os.getcwd() + "\\" + STATIC.DATA_DIR + "\\" + self.dbname )
+			dbname = STATIC.DBNAME_UNIX
+		
+		#connect to db
 
-		try:
-
-			if self.platform == STATIC.PLATFORM_WINDOWS:
-				#connection MS ACCESS
-				#self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" + STATIC.DBPATH + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
-
-				self.cnx = connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=" +  STATIC.DATA_DIR + "\\" + self.dbname + ";Uid=Admin;Pwd=;")
-			else:
-				# Connection to sqlite3
-				print("Platform different than windows / switching to SQLite")
-				self.cnx = connect(STATIC.DBPATH_UNIX + "/" + self.dbname)
-
-			print("Connection to db " + self.dbname + " successfull")
-			# clear RFS used for consistency purpose
-			self.clear_rfs_used()
-		except:
-			print("Connection to db " + self.dbname + " failed")
+		self.connect(dbname)
 
 
 class RemoteDatabase(Database):
