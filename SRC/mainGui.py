@@ -7,6 +7,7 @@ from sideGui import *
 from file_manager import *
 from table_gui import *
 from server_connection import *
+from switch_db import *
 import about
 
 
@@ -75,6 +76,12 @@ class TopWindow(QMainWindow):
 		exitAction.triggered.connect(self.quitApplication)
 		# exitAction.triggered.connect(qApp.quit)
 
+		# db switch
+		switch_db = QAction('&Switch database', self)
+		switch_db.setShortcut('Ctrl+S')
+		switch_db.setStatusTip('Change local databse')
+		switch_db.triggered.connect(self.switcher_db)
+		
 		# remote server button
 		remoteServer = QAction('&Remote server', self)
 		remoteServer.setShortcut('Ctrl+R')
@@ -90,6 +97,7 @@ class TopWindow(QMainWindow):
 		self.menubar = self.menuBar()
 		# fileMenu
 		self.fileMenu = self.menubar.addMenu('&File')
+		self.fileMenu.addAction(switch_db)
 		self.fileMenu.addAction(remoteServer)
 		self.fileMenu.addAction(exitAction)
 
@@ -105,6 +113,10 @@ class TopWindow(QMainWindow):
 		print("remote server")
 		RemoteServerWindow(self.core.db, self.params, self.fm, self)
 
+	def switcher_db(self):
+		print("Switcher of database")
+		SwitchDB(self.core.db, self.params, self.fm, self)
+		
 	def	quitApplication(self):
 		# print("Quitting")
 		if len(self.core.events_list) > 0:
